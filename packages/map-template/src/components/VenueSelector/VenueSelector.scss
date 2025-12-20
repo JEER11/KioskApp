@@ -1,0 +1,137 @@
+@import '../../variables.scss';
+
+$button-from-top: var(--spacing-small);
+$button-width: var(--spacing-xx-large);
+$button-height: $button-width;
+
+$transition-speed: 400ms;
+$transition-timing-function: ease;
+$align-offset: 2px;
+
+.venue-selector {
+    &__content {
+        position: absolute;
+        background-color: white;
+        z-index: var(--z-index-popup);
+        overflow-y: hidden;
+        display: grid;
+        grid-template-rows: var(--spacing-xxxx-large) 1fr;
+    }
+
+    &__header {
+        display: grid;
+        // Three-column grid:
+        // 1. Empty space (--spacing-xxx-large)
+        // 2. Heading with flexible width
+        // 3. Close button (--spacing-xxx-large)
+        grid-template-columns: var(--spacing-xxx-large) 1fr var(--spacing-xxx-large); // Three columns layout
+        align-items: center;
+        padding: var(--spacing-medium);
+        height: calc($button-height + 2 * var(--spacing-small));
+
+        h1 {
+            color: var(--color-gray-90);
+            font-size: var(--font-size-small);
+            margin: 0;
+            text-align: center; // Center text
+            grid-column: 2; // Place in middle column
+        }
+
+        // Place close button in last column
+        .venue-selector__button {
+            grid-column: 3;
+            justify-self: end;
+        }
+    }
+
+    &__list {
+        overflow-y: auto;
+        padding: var(--spacing-medium);
+    }
+
+    &__button {
+        background-color: var(--tailwind-colors-white);
+        border-radius: var(--rounding-large);
+        border: 1px solid #E6E6E6;
+        width: var(--spacing-xxx-large);
+        height: var(--spacing-xxx-large);
+        position: relative;
+
+        &:hover {
+            background-color: var(--tailwind-colors-gray-100);
+            border: 1px solid var(--tailwind-colors-gray-200);
+        }
+    }
+
+    /*
+     * Transition classes.
+     * The transitions make the Venue selector appear to be expanding from and disappearing into the toggle button.
+     */
+
+    &__content {
+        &-enter {
+            top: $button-from-top;
+            bottom: calc(100% - var(--spacing-xxxx-large));
+            left: var(--spacing-x-small);
+            width: var(--spacing-xx-large);
+            transition: all $transition-speed $transition-timing-function;
+            opacity: 0;
+
+            @media (min-width: $desktop-breakpoint) {
+                right: var(--spacing-small);
+                left: auto;
+            }
+        }
+
+        &-enter-active,
+        &-enter-done {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            opacity: 1;
+
+            @media (min-width: $desktop-breakpoint) {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        &-exit {
+            top: var(--spacing-xxxx-large);
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: all $transition-speed $transition-timing-function;
+            opacity: 1;
+
+            @media (min-width: $desktop-breakpoint) {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        &-exit-active {
+            top: $button-from-top;
+            bottom: calc(100% - var(--spacing-xxxx-large));
+            left: var(--spacing-x-small);
+            width: var(--spacing-xx-large);
+            opacity: 0;
+
+            @media (min-width: $desktop-breakpoint) {
+                right: var(--spacing-small);
+                left: auto;
+            }
+        }
+    }
+
+    @media (min-width: $desktop-breakpoint) {
+        &__content {
+            width: 568px;
+            right: var(--spacing-small);
+            bottom: var(--spacing-large);
+            top: var(--spacing-small);
+            border-radius: var(--rounding-large);
+        }
+    }
+}

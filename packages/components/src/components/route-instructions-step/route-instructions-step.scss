@@ -1,0 +1,136 @@
+@use '~@mapsindoors/midt/build/scss/variables';
+@use "~@mapsindoors/midt/font";
+@use "~@mapsindoors/midt/padding";
+@use "~@mapsindoors/midt/margin";
+@use "~@mapsindoors/midt/color";
+@use "~@mapsindoors/midt/border";
+@use "~@mapsindoors/midt/sizing";
+@use "~@mapsindoors/midt/icons";
+@use "~@mapsindoors/midt/background-color";
+
+:host {
+    display: block;
+    @include font.family(sans-serif);
+}
+
+.step {
+    display: grid;
+    gap: variables.$spacing-medium;
+    justify-items: center;
+
+    &__info {
+        display: grid;
+        grid-auto-flow: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        position: sticky;
+        top: 50px;
+        background: white;
+        z-index: 1000;
+        padding-bottom: variables.$spacing-x-small;
+    }
+
+    &__destination {
+        display: grid;
+        gap: variables.$spacing-x-small;
+        align-items: center;
+        justify-content: center;
+        grid-auto-flow: column;
+    }
+
+    &__heading {
+        @include font.weight(large);
+        @include font.size(large);
+        @include margin.all(none);
+
+        >span {
+            @include font.size(small);
+            @include color.gray(60);
+        }
+    }
+
+    &__travel-mode {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        min-height: 72px;
+
+        &::before {
+            position: absolute;
+            width: calc(50% - 2px);
+            left: 0;
+            height: 100%;
+            content: "";
+        }
+
+        &--dotted {
+            &::before {
+                border-right: variables.$spacing-xx-small dotted variables.$color-blue-30;
+            }
+        }
+
+        &--solid {
+            &::before {
+                border-right: variables.$spacing-xx-small solid variables.$color-blue-30;
+            }
+        }
+
+        &-icon {
+            position: absolute; /* To ensure it is placed above dots */
+            left: 50%;
+            top: variables.$spacing-large; /* Halfway down uncollapsed (72px) */
+            transform: translateX(-50%);
+
+            /* solid background and padding to hide the dots */
+            @include background-color.white(base);
+            padding: 3px;
+            border-radius: variables.$spacing-xx-small;
+
+            mi-icon {
+                @include icons.size(small);
+                @include background-color.gray(60);
+                display: block;
+            }
+        }
+    }
+
+    &__short-name {
+        margin-right: variables.$spacing-xx-small;
+        padding: variables.$spacing-xxx-small variables.$spacing-xx-small;
+        @include font.size(small);
+        @include color.white();
+        @include background-color.gray(60);
+        @include border.radius(small);
+    }
+
+    &__distance-duration {
+        @include color.gray(60);
+        @include font.size(small);
+    }
+
+    &__transit-action {
+        @include font.weight(medium);
+        @include font.size(small);
+        @include margin.bottom(variables.$spacing-xx-small);
+        @include color.gray(60);
+    }
+
+    &__toggle {
+        display: grid;
+        justify-content: center;
+
+        mi-icon {
+            width: variables.$spacing-large;
+            height: variables.$spacing-large;
+            display: block;
+        }
+    }
+
+    &__details {
+        display: grid;
+        gap: variables.$spacing-large;
+        width: 100%;
+    }
+}

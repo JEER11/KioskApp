@@ -1,0 +1,67 @@
+.route-instructions {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr min-content;
+
+    &__footer {
+        position: sticky;
+        bottom: 134px;
+        background: white;
+        padding-bottom: var(--spacing-medium);
+
+        &::before {
+            content: '';
+            position: absolute;
+            pointer-events: none;
+            bottom: var(--spacing-xx-large);
+            left: 0;
+            right: 0;
+            height: var(--spacing-xx-large);
+            background: linear-gradient(rgba(255, 255, 255, 0), white);
+        }
+
+        &--kiosk {
+            &::before {
+                background: transparent;
+            }
+        }
+    }
+
+    &__actions {
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &__overview {
+        color: var(--color-gray-90);
+        font-weight: var(--font-weight-large);
+    }
+
+    &__button {
+        display: grid;
+        justify-content: center;
+        background: none;
+        border: none;
+        width: var(--icon-size-medium);
+        height: var(--icon-size-medium);
+        align-content: center;
+
+        &--kiosk {
+            border-radius: var(--rounding-large);
+            border: 1px solid var(--color-gray-30);
+            padding: 18px;
+        }
+    }
+
+    button:disabled,
+    button[disabled] {
+        cursor: not-allowed;
+        opacity: 0.3;
+    }
+
+    mi-route-instructions-step {
+        height: 100%;
+    }
+}

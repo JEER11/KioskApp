@@ -1,0 +1,53 @@
+.sheet {
+    pointer-events: none;
+    opacity: 0;
+    transition: all .25s;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    max-height: 100%;
+    transform: translateY(100%);
+    background-color: var(--color-white-white);
+    border-top-left-radius: var(--rounding-large);
+    border-top-right-radius: var(--rounding-large);
+
+    // A drag indicator as pseudo element
+    &::before {
+        position: absolute;
+        content: ' ';
+        top: var(--spacing-xx-small);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 28px;
+        height: var(--spacing-xx-small);
+        border-radius: var(--spacing-xx-small);
+        background-color: var(--color-gray-30);
+    }
+
+    &--max {
+        // Add padding to push down content
+        padding-top: var(--spacing-small);
+    }
+
+    &--active {
+        pointer-events: all;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    &--dragging {
+        transition: none;
+        * {
+            user-select: none;
+        }
+    }
+
+    &__content {
+        height: 100%;
+        overflow-y: auto;
+
+        &--no-scroll {
+            overflow-y: hidden;
+        }
+    }
+}

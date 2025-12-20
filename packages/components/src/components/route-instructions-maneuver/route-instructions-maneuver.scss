@@ -1,0 +1,36 @@
+@use '~@mapsindoors/midt/build/scss/variables';
+@use "~@mapsindoors/midt/color";
+
+
+:host {
+    display: grid;
+    gap: variables.$spacing-large;
+    grid-auto-flow: column;
+    align-items: center;
+    grid-template-columns: variables.$spacing-large 1fr;
+    border-top: 1px solid variables.$color-gray-30;
+    padding: variables.$spacing-medium;
+}
+
+.icon {
+    width: variables.$spacing-large;
+    height: variables.$spacing-large;
+}
+
+.description {
+    font-size: variables.$spacing-medium;
+    display: grid;
+    gap: variables.$spacing-x-small;
+    height: fit-content;
+
+    &__text {
+        margin: 0;
+        font-size: variables.$spacing-medium;
+        word-break: break-all;
+    }
+
+    mi-distance {
+        font-size: variables.$spacing-small;
+        @include color.gray(60);
+    }
+}

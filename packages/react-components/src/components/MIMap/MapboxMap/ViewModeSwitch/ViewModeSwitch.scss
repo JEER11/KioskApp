@@ -1,0 +1,23 @@
+$desktop-breakpoint: 992px;
+
+.view-mode-switch {
+    display: grid;
+    background-color: white;
+    height: fit-content;
+    border-radius: var(--spacing-small);
+    border: 1px solid #E6E6E6;
+    grid-auto-flow: row; // Stack buttons vertically
+    width: fit-content; // Only take up needed space
+    
+    &__button {
+        border-radius: var(--rounding-large, 4px);
+        width: var(--spacing-xxx-large);
+        height: var(--spacing-xxx-large);
+        box-sizing: border-box;
+        display: grid;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--tailwind-colors-white, white);
+        background-clip: padding-box;
+    }
+}
