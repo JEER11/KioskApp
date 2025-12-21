@@ -230,6 +230,12 @@ function GeoJsonOverlay() {
                     };
                     addClick('njit-building-fill');
                     addClick('njit-points');
+                    // Also listen on the base map 'building' layer for clicks
+                    try {
+                        if (map.getLayer('building')) {
+                            addClick('building');
+                        }
+                    } catch (err) { /* no-op */ }
                 }
 
                 if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
