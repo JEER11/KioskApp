@@ -27,6 +27,7 @@ import appConfigState from '../../atoms/appConfigState';
 import isNullOrUndefined from '../../helpers/isNullOrUndefined';
 import ResetKioskViewButton from '../ResetKioskViewButton/ResetKioskViewButton.jsx';
 import { useIsKioskContext } from '../../hooks/useIsKioskContext';
+import GeoJsonOverlay from '../GeoJsonOverlay/GeoJsonOverlay.jsx';
 
 MapWrapper.propTypes = {
     onLocationClick: PropTypes.func,
@@ -339,6 +340,8 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
             devicePosition={devicePosition}
             isKiosk={isKiosk}
         />}
+        {/* Static campus overlay */}
+        {apiKey && <GeoJsonOverlay />}
         {/* Pass isWayfindingOrDirections prop to ViewSelector to disable interactions while wayfinding or directions is active*/}
         {apiKey && <>
             <ViewSelector isViewSelectorVisible={isViewSelectorVisible} isViewSelectorDisabled={isWayfindingOrDirections} />
