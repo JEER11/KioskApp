@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "type": "room", "name": "Restroom - L1" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.1789, 40.7428],
+            [-74.1787, 40.7428],
+            [-74.1787, 40.7426],
+            [-74.1789, 40.7426],
+            [-74.1789, 40.7428]
+          ]
+        ]
+      }
+    }
+  ]
+}
