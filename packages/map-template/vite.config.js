@@ -16,7 +16,7 @@ export default defineConfig(() => {
         plugins: [
             react(),
             svgr(),
-            ViteFaviconsPlugin('./public/favicon.png'),
+            ViteFaviconsPlugin('./public/TabIcon.png'),
             eslint(),
         ]
     }
