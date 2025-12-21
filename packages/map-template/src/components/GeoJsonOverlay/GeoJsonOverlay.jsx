@@ -39,7 +39,27 @@ function GeoJsonOverlay() {
                 // Load campus GeoJSON
                 const res = await fetch('/data/njit-campus.geojson');
                 if (!res.ok) return;
-                const geojson = await res.json();
+                let geojson = await res.json();
+                // Filter to NJIT campus bounds to avoid stray features
+                const NJIT_BOUNDS = { minLng: -74.1832, maxLng: -74.1732, minLat: 40.7415, maxLat: 40.7449 };
+                const withinBounds = (coords) => {
+                    if (!Array.isArray(coords)) return false;
+                    const [lng, lat] = coords;
+                    return lng >= NJIT_BOUNDS.minLng && lng <= NJIT_BOUNDS.maxLng && lat >= NJIT_BOUNDS.minLat && lat <= NJIT_BOUNDS.maxLat;
+                };
+                const featureInBounds = (f) => {
+                    try {
+                        const g = f?.geometry;
+                        if (!g) return false;
+                        if (g.type === 'Point') return withinBounds(g.coordinates);
+                        if (g.type === 'Polygon') return g.coordinates?.[0]?.some(withinBounds);
+                        if (g.type === 'MultiPolygon') return g.coordinates?.flat(2)?.some(([lng, lat]) => withinBounds([lng, lat]));
+                        return false;
+                    } catch { return false; }
+                };
+                if (Array.isArray(geojson?.features)) {
+                    geojson = { ...geojson, features: geojson.features.filter(featureInBounds) };
+                }
 
                 if (mapType === mapTypes.Mapbox) {
                     const map = mapsIndoorsInstance.getMap();
@@ -173,6 +193,12 @@ function GeoJsonOverlay() {
                                 });
                             }
                         }
+                        // Reduce clutter: hide default POI labels to avoid random lots/restrooms
+                        ['poi-label'].forEach(layerId => {
+                            if (map.getLayer(layerId)) {
+                                map.setLayoutProperty(layerId, 'visibility', 'none');
+                            }
+                        });
                     } catch (e) { /* no-op */ }
 
                     // Restroom glow highlight around focused point

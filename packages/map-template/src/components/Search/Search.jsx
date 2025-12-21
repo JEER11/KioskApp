@@ -162,8 +162,9 @@ function Search({ onSetSize, isOpen }) {
      */
     function getFilteredLocations(category) {
         const categoryText = (category || '').toString().toLowerCase();
+        // Be robust to odd keys like "Parking_" or localized labels
         const isOverlayRestroom = /restroom|toilet|bathroom/.test(categoryText);
-        const isOverlayParking = /parking|garage|lot/.test(categoryText);
+        const isOverlayParking = /parking|garage|lot/.test(categoryText) || categoryText.startsWith('parking');
 
         // Creates a selected categoriers tree, where first category in the array is parent and second one is child
         // Ensure category is unique before pushing to selectedCategories.current
@@ -181,21 +182,51 @@ function Search({ onSetSize, isOpen }) {
 
         // For NJIT overlay-only categories, skip MapsIndoors search and rely on overlay filter
         if (isOverlayRestroom || isOverlayParking) {
-            // Build a simple list from NJIT features
-            const list = njitFeatures
-                .filter(f => f.geometry?.type === 'Point')
-                .filter(f => {
-                    const a = (f.properties?.amenity || '').toLowerCase();
-                    return isOverlayRestroom
-                        ? (a === 'toilets' || a === 'toilet' || a === 'restroom')
-                        : (a === 'parking');
-                })
-                .map(f => ({
-                    id: `${f.properties?.name}-${f.geometry.coordinates.join(',')}`,
-                    name: f.properties?.name || 'Feature',
-                    coords: f.geometry.coordinates,
-                    amenity: f.properties?.amenity
-                }));
+            // Helper: compute a simple centroid for Polygon/MultiPolygon
+            const getCentroid = (geom) => {
+                try {
+                    if (!geom) return null;
+                    if (geom.type === 'Point') return geom.coordinates;
+                    const coords = geom.type === 'Polygon' ? geom.coordinates[0] : (geom.coordinates?.[0]?.[0] || []);
+                    if (!Array.isArray(coords) || coords.length === 0) return null;
+                    let sx = 0, sy = 0; let n = 0;
+                    coords.forEach(([x, y]) => { if (typeof x === 'number' && typeof y === 'number') { sx += x; sy += y; n += 1; } });
+                    if (!n) return null;
+                    return [sx / n, sy / n];
+                } catch (e) { return null; }
+            };
+
+            // Filter overlay features
+            const filtered = njitFeatures.filter(f => {
+                const a = (f.properties?.amenity || '').toLowerCase();
+                return isOverlayRestroom
+                    ? (a === 'toilets' || a === 'toilet' || a === 'restroom')
+                    : (a === 'parking');
+            });
+
+            // Group by building name
+            const byBuilding = new Map();
+            filtered.forEach(f => {
+                const b = (f.properties?.building || f.properties?.name || '').toString();
+                if (!b) return;
+                if (!byBuilding.has(b)) byBuilding.set(b, []);
+                byBuilding.get(b).push(f);
+            });
+
+            const list = Array.from(byBuilding.entries()).map(([buildingName, feats]) => {
+                // Prefer a Point feature for centering; fallback to centroid of first polygon
+                const pointFeat = feats.find(ff => ff.geometry?.type === 'Point');
+                const center = pointFeat ? pointFeat.geometry.coordinates : getCentroid(feats[0]?.geometry);
+                const amenity = (feats[0]?.properties?.amenity) || (isOverlayParking ? 'parking' : 'restroom');
+                return {
+                    id: `${buildingName}-${amenity}`,
+                    name: buildingName,
+                    coords: center,
+                    amenity,
+                    count: feats.length
+                };
+            }).filter(item => Array.isArray(item.coords));
+
             setNjitList(list);
             setSearchResults([]);
             setFilteredLocations([]);
@@ -237,14 +268,14 @@ function Search({ onSetSize, isOpen }) {
         if (map?.flyTo) {
             map.flyTo({ center: [lng, lat], zoom: 18 });
             // Notify overlay to highlight restroom and building area
-            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat] } }));
+            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat], building: item.name } }));
             return;
         }
         // Google
         if (typeof window.google !== 'undefined' && window.google.maps && map?.setCenter) {
             map.setCenter({ lat, lng });
             map.setZoom(18);
-            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat] } }));
+            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat], building: item.name } }));
         }
     }
 
