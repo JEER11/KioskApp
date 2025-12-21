@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Study Hall", "type": "area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178900, 40.743870],
+          [-74.178820, 40.743860],
+          [-74.178820, 40.743840],
+          [-74.178900, 40.743850],
+          [-74.178900, 40.743870]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Corridor", "type": "area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178890, 40.743920],
+          [-74.178810, 40.743910],
+          [-74.178790, 40.743930],
+          [-74.178870, 40.743940],
+          [-74.178890, 40.743920]
+        ]]
+      }
+    }
+  ]
+}

@@ -52,6 +52,9 @@ Search.propTypes = {
  * @returns
  */
 function Search({ onSetSize, isOpen }) {
+        // NJIT overlay data for custom category lists (restrooms/parking)
+        const [njitFeatures, setNjitFeatures] = useState([]);
+        const [njitList, setNjitList] = useState([]);
     const appConfig = useRecoilValue(appConfigState);
 
     const { t } = useTranslation();
@@ -158,6 +161,10 @@ function Search({ onSetSize, isOpen }) {
      * @param {string} category
      */
     function getFilteredLocations(category) {
+        const categoryText = (category || '').toString().toLowerCase();
+        const isOverlayRestroom = /restroom|toilet|bathroom/.test(categoryText);
+        const isOverlayParking = /parking|garage|lot/.test(categoryText);
+
         // Creates a selected categoriers tree, where first category in the array is parent and second one is child
         // Ensure category is unique before pushing to selectedCategories.current
         if (!selectedCategoriesArray.current.includes(category)) {
@@ -172,6 +179,30 @@ function Search({ onSetSize, isOpen }) {
         }
         setSelectedCategory(category)
 
+        // For NJIT overlay-only categories, skip MapsIndoors search and rely on overlay filter
+        if (isOverlayRestroom || isOverlayParking) {
+            // Build a simple list from NJIT features
+            const list = njitFeatures
+                .filter(f => f.geometry?.type === 'Point')
+                .filter(f => {
+                    const a = (f.properties?.amenity || '').toLowerCase();
+                    return isOverlayRestroom
+                        ? (a === 'toilets' || a === 'toilet' || a === 'restroom')
+                        : (a === 'parking');
+                })
+                .map(f => ({
+                    id: `${f.properties?.name}-${f.geometry.coordinates.join(',')}`,
+                    name: f.properties?.name || 'Feature',
+                    coords: f.geometry.coordinates,
+                    amenity: f.properties?.amenity
+                }));
+            setNjitList(list);
+            setSearchResults([]);
+            setFilteredLocations([]);
+            setSize(snapPoints.MAX);
+            return;
+        }
+
         // Regarding the venue name: The venue parameter in the SDK's getLocations method is case sensitive.
         // So when the currentVenueName is set based on a Locations venue property, the casing may differ.
         // Thus we need to find the venue name from the list of venues.
@@ -180,6 +211,43 @@ function Search({ onSetSize, isOpen }) {
             venue: searchAllVenues ? undefined : venuesInSolution.find(venue => venue.name.toLowerCase() === currentVenueName.toLowerCase())?.name,
         }).then(results => onResults(results, true));
     }
+    // Load NJIT GeoJSON once
+    useEffect(() => {
+        let aborted = false;
+        async function load() {
+            try {
+                const res = await fetch('/data/njit-campus.geojson', { cache: 'no-cache' });
+                if (res.ok) {
+                    const gj = await res.json();
+                    if (!aborted) setNjitFeatures(Array.isArray(gj.features) ? gj.features : []);
+                }
+            } catch (e) { /* no-op */ }
+        }
+        load();
+        return () => { aborted = true; }
+    }, []);
+
+    // Center map on a selected NJIT item
+    function onNjitItemClicked(item) {
+        const map = mapsIndoorsInstance?.getMap?.();
+        if (!map || !item?.coords) return;
+        const [lng, lat] = item.coords;
+
+        // Mapbox
+        if (map?.flyTo) {
+            map.flyTo({ center: [lng, lat], zoom: 18 });
+            // Notify overlay to highlight restroom and building area
+            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat] } }));
+            return;
+        }
+        // Google
+        if (typeof window.google !== 'undefined' && window.google.maps && map?.setCenter) {
+            map.setCenter({ lat, lng });
+            map.setZoom(18);
+            window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat] } }));
+        }
+    }
+
 
     /**
      * Communicate size change to parent component.
@@ -619,7 +687,7 @@ function Search({ onSetSize, isOpen }) {
                     <span>{t('Search by name, category, building...')}</span>
                     <SearchField
                         ref={searchFieldRef}
-                        mapsindoors={true}
+                        mapsindoors={!(/restroom|toilet|bathroom|parking|garage|lot/.test((selectedCategory || '').toString().toLowerCase()))}
                         placeholder={t('Search by name, category, building...')}
                         results={locations => onResults(locations)}
                         clicked={() => searchFieldClicked()}
@@ -672,6 +740,20 @@ function Search({ onSetSize, isOpen }) {
                             isHovered={location?.id === hoveredLocation?.id}
                         />
                     )}
+                </div>
+            )}
+
+            {/* NJIT overlay list for Restrooms/Parking */}
+            {njitList.length > 0 && (
+                <div className="search__results prevent-scroll" {...scrollableContentSwipePrevent}>
+                    {njitList.map(item => (
+                        <button key={item.id} className="list-item-location" onClick={() => onNjitItemClicked(item)}>
+                            <div className="list-item-location__content">
+                                <div className="list-item-location__title">{item.name}</div>
+                                <div className="list-item-location__subtitle">{item.amenity === 'parking' ? t('Parking') : t('Restroom')}</div>
+                            </div>
+                        </button>
+                    ))}
                 </div>
             )}
 

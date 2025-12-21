@@ -1,0 +1,7 @@
+{
+  "building": "Kupfrian Hall",
+  "levels": [
+    { "id": "L1", "name": "Level 1", "file": "/data/floorplans/kupfrian/level1.geojson" },
+    { "id": "L2", "name": "Level 2", "file": "/data/floorplans/kupfrian/level2.geojson" }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "building": "Campus Center",
+  "levels": [
+    { "id": "L1", "name": "Level 1", "file": "/data/floorplans/campus-center/level1.geojson" },
+    { "id": "L2", "name": "Level 2", "file": "/data/floorplans/campus-center/level2.geojson" }
+  ]
+}

@@ -1,20 +1,10 @@
 {
-  "electrical and computer engineering building": "",
-  "kupfrian hall": "",
-  "mechanical & industrial engineering center": "",
-  "campus center": "",
-  "tiernan hall": "",
-  "colton hall": "",
-  "cypress hall": "",
-  "oak hall": "",
-  "redwood hall": "",
-  "specht building": "",
-  "eberhardt hall": "",
-  "fenster hall": "",
-  "york center for environmental engineering and science": "",
-  "william s. guttenberg information technologies center": "",
-  "science and technology parking garage": "",
-  "lot 3": "",
-  "lot 5": "",
-  "lot 7": ""
+  "campus center": "https://via.placeholder.com/400x250?text=Campus+Center",
+  "fenster hall": "https://via.placeholder.com/400x250?text=Fenster+Hall",
+  "william s. guttenberg information technologies center": "https://via.placeholder.com/400x250?text=GITC",
+  "eberhardt hall": "https://via.placeholder.com/400x250?text=Eberhardt+Hall",
+  "science and technology parking garage": "https://via.placeholder.com/400x250?text=ST+Parking+Garage",
+  "lot 3": "https://via.placeholder.com/400x250?text=Lot+3",
+  "lot 5": "https://via.placeholder.com/400x250?text=Lot+5",
+  "lot 7": "https://via.placeholder.com/400x250?text=Lot+7"
 }

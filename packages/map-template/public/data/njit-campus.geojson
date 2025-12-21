@@ -1,4 +1,101 @@
 {
   "type": "FeatureCollection",
-  "features": []
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campus Center Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=Campus+Center+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1786, 40.7430]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fenster Hall Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=Fenster+Hall+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1774, 40.7420]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "GITC Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=GITC+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1789, 40.7435]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Science and Technology Parking Garage",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=ST+Parking+Garage"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1790, 40.7415]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lot 3",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=Lot+3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1768, 40.7418]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lot 5",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=Lot+5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1782, 40.7412]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lot 7",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=Lot+7"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1792, 40.7424]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eberhardt Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Eberhardt+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1765, 40.7432]
+      }
+    }
+  ]
 }

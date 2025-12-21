@@ -140,7 +140,9 @@ function MapsIndoorsMap(props) {
         // For the apiKey and venue, set the venue to "AUSTINOFFICE" if the apiKey is "mapspeople3d" and no venue is provided. We want this as the default venue for the "mapspeople3d" apiKey.
         const apiKey = props.supportsUrlParameters && apiKeyQueryParameter ? apiKeyQueryParameter : (props.apiKey || defaultProps.apiKey);
         let venue = props.supportsUrlParameters && venueQueryParameter ? venueQueryParameter : (props.venue || defaultProps.venue);
-        if (apiKey === 'mapspeople3d' && !venue) {
+        // Avoid defaulting to Austin if a custom center is provided
+        const hasCenterOverride = (props.supportsUrlParameters && centerQueryParameter) || props.center;
+        if (apiKey === 'mapspeople3d' && !venue && !hasCenterOverride) {
             venue = 'AUSTINOFFICE';
         }
 

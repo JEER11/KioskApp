@@ -28,6 +28,7 @@ import isNullOrUndefined from '../../helpers/isNullOrUndefined';
 import ResetKioskViewButton from '../ResetKioskViewButton/ResetKioskViewButton.jsx';
 import { useIsKioskContext } from '../../hooks/useIsKioskContext';
 import GeoJsonOverlay from '../GeoJsonOverlay/GeoJsonOverlay.jsx';
+import FloorPlansOverlay from '../FloorPlansOverlay/FloorPlansOverlay.jsx';
 
 MapWrapper.propTypes = {
     onLocationClick: PropTypes.func,
@@ -251,8 +252,8 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
             }
         });
 
-        // TODO: Turn off visibility for building outline for demo purposes until the SDK supports Display Rules for Buildings too.
-        miInstance.setDisplayRule(['MI_BUILDING_OUTLINE'], { visible: false });
+        // Ensure building outlines can be visible by default
+        // (honors SDK/app config display rules)
 
         miInstance.on('click', location => onLocationClick(location));
         miInstance.once('building_changed', () => onBuildingChanged(miInstance))
@@ -342,6 +343,8 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         />}
         {/* Static campus overlay */}
         {apiKey && <GeoJsonOverlay />}
+        {/* Floor plans overlay for indoor viewing */}
+        {apiKey && <FloorPlansOverlay />}
         {/* Pass isWayfindingOrDirections prop to ViewSelector to disable interactions while wayfinding or directions is active*/}
         {apiKey && <>
             <ViewSelector isViewSelectorVisible={isViewSelectorVisible} isViewSelectorDisabled={isWayfindingOrDirections} />
