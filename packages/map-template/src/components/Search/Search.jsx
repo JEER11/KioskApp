@@ -204,28 +204,45 @@ function Search({ onSetSize, isOpen }) {
                     : (a === 'parking');
             });
 
-            // Group by building name
-            const byBuilding = new Map();
-            filtered.forEach(f => {
-                const b = (f.properties?.building || f.properties?.name || '').toString();
-                if (!b) return;
-                if (!byBuilding.has(b)) byBuilding.set(b, []);
-                byBuilding.get(b).push(f);
-            });
+            let list = [];
 
-            const list = Array.from(byBuilding.entries()).map(([buildingName, feats]) => {
-                // Prefer a Point feature for centering; fallback to centroid of first polygon
-                const pointFeat = feats.find(ff => ff.geometry?.type === 'Point');
-                const center = pointFeat ? pointFeat.geometry.coordinates : getCentroid(feats[0]?.geometry);
-                const amenity = (feats[0]?.properties?.amenity) || (isOverlayParking ? 'parking' : 'restroom');
-                return {
-                    id: `${buildingName}-${amenity}`,
-                    name: buildingName,
-                    coords: center,
-                    amenity,
-                    count: feats.length
-                };
-            }).filter(item => Array.isArray(item.coords));
+            if (isOverlayRestroom) {
+                // List each restroom individually (like default behavior for other categories)
+                list = filtered.map(f => {
+                    const center = f.geometry?.type === 'Point' ? f.geometry.coordinates : getCentroid(f.geometry);
+                    const name = f.properties?.name || f.properties?.alt_name || f.properties?.building || t('Restroom');
+                    const building = f.properties?.building || null;
+                    return {
+                        id: f.id || `${name}-${center?.join(',')}`,
+                        name,
+                        building,
+                        coords: center,
+                        amenity: 'restroom'
+                    };
+                }).filter(item => Array.isArray(item.coords));
+            } else {
+                // Parking: keep grouping by building
+                const byBuilding = new Map();
+                filtered.forEach(f => {
+                    const b = (f.properties?.building || f.properties?.name || '').toString();
+                    if (!b) return;
+                    if (!byBuilding.has(b)) byBuilding.set(b, []);
+                    byBuilding.get(b).push(f);
+                });
+
+                list = Array.from(byBuilding.entries()).map(([buildingName, feats]) => {
+                    const pointFeat = feats.find(ff => ff.geometry?.type === 'Point');
+                    const center = pointFeat ? pointFeat.geometry.coordinates : getCentroid(feats[0]?.geometry);
+                    const amenity = (feats[0]?.properties?.amenity) || 'parking';
+                    return {
+                        id: `${buildingName}-${amenity}`,
+                        name: buildingName,
+                        coords: center,
+                        amenity,
+                        count: feats.length
+                    };
+                }).filter(item => Array.isArray(item.coords));
+            }
 
             setNjitList(list);
             setSearchResults([]);
@@ -776,15 +793,26 @@ function Search({ onSetSize, isOpen }) {
 
             {/* NJIT overlay list for Restrooms/Parking */}
             {njitList.length > 0 && (
-                <div className="search__results prevent-scroll" {...scrollableContentSwipePrevent}>
-                    {njitList.map(item => (
-                        <button key={item.id} className="list-item-location" onClick={() => onNjitItemClicked(item)}>
-                            <div className="list-item-location__content">
-                                <div className="list-item-location__title">{item.name}</div>
-                                <div className="list-item-location__subtitle">{item.amenity === 'parking' ? t('Parking') : t('Restroom')}</div>
-                            </div>
-                        </button>
-                    ))}
+                <div className="search__results search__overlay-results prevent-scroll" {...scrollableContentSwipePrevent}>
+                    {njitList.map(item => {
+                        const isParking = item.amenity === 'parking';
+                        const iconLabel = isParking ? 'P' : 'WC';
+                        const subtitle = isParking
+                            ? t('Parking')
+                            : item.building
+                                ? `${t('Restroom')} · ${item.building}`
+                                : t('Restroom');
+
+                        return (
+                            <button key={item.id} className="overlay-item" onClick={() => onNjitItemClicked(item)}>
+                                <div className="overlay-item__icon" data-amenity={item.amenity}>{iconLabel}</div>
+                                <div className="overlay-item__content">
+                                    <div className="overlay-item__title">{item.name}</div>
+                                    <div className="overlay-item__subtitle">{subtitle}</div>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
             )}
 

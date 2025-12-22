@@ -20,7 +20,8 @@ function FloorPlansOverlay() {
     const aliases = {
       'kupfrian hall': 'kupfrian',
       'campus center': 'campus-center',
-      'fenster hall': 'fenster-hall'
+      'fenster hall': 'fenster-hall',
+      'laurel hall': 'laurel'
     };
     return aliases[n] || n.replace(/\s+/g, '-');
   };

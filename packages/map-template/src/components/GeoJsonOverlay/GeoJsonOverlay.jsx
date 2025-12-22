@@ -22,8 +22,8 @@ function GeoJsonOverlay() {
 
         let aborted = false;
         const lower = (selectedCategory || '').toLowerCase();
-        const isRestroom = lower.includes('restroom');
-        const isParking = lower.includes('parking');
+        const isRestroom = /restroom|toilet|bathroom/.test(lower);
+        const isParking = /parking|garage|lot/.test(lower);
 
         const loadAndRender = async () => {
             try {
@@ -76,32 +76,64 @@ function GeoJsonOverlay() {
                         amenityFilter = ['==', ['get', 'amenity'], 'parking'];
                     }
 
-                    const layers = [
-                        {
-                            id: 'njit-parking-fill',
-                            type: 'fill',
-                            filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['==', ['get', 'amenity'], 'parking']],
-                            paint: { 'fill-color': '#FFD54F', 'fill-opacity': 0.18 }
-                        },
-                        {
+                    // Base polygon filters
+                    const basePolygonFilter = ['==', ['geometry-type'], 'Polygon'];
+                    const outlineFilter = isParking
+                        ? ['in', ['geometry-type'], 'Polygon', 'MultiPolygon']
+                        : ['all', basePolygonFilter, ['has', 'building']];
+
+                    // Add/update building fill
+                    if (!map.getLayer('njit-building-fill')) {
+                        map.addLayer({
                             id: 'njit-building-fill',
                             type: 'fill',
-                            filter: ['all', ['==', ['geometry-type'], 'Polygon'], ['has', 'building']],
+                            source: sourceId,
+                            filter: ['all', basePolygonFilter, ['has', 'building']],
                             paint: { 'fill-color': '#C00000', 'fill-opacity': 0.12 }
-                        },
-                        {
-                            id: 'njit-outline',
-                            type: 'line',
-                            filter: ['in', ['geometry-type'], 'Polygon', 'MultiPolygon'],
-                            paint: { 'line-color': '#C00000', 'line-width': 0.6, 'line-opacity': 0.5 }
-                        },
-                        {
-                            id: 'njit-points',
-                            type: 'circle',
-                            filter: ['all', basePointFilter, amenityFilter],
-                            paint: { 'circle-color': ['case', ['in', ['get', 'amenity'], ['literal', ['toilets', 'toilet', 'restroom']]], '#1E88E5', '#C00000'], 'circle-radius': 4, 'circle-opacity': 0.95 }
+                        });
+                    }
+
+                    // Parking polygons only when parking is selected
+                    if (isParking) {
+                        if (!map.getLayer('njit-parking-fill')) {
+                            map.addLayer({
+                                id: 'njit-parking-fill',
+                                type: 'fill',
+                                source: sourceId,
+                                filter: ['all', basePolygonFilter, ['==', ['get', 'amenity'], 'parking']],
+                                paint: { 'fill-color': '#FFD54F', 'fill-opacity': 0.18 }
+                            });
+                        } else {
+                            map.setFilter('njit-parking-fill', ['all', basePolygonFilter, ['==', ['get', 'amenity'], 'parking']]);
                         }
-                    ];
+                    } else {
+                        if (map.getLayer('njit-parking-fill')) map.removeLayer('njit-parking-fill');
+                    }
+
+                    // Outline polygons: limit to buildings unless parking category is active
+                    if (!map.getLayer('njit-outline')) {
+                        map.addLayer({ id: 'njit-outline', type: 'line', source: sourceId, filter: outlineFilter, paint: { 'line-color': '#C00000', 'line-width': 0.6, 'line-opacity': 0.5 } });
+                    } else {
+                        map.setFilter('njit-outline', outlineFilter);
+                    }
+
+                    // Points layer (restrooms/parking) only when those categories are selected
+                    const shouldShowPoints = isRestroom || isParking;
+                    if (shouldShowPoints) {
+                        if (!map.getLayer('njit-points')) {
+                            map.addLayer({
+                                id: 'njit-points',
+                                type: 'circle',
+                                source: sourceId,
+                                filter: ['all', basePointFilter, amenityFilter],
+                                paint: { 'circle-color': ['case', ['in', ['get', 'amenity'], ['literal', ['toilets', 'toilet', 'restroom']]], '#1E88E5', '#C00000'], 'circle-radius': 4, 'circle-opacity': 0.95 }
+                            });
+                        } else {
+                            map.setFilter('njit-points', ['all', basePointFilter, amenityFilter]);
+                        }
+                    } else {
+                        if (map.getLayer('njit-points')) map.removeLayer('njit-points');
+                    }
 
                     if (map.getSource(sourceId)) {
                         map.getSource(sourceId).setData(geojson);
@@ -114,37 +146,35 @@ function GeoJsonOverlay() {
                         map.addSource(highlightSourceId, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
                     }
 
-                    // Add layers if missing
-                    layers.forEach(l => {
-                        if (!map.getLayer(l.id)) {
-                            map.addLayer({ id: l.id, type: l.type, source: sourceId, filter: l.filter, paint: l.paint });
-                        }
-                    });
-
                     // Add label layer for feature names (Mapbox)
                     const labelFilter = ['all', basePointFilter, amenityFilter];
-                    if (!map.getLayer('njit-labels')) {
-                        map.addLayer({
-                            id: 'njit-labels',
-                            type: 'symbol',
-                            source: sourceId,
-                            filter: labelFilter,
-                            layout: {
-                                'text-field': ['get', 'name'],
-                                'text-size': 12,
-                                'text-offset': [0, 1.2],
-                                'text-anchor': 'top',
-                                'text-allow-overlap': false
-                            },
-                            paint: {
-                                'text-color': '#1b1b1b',
-                                'text-halo-color': '#ffffff',
-                                'text-halo-width': 1.2,
-                                'text-halo-blur': 0.5
-                            }
-                        });
+                    const shouldShowLabels = shouldShowPoints;
+                    if (shouldShowLabels) {
+                        if (!map.getLayer('njit-labels')) {
+                            map.addLayer({
+                                id: 'njit-labels',
+                                type: 'symbol',
+                                source: sourceId,
+                                filter: labelFilter,
+                                layout: {
+                                    'text-field': ['get', 'name'],
+                                    'text-size': 12,
+                                    'text-offset': [0, 1.2],
+                                    'text-anchor': 'top',
+                                    'text-allow-overlap': false
+                                },
+                                paint: {
+                                    'text-color': '#1b1b1b',
+                                    'text-halo-color': '#ffffff',
+                                    'text-halo-width': 1.2,
+                                    'text-halo-blur': 0.5
+                                }
+                            });
+                        } else {
+                            map.setFilter('njit-labels', labelFilter);
+                        }
                     } else {
-                        map.setFilter('njit-labels', labelFilter);
+                        if (map.getLayer('njit-labels')) map.removeLayer('njit-labels');
                     }
 
                     // Enhance building visibility using Mapbox composite source
@@ -281,12 +311,16 @@ function GeoJsonOverlay() {
                         const amenity = feature.getProperty('amenity');
                         const hasBuilding = feature.getProperty('building') != null;
 
-                        // Apply category filters: hide non-matching features
+                        // Apply category filters: by default, hide points and parking unless selected
                         if (isRestroom) {
                             const match = amenity === 'toilets' || amenity === 'toilet' || amenity === 'restroom';
                             if (!match) return { visible: false };
                         } else if (isParking) {
                             if (amenity !== 'parking') return { visible: false };
+                        } else {
+                            // No overlay category chosen: hide points entirely; hide parking polygons
+                            if (geomType === 'Point') return { visible: false };
+                            if (amenity === 'parking') return { visible: false };
                         }
 
                         if (geomType === 'Point') {

@@ -26,6 +26,10 @@
         }
     }
 
+    &__overlay-results {
+        gap: var(--spacing-xx-small);
+    }
+
 
     &__scroll-buttons {
         position: fixed;
@@ -52,4 +56,63 @@
             display: none;
         }
     }
+}
+
+.overlay-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+    width: 100%;
+    padding: var(--spacing-small) var(--spacing-medium);
+    border: 1px solid var(--color-gray-20);
+    border-radius: var(--rounding-large);
+    background: #fff;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+        border-color: var(--color-gray-40);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-blue-60, #1E88E5);
+        outline-offset: 2px;
+    }
+}
+
+.overlay-item__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 13px;
+    background: #e8f2ff;
+    color: #1E88E5;
+
+    &[data-amenity="parking"] {
+        background: #e5f6ef;
+        color: #0f9d58;
+    }
+}
+
+.overlay-item__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.overlay-item__title {
+    font-weight: 600;
+    color: var(--color-gray-90, #1f2933);
+}
+
+.overlay-item__subtitle {
+    font-size: 13px;
+    color: var(--color-gray-70, #5f6a71);
 }

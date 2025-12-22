@@ -329,6 +329,11 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         }
     }, [appConfig])
 
+    // Use Google hybrid (satellite + labels) when Google Maps is selected
+    const mergedMapOptions = mapType === mapTypes.Google
+        ? { ...mapOptions, mapTypeId: 'hybrid' }
+        : mapOptions;
+
     return (<>
         {apiKey && <MIMap
             apiKey={apiKey}
@@ -336,7 +341,7 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
             gmApiKey={mapType === mapTypes.Google ? gmApiKey : undefined}
             onInitialized={onInitialized}
             resetUICounter={resetCount}
-            mapOptions={mapOptions}
+            mapOptions={mergedMapOptions}
             gmMapId={gmMapId}
             devicePosition={devicePosition}
             isKiosk={isKiosk}
