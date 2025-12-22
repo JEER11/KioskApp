@@ -1,8 +1,6 @@
-# MapsIndoors Web UI
 
-This monorepo contains all UI projects for the MapsIndoors platform for Web. It is managed with [Lerna](https://lerna.js.org), which makes it easier to work with multiple connected projects in one repo, like this.
 
-## Project context: AI/ML Smart Kiosk (senior project)
+## AI/ML Smart Kiosk senior project
 
 This fork is being adapted into a touchless, multimodal campus wayfinding kiosk for NJIT. The deployment intent:
 
@@ -11,6 +9,11 @@ This fork is being adapted into a touchless, multimodal campus wayfinding kiosk 
 - Software focus: MapsIndoors map template as the UI shell; integrate gesture recognition (e.g., zoom/scroll/select), voice intents (e.g., “directions to the library”), and AI-assisted routing.
 - UX defaults: Kiosk-origin pin, venue preselection for NJIT, fast reset-to-home on inactivity, QR code handoff to mobile, clear accessibility cues, and support for multiple languages.
 - Safety and privacy: No persistent storage of user audio/video; design aligns with campus privacy expectations and touchless interaction hygiene goals.
+
+  
+# MapsIndoors Web UI
+
+This monorepo contains all UI projects for the MapsIndoors platform for Web. It is managed with [Lerna](https://lerna.js.org), which makes it easier to work with multiple connected projects in one repo, like this.
 
 ## Quickstart
 
