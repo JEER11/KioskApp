@@ -64,6 +64,59 @@ import { ZoomLevelValues } from '../../constants/zoomLevelValues.js';
 import { useOnRouteFinished } from '../../hooks/useOnRouteFinished.js';
 import notificationMessageState from '../../atoms/notificationMessageState.js';
 
+// Local image overrides for venue cards (served from /public/Building)
+const customVenueImages = {
+    'campus center': '/Building/Campuscenter.png',
+    'cullimore hall': '/Building/Cullimore.png',
+    'eberhardt hall': '/Building/Eberhardt.png',
+    'ece building': '/Building/ECEb.png',
+    'greek village': '/Building/Greekvillage.png',
+    'kupfrian hall': '/Building/Kupfrianhall.png',
+    'makerspace': '/Building/Makerspace.png',
+    'wellness center': '/Building/WellnessCenter.png'
+};
+
+// Resolve a venue card image. Prefer local kiosk imagery, fall back to app config.
+function getVenueImage(venueName, appConfig) {
+    const key = venueName?.toLowerCase();
+    if (!key) return undefined;
+
+    const fromLocal = customVenueImages[key];
+    const fromConfig = appConfig?.venueImages?.[key];
+
+    return fromLocal || fromConfig;
+}
+
+// Desired display order and names for kiosk deployment
+const customVenueList = [
+    { name: 'Campus Center', image: '/Building/Campuscenter.png' },
+    { name: 'Cullimore Hall', image: '/Building/Cullimore.png' },
+    { name: 'Eberhardt Hall', image: '/Building/Eberhardt.png' },
+    { name: 'ECE Building', image: '/Building/ECEb.png' },
+    { name: 'Greek Village', image: '/Building/Greekvillage.png' },
+    { name: 'Kupfrian Hall', image: '/Building/Kupfrianhall.png' },
+    { name: 'Makerspace', image: '/Building/Makerspace.png' },
+    { name: 'Wellness Center', image: '/Building/WellnessCenter.png' }
+];
+
+// Apply kiosk-specific venue naming and imagery while preserving IDs
+function applyCustomVenuePresentation(venues, appConfig) {
+    return venues.map((venue, index) => {
+        const override = customVenueList[index];
+        const image = getVenueImage(override?.name, appConfig) || override?.image || getVenueImage(venue.name, appConfig);
+
+        if (override) {
+            venue.name = override.name;
+            if (venue.venueInfo) {
+                venue.venueInfo.name = override.name;
+            }
+        }
+
+        venue.image = image;
+        return venue;
+    });
+}
+
 // Define the Custom Elements from our components package.
 defineCustomElements();
 
@@ -299,10 +352,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
 
                 if (venuesInSolution.length > 0) {
                     window.mapsindoors.services.VenuesService.getVenues().then(venuesResult => {
-                        venuesResult = venuesResult.map(venue => {
-                            venue.image = appConfig.venueImages[venue.name.toLowerCase()];
-                            return venue;
-                        });
+                        venuesResult = applyCustomVenuePresentation(venuesResult, appConfig);
                         setVenuesInSolution(venuesResult);
                     });
                 }
@@ -350,10 +400,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 // Ensure a minimum waiting time of 3 seconds
                 new Promise(resolve => setTimeout(resolve, 3000))
             ]).then(([venuesResult, appConfigResult]) => {
-                venuesResult = venuesResult.map(venue => {
-                    venue.image = appConfigResult.venueImages[venue.name.toLowerCase()];
-                    return venue;
-                });
+                venuesResult = applyCustomVenuePresentation(venuesResult, appConfigResult);
                 setVenuesInSolution(venuesResult);
             });
             setMapReady(false);
