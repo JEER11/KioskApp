@@ -64,6 +64,10 @@ function GeoJsonOverlay() {
                 if (mapType === mapTypes.Mapbox) {
                     const map = mapsIndoorsInstance.getMap();
                     if (!map) return;
+                    // Wait for style so sources/layers can be added safely
+                    if (!map.isStyleLoaded()) {
+                        await new Promise(resolve => map.once('styledata', resolve));
+                    }
                     const sourceId = 'njit-geojson';
                     const highlightSourceId = 'njit-highlight-point';
 
@@ -81,6 +85,17 @@ function GeoJsonOverlay() {
                     const outlineFilter = isParking
                         ? ['in', ['geometry-type'], 'Polygon', 'MultiPolygon']
                         : ['all', basePolygonFilter, ['has', 'building']];
+
+                    // Ensure sources exist before layers
+                    if (map.getSource(sourceId)) {
+                        map.getSource(sourceId).setData(geojson);
+                    } else {
+                        map.addSource(sourceId, { type: 'geojson', data: geojson });
+                    }
+
+                    if (!map.getSource(highlightSourceId)) {
+                        map.addSource(highlightSourceId, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+                    }
 
                     // Add/update building fill
                     if (!map.getLayer('njit-building-fill')) {
@@ -133,17 +148,6 @@ function GeoJsonOverlay() {
                         }
                     } else {
                         if (map.getLayer('njit-points')) map.removeLayer('njit-points');
-                    }
-
-                    if (map.getSource(sourceId)) {
-                        map.getSource(sourceId).setData(geojson);
-                    } else {
-                        map.addSource(sourceId, { type: 'geojson', data: geojson });
-                    }
-
-                    // Highlight point source for glowing restroom marker
-                    if (!map.getSource(highlightSourceId)) {
-                        map.addSource(highlightSourceId, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
                     }
 
                     // Add label layer for feature names (Mapbox)
