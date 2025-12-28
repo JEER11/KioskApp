@@ -92,6 +92,7 @@ function MapsIndoorsMap(props) {
         const queryStringParams = new URLSearchParams(queryString);
 
         const defaultProps = {
+            // Use public demo solution so the UI renders even without a local API key.
             apiKey: 'mapspeople3d',
             useMapProviderModule: false,
             useKeyboard: false,
