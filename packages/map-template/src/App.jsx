@@ -12,8 +12,8 @@ function App() {
                 mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
                 logo={"/Loading.png"}
                 primaryColor={"#C00000"}
-                // Center the map on NJIT campus (lng,lat)
-                center={import.meta.env.VITE_CENTER ?? "-74.1780,40.7420"}
+                // Center only if provided via env; otherwise let the venue decide (avoids mismatched venue/center)
+                center={import.meta.env.VITE_CENTER}
                 // Ensure searches stay within MapsIndoors data only
                 searchExternalLocations={false}
                 // Improve base map legibility

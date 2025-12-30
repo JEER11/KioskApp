@@ -262,6 +262,9 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
 
         setMapsIndoorsInstance(miInstance);
 
+        // Mark map as ready once initialization succeeds to clear the splash screen.
+        onMapPositionKnown();
+
         // Assign the miInstance to the mapsIndoorsInstance on the window interface.
         window.mapsIndoorsInstance = miInstance;
 

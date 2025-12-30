@@ -412,16 +412,15 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
      */
     useEffect(() => {
         if (mapsindoorsSDKAvailable && appConfig) {
-            if (
-                isNullOrUndefined(mapboxAccessToken) &&
-                isNullOrUndefined(gmApiKey) &&
-                isNullOrUndefined(appConfig?.appSettings?.mapboxAccessToken) &&
-                isNullOrUndefined(appConfig?.appSettings?.gmKey)
-            ) {
+            // Prefer Google if a Google key is provided; only fall back to App Config Mapbox token when no Google key is available.
+            const effectiveGmKey = gmApiKey || appConfig?.appSettings?.gmKey;
+            const effectiveMapboxToken = mapboxAccessToken ?? (effectiveGmKey ? null : appConfig?.appSettings?.mapboxAccessToken);
+
+            if (isNullOrUndefined(effectiveMapboxToken) && isNullOrUndefined(effectiveGmKey)) {
                 setErrorMessage({ text: 'Please provide a Mapbox Access Token or Google Maps API key to show a map.', type: 'error' });
             } else {
-                setMapboxAccessToken(mapboxAccessToken || appConfig.appSettings?.mapboxAccessToken);
-                setGmApiKey(gmApiKey || appConfig.appSettings?.gmKey);
+                setMapboxAccessToken(effectiveMapboxToken ?? null);
+                setGmApiKey(effectiveGmKey ?? null);
             }
         }
     }, [gmApiKey, mapboxAccessToken, mapsindoorsSDKAvailable, appConfig]);
