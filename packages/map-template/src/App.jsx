@@ -7,8 +7,8 @@ function App() {
             {/* This is the Map Template component */}
             <MapsIndoorsMap supportsUrlParameters={true}
                 apiKey={import.meta.env.VITE_MAPSINDOORS_API_KEY}
-                // Fall back to NJIT campus if no env venue is provided
-                venue={import.meta.env.VITE_VENUE ?? "NJIT Campus"}
+                // Leave venue unset so we can force the center to Newark even with the demo solution
+                venue={import.meta.env.VITE_VENUE || ""}
                 gmApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
                 mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
                 // Force provider selection by keys (Google since Mapbox token is empty)
