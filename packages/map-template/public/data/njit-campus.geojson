@@ -94,7 +94,91 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1765, 40.7432]
+        "coordinates": [-74.17985, 40.74278]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campus Center",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Campus+Center"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17860, 40.74300]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cullimore Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Cullimore+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17945, 40.74286]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ECE Building",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=ECE+Building"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1783, 40.7436]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Greek Village",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Greek+Village"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1771, 40.7425]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kupfrian Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Kupfrian+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1774, 40.7440]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Makerspace",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Makerspace"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1779, 40.7436]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wellness Center",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Wellness+Center"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1766, 40.7427]
       }
     }
   ]
