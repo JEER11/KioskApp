@@ -20,16 +20,17 @@ VenueSelector.propTypes = {
     active: PropTypes.bool
 };
 
-// Map venue names to NJIT building coordinates (based on actual campus building locations)
+// Map venue names to NJIT building coordinates (based on actual campus building locations from njit-campus.geojson)
+// Using precise coordinates for each NJIT building
 const venueToNJITBuilding = {
     'Campus Center': { coords: [-74.17860, 40.74300], name: 'Campus Center' },
     'Cullimore Hall': { coords: [-74.17945, 40.74286], name: 'Cullimore Hall' },
     'Eberhardt Hall': { coords: [-74.17985, 40.74278], name: 'Eberhardt Hall' },
-    'ECE Building': { coords: [-74.17834, 40.74360], name: 'ECE Building' },
-    'Greek Village': { coords: [-74.17710, 40.74253], name: 'Greek Village' },
-    'Kupfrian Hall': { coords: [-74.17745, 40.74395], name: 'Kupfrian Hall' },
-    'Makerspace': { coords: [-74.17787, 40.74358], name: 'Makerspace' },
-    'Wellness Center': { coords: [-74.17661, 40.74265], name: 'Wellness Center' }
+    'ECE Building': { coords: [-74.1783, 40.7436], name: 'ECE Building' },
+    'Greek Village': { coords: [-74.1771, 40.7425], name: 'Greek Village' },
+    'Kupfrian Hall': { coords: [-74.1774, 40.7440], name: 'Kupfrian Hall' },
+    'Makerspace': { coords: [-74.1779, 40.7436], name: 'Makerspace' },
+    'Wellness Center': { coords: [-74.1766, 40.7427], name: 'Wellness Center' }
 };
 
 /**
@@ -63,11 +64,14 @@ function VenueSelector({ onOpen, onClose, active }) {
     const selectVenue = venue => {
         setVenueWasSelected(true);
         
-        // Navigate to NJIT building (don't set venue name to avoid MapsIndoors venue navigation)
+        // Look up the NJIT building by venue name
         const buildingData = venueToNJITBuilding[venue.name];
+        
         if (buildingData && mapsIndoorsInstance) {
+            // Navigate to the correct NJIT building coordinates
             navigateToBuilding(buildingData);
-            // Don't call setCurrentVenueName to avoid triggering MapsIndoors venue navigation
+        } else {
+            console.warn('No building data found for venue:', venue.name);
         }
         
         toggle();
