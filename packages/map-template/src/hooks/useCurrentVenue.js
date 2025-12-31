@@ -31,8 +31,17 @@ export const useCurrentVenue = () => {
      * Responsible for setting the Venue state whenever venueName changes (and all Venues in the Solution are loaded).
      */
     useEffect(() => {
-        if (!currentVenueName && venuesInSolution.length) {
-            setCurrentVenueName(getVenueToSet(venuesInSolution)?.name);
+        if (!venuesInSolution.length) return;
+
+        const venueExists = currentVenueName && venuesInSolution.some(venue => venue.name.toLowerCase() === currentVenueName.toLowerCase());
+
+        // If the incoming venue name does not exist (e.g. custom kiosk labels renamed venues), pick a safe default so the map can render immediately.
+        if (!currentVenueName || !venueExists) {
+            const fallbackVenue = getVenueToSet(venuesInSolution)?.name;
+
+            if (fallbackVenue && fallbackVenue !== currentVenueName) {
+                setCurrentVenueName(fallbackVenue);
+            }
         }
     }, [currentVenueName, venuesInSolution]);
 
@@ -67,14 +76,14 @@ export const useCurrentVenue = () => {
      * Used when there is no set venue.
      * Calculates which venue to set based on number of venues and alphabetic order.
      */
-    const getVenueToSet = () => {
+    const getVenueToSet = (venues = venuesInSolution) => {
         // If there's only one venue, early return with that.
-        if (venuesInSolution.length === 1) {
-            return venuesInSolution[0];
+        if (venues.length === 1) {
+            return venues[0];
         }
 
         // Else take first venue sorted alphabetically
-        return [...venuesInSolution].sort(function (a, b) { return (a.venueInfo.name > b.venueInfo.name) ? 1 : ((b.venueInfo.name > a.venueInfo.name) ? -1 : 0); })[0];
+        return [...venues].sort(function (a, b) { return (a.venueInfo.name > b.venueInfo.name) ? 1 : ((b.venueInfo.name > a.venueInfo.name) ? -1 : 0); })[0];
     };
 
     /**

@@ -95,6 +95,28 @@ const useMapBoundsDeterminer = () => {
             setKioskOriginLocationInfo({ id: null, originalRule: null });
         }
 
+        // If we cannot resolve a venue (e.g., using a demo key) but a center is provided,
+        // still pan to the requested center so the kiosk opens at NJIT coordinates.
+        if (mapsIndoorsInstance && !currentVenue && !isNullOrUndefined(center)) {
+            setMapPositionInvestigating(true);
+
+            const centerPoint = getCenterPoint().geometry;
+
+            if (isDesktop) {
+                getDesktopPaddingLeft().then(desktopPaddingLeft => {
+                    setMapPositionKnown(centerPoint);
+                    goTo(centerPoint, mapsIndoorsInstance, 0, desktopPaddingLeft, getZoomLevel(startZoomLevel), currentPitch, bearing);
+                });
+            } else {
+                getMobilePaddingBottom().then(mobilePaddingBottom => {
+                    setMapPositionKnown(centerPoint);
+                    goTo(centerPoint, mapsIndoorsInstance, mobilePaddingBottom, 0, getZoomLevel(startZoomLevel), currentPitch, bearing);
+                });
+            }
+
+            return;
+        }
+
         if (mapsIndoorsInstance && currentVenue) {
             setMapPositionInvestigating(true);
 

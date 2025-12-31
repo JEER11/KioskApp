@@ -7,13 +7,18 @@ function App() {
             {/* This is the Map Template component */}
             <MapsIndoorsMap supportsUrlParameters={true}
                 apiKey={import.meta.env.VITE_MAPSINDOORS_API_KEY}
-                venue={import.meta.env.VITE_VENUE}
+                // Fall back to NJIT campus if no env venue is provided
+                venue={import.meta.env.VITE_VENUE ?? "NJIT Campus"}
                 gmApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
                 mapboxAccessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}
+                // Force provider selection by keys (Google since Mapbox token is empty)
+                useMapProviderModule={false}
                 logo={"/Loading.png"}
                 primaryColor={"#C00000"}
-                // Center only if provided via env; otherwise let the venue decide (avoids mismatched venue/center)
-                center={import.meta.env.VITE_CENTER}
+                // Default to NJIT Newark campus when no env override is set
+                center={import.meta.env.VITE_CENTER ?? "-74.1780,40.7420"}
+                // Zoom in to campus on load
+                startZoomLevel={18}
                 // Ensure searches stay within MapsIndoors data only
                 searchExternalLocations={false}
                 // Improve base map legibility
