@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Map Template (dev)",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"..\\web-ui-main\\node_modules\\vite\\bin\\vite.js"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\web-ui-main\\packages\\map-template"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Demo Office (dev)",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"..\\web-ui-main\\node_modules\\vite\\bin\\vite.js"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\web-ui-main\\packages\\demo-office"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Map Template (dev)",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"..\\web-ui-main\\node_modules\\vite\\bin\\vite.js"
+			],
+			"isBackground": true,
+			"group": "none"
+		}
+	]
+}
