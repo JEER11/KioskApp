@@ -11,26 +11,12 @@ import Venue from './Venue/Venue';
 import currentVenueNameState from '../../atoms/currentVenueNameState';
 import isLocationClickedState from '../../atoms/isLocationClickedState';
 import venueWasSelectedState from '../../atoms/venueWasSelectedState';
-import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import PropTypes from 'prop-types';
 
 VenueSelector.propTypes = {
     onOpen: PropTypes.func,
     onClose: PropTypes.func,
     active: PropTypes.bool
-};
-
-// Map venue names to NJIT building coordinates (based on actual campus building locations from njit-campus.geojson)
-// Using precise coordinates for each NJIT building
-const venueToNJITBuilding = {
-    'Campus Center': { coords: [-74.17860, 40.74300], name: 'Campus Center' },
-    'Cullimore Hall': { coords: [-74.17945, 40.74286], name: 'Cullimore Hall' },
-    'Eberhardt Hall': { coords: [-74.17985, 40.74278], name: 'Eberhardt Hall' },
-    'ECE Building': { coords: [-74.1783, 40.7436], name: 'ECE Building' },
-    'Greek Village': { coords: [-74.1771, 40.7425], name: 'Greek Village' },
-    'Kupfrian Hall': { coords: [-74.1774, 40.7440], name: 'Kupfrian Hall' },
-    'Makerspace': { coords: [-74.1779, 40.7436], name: 'Makerspace' },
-    'Wellness Center': { coords: [-74.1766, 40.7427], name: 'Wellness Center' }
 };
 
 /**
@@ -48,7 +34,6 @@ function VenueSelector({ onOpen, onClose, active }) {
     const venueSelectorContentRef = useRef(null);
     const venuesInSolution = useRecoilValue(venuesInSolutionState);
     const [, setVenueWasSelected] = useRecoilState(venueWasSelectedState);
-    const mapsIndoorsInstance = useRecoilValue(mapsIndoorsInstanceState);
 
     const currentVenueName = useRecoilValue(currentVenueNameState);
 
@@ -62,54 +47,9 @@ function VenueSelector({ onOpen, onClose, active }) {
      * @param {object} venue
      */
     const selectVenue = venue => {
+        console.log('Venue selected:', venue.name, 'with geometry:', venue.geometry);
         setVenueWasSelected(true);
-        
-        // Look up the NJIT building by venue name
-        const buildingData = venueToNJITBuilding[venue.name];
-        
-        if (buildingData && mapsIndoorsInstance) {
-            // Navigate to the correct NJIT building coordinates
-            navigateToBuilding(buildingData);
-        } else {
-            console.warn('No building data found for venue:', venue.name);
-        }
-        
         toggle();
-    };
-
-    /**
-     * Navigate the map to an NJIT building location
-     * 
-     * @param {object} buildingData - Building data with coords and name
-     */
-    const navigateToBuilding = (buildingData) => {
-        const map = mapsIndoorsInstance?.getMap?.();
-        if (!map || !buildingData?.coords) return;
-        
-        const [lng, lat] = buildingData.coords;
-
-        // Mapbox
-        if (map?.flyTo) {
-            map.flyTo({ center: [lng, lat], zoom: 20, duration: 1000, essential: true });
-            // Notify overlay to highlight the building
-            setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('njit-focus', { 
-                    detail: { coords: [lng, lat], building: buildingData.name } 
-                }));
-            }, 100);
-            return;
-        }
-        
-        // Google Maps
-        if (typeof window.google !== 'undefined' && window.google.maps && map?.setCenter) {
-            map.setCenter({ lat, lng });
-            map.setZoom(20);
-            setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('njit-focus', { 
-                    detail: { coords: [lng, lat], building: buildingData.name } 
-                }));
-            }, 100);
-        }
     };
 
     /**

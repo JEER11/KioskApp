@@ -89,14 +89,14 @@ function getVenueImage(venueName, appConfig) {
 
 // Desired display order and names for kiosk deployment
 const customVenueList = [
-    { name: 'Campus Center', image: '/Building/Campuscenter.png' },
-    { name: 'Cullimore Hall', image: '/Building/Cullimore.png' },
-    { name: 'Eberhardt Hall', image: '/Building/Eberhardt.png' },
-    { name: 'ECE Building', image: '/Building/ECEb.png' },
-    { name: 'Greek Village', image: '/Building/Greekvillage.png' },
-    { name: 'Kupfrian Hall', image: '/Building/Kupfrianhall.png' },
-    { name: 'Makerspace', image: '/Building/Makerspace.png' },
-    { name: 'Wellness Center', image: '/Building/WellnessCenter.png' }
+    { name: 'Campus Center', image: '/Building/Campuscenter.png', coords: [-74.17860, 40.74300] },
+    { name: 'Cullimore Hall', image: '/Building/Cullimore.png', coords: [-74.17945, 40.74286] },
+    { name: 'Eberhardt Hall', image: '/Building/Eberhardt.png', coords: [-74.17985, 40.74278] },
+    { name: 'ECE Building', image: '/Building/ECEb.png', coords: [-74.1783, 40.7436] },
+    { name: 'Greek Village', image: '/Building/Greekvillage.png', coords: [-74.1771, 40.7425] },
+    { name: 'Kupfrian Hall', image: '/Building/Kupfrianhall.png', coords: [-74.1774, 40.7440] },
+    { name: 'Makerspace', image: '/Building/Makerspace.png', coords: [-74.1779, 40.7436] },
+    { name: 'Wellness Center', image: '/Building/WellnessCenter.png', coords: [-74.1766, 40.7427] }
 ];
 
 // Apply kiosk-specific venue naming and imagery while preserving IDs
@@ -106,10 +106,38 @@ function applyCustomVenuePresentation(venues, appConfig) {
         const image = getVenueImage(override?.name, appConfig) || override?.image || getVenueImage(venue.name, appConfig);
 
         if (override) {
-            venue.name = override.name;
-            if (venue.venueInfo) {
-                venue.venueInfo.name = override.name;
+            // Create a new venue object to avoid immutability issues
+            const newVenue = Object.assign({}, venue);
+            newVenue.name = override.name;
+            
+            if (newVenue.venueInfo) {
+                newVenue.venueInfo = Object.assign({}, venue.venueInfo);
+                newVenue.venueInfo.name = override.name;
             }
+            
+            // CRITICAL: Fix venue geometry to point to correct NJIT building location
+            if (override.coords) {
+                const [lng, lat] = override.coords;
+                console.log('Setting venue geometry for', override.name, 'to', override.coords);
+                
+                // Create completely new geometry object
+                newVenue.geometry = {
+                    type: 'Point',
+                    coordinates: [lng, lat],
+                    bbox: [lng, lat, lng, lat]
+                };
+                
+                // Also update anchor if it exists
+                if (newVenue.anchor) {
+                    newVenue.anchor = {
+                        type: 'Point',
+                        coordinates: [lng, lat]
+                    };
+                }
+            }
+            
+            newVenue.image = image;
+            return newVenue;
         }
 
         venue.image = image;

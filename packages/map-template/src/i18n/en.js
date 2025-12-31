@@ -64,7 +64,7 @@ const en = {
     'Choose destination': 'Choose destination',
     // Venue selector
     'Venues': 'Venues',
-    'Select venue': 'Select venue',
+    'Select venue': 'NJIT Buildings',
     'Current': 'Current',
     // QR code dialog
     'Scan QR code': 'Scan QR code',
