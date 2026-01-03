@@ -36,6 +36,27 @@
 			],
 			"isBackground": true,
 			"group": "none"
+		},
+		{
+			"label": "Run Map Template Website",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"../../node_modules/vite/bin/vite.js"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\web-ui-main\\packages\\map-template"
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			}
 		}
 	]
 }
