@@ -26,8 +26,14 @@
         height: var(--spacing-xxx-large);
         background: #000000;
         transition: background-color 0.2s, border-color 0.2s;
-        color: #ffffff;
+        color: #dc143c;
         font: inherit;
+
+        svg, img, path, * {
+            color: #dc143c !important;
+            fill: #dc143c !important;
+            stroke: #dc143c !important;
+        }
 
         &:not(:disabled):hover {
             background-color: #1a1a1a;

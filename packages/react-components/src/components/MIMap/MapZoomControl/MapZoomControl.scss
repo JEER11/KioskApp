@@ -41,8 +41,15 @@
             width: 20px;
             height: 20px;
             display: block;
-            color: #ffffff;
-            fill: #ffffff;
+            color: #dc143c !important;
+            fill: #dc143c !important;
+            stroke: #dc143c !important;
+
+            path, * {
+                color: #dc143c !important;
+                fill: #dc143c !important;
+                stroke: #dc143c !important;
+            }
         }
 
         &:not(:last-child) {

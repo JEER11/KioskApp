@@ -57,6 +57,12 @@ $align-offset: 2px;
         height: var(--spacing-xxx-large);
         position: relative;
 
+        svg, img, path, * {
+            color: #dc143c !important;
+            fill: #dc143c !important;
+            stroke: #dc143c !important;
+        }
+
         &:hover {
             background-color: #1a1a1a;
             border: 1px solid #555555;

@@ -52,8 +52,19 @@ mi-search input::placeholder {
 mi-my-position button,
 mi-floor-selector button {
   background-color: #000000 !important;
-  color: #ffffff !important;
+  color: #dc143c !important;
   border-color: #3a3a3a !important;
+}
+
+mi-my-position button svg,
+mi-my-position svg,
+mi-my-position button svg path,
+mi-my-position svg path,
+mi-my-position button svg *,
+mi-my-position svg * {
+  color: #dc143c !important;
+  fill: #dc143c !important;
+  stroke: #dc143c !important;
 }
 
 /* Target shadow DOM parts for MapsIndoors components */
@@ -61,8 +72,16 @@ mi-my-position::part(button),
 mi-floor-selector::part(button),
 mi-floor-selector::part(list) {
   background-color: #000000 !important;
-  color: #ffffff !important;
+  color: #dc143c !important;
   border-color: #3a3a3a !important;
+}
+
+mi-my-position::part(icon),
+mi-my-position::part(icon) path,
+mi-my-position::part(icon) * {
+  color: #dc143c !important;
+  fill: #dc143c !important;
+  stroke: #dc143c !important;
 }
 
 /* Override all white backgrounds globally */

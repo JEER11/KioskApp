@@ -1,9 +1,14 @@
 import './App.css';
 import MapsIndoorsMap from './components/MapsIndoorsMap/MapsIndoorsMap';
+import WeatherHeader from './components/WeatherHeader/WeatherHeader';
 
 function App() {
     return (
         <div className="app">
+            <WeatherHeader 
+                location={{ lat: 40.7420, lon: -74.1780 }}
+                apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
+            />
             {/* This is the Map Template component */}
             <MapsIndoorsMap supportsUrlParameters={true}
                 apiKey={import.meta.env.VITE_MAPSINDOORS_API_KEY}
