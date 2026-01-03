@@ -1,6 +1,6 @@
 .legend {
     position: absolute;
-    background: white;
+    background: #000000;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -60,7 +60,7 @@
                 left: 0;
                 right: 0;
                 height: var(--spacing-xx-large);
-                background: linear-gradient(rgba(255, 255, 255, 0), white);
+                background: linear-gradient(rgba(0, 0, 0, 0), #000000);
             }
 
             &::after {
@@ -70,7 +70,7 @@
                 left: 0;
                 right: 0;
                 height: var(--spacing-xx-large);
-                background: linear-gradient(white, rgba(255, 255, 255, 0));
+                background: linear-gradient(#000000, rgba(0, 0, 0, 0));
             }
         }
     }

@@ -1,1 +1,22 @@
 	$desktop-breakpoint: 992px;
+
+/* Dark theme CSS variables */
+:root {
+	--color-white-white: #000000;
+	--color-black-black: #ffffff;
+	--color-black-base: #ffffff;
+	--color-gray-10: #1a1a1a;
+	--color-gray-20: #2a2a2a;
+	--color-gray-30: #3a3a3a;
+	--color-gray-40: #4a4a4a;
+	--color-gray-50: #5a5a5a;
+	--color-gray-60: #cccccc;
+	--color-gray-70: #dddddd;
+	--color-gray-80: #eeeeee;
+	--color-gray-90: #ffffff;
+	--brand-colors-white-100: #000000;
+	--brand-colors-black-100: #ffffff;
+	--tailwind-colors-white: #000000;
+	--tailwind-colors-gray-100: #1a1a1a;
+	--tailwind-colors-gray-200: #2a2a2a;
+}

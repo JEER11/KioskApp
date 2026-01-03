@@ -11,7 +11,7 @@ $align-offset: 2px;
 .venue-selector {
     &__content {
         position: absolute;
-        background-color: white;
+        background-color: #000000;
         z-index: var(--z-index-popup);
         overflow-y: hidden;
         display: grid;
@@ -50,16 +50,16 @@ $align-offset: 2px;
     }
 
     &__button {
-        background-color: var(--tailwind-colors-white);
+        background-color: #000000;
         border-radius: var(--rounding-large);
-        border: 1px solid #E6E6E6;
+        border: 1px solid #3a3a3a;
         width: var(--spacing-xxx-large);
         height: var(--spacing-xxx-large);
         position: relative;
 
         &:hover {
-            background-color: var(--tailwind-colors-gray-100);
-            border: 1px solid var(--tailwind-colors-gray-200);
+            background-color: #1a1a1a;
+            border: 1px solid #555555;
         }
     }
 

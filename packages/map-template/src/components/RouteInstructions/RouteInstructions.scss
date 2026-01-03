@@ -6,7 +6,7 @@
     &__footer {
         position: sticky;
         bottom: 134px;
-        background: white;
+        background: #000000;
         padding-bottom: var(--spacing-medium);
 
         &::before {
@@ -17,7 +17,7 @@
             left: 0;
             right: 0;
             height: var(--spacing-xx-large);
-            background: linear-gradient(rgba(255, 255, 255, 0), white);
+            background: linear-gradient(rgba(0, 0, 0, 0), #000000);
         }
 
         &--kiosk {
