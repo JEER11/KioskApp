@@ -55,6 +55,7 @@ function Search({ onSetSize, isOpen }) {
         // NJIT overlay data for custom category lists (restrooms/parking)
         const [njitFeatures, setNjitFeatures] = useState([]);
         const [njitList, setNjitList] = useState([]);
+        const [expandedCategory, setExpandedCategory] = useState(null);
     const appConfig = useRecoilValue(appConfigState);
 
     const { t } = useTranslation();
@@ -430,8 +431,9 @@ function Search({ onSetSize, isOpen }) {
                 setIsInputFieldInFocus(true);
             }, { once: true });
         } else {
-            searchFieldRef.current.focusInput();
+            // On desktop (no sheet), set focus immediately
             setIsInputFieldInFocus(true);
+            searchFieldRef.current.focusInput();
         }
     }
 
@@ -749,14 +751,68 @@ function Search({ onSetSize, isOpen }) {
             {/* Vertical list of Categories */}
             {/* Show full category list if (kiosk mode and showCategoriesUnderSearch is true) OR input is in focus, and only when searchResults are empty */}
             {(shouldShowCategoriesUnderSearch() || isInputFieldInFocus) && !showNotFoundMessage && categories.length > 0 && searchResults.length === 0 && (
-                <Categories
-                    onSetSize={onSetSize}
-                    searchFieldRef={searchFieldRef}
-                    getFilteredLocations={(category) => getFilteredLocations(category)}
-                    isOpen={!!selectedCategory}
-                    topLevelCategory={true}
-                    categoryOrientation={areHorizontalCategoriesEnabled ? 'horizontal' : 'vertical'}
-                />
+                <div>
+                    {categories.filter(([, categoryInfo]) => {
+                        // Filter out Men's and Women's Restroom from main categories
+                        const displayName = categoryInfo.displayName?.toLowerCase() || '';
+                        return !(displayName.includes('men\'s') || displayName.includes('women\'s'));
+                    }).map(([category, categoryInfo]) => {
+                        const isRestroom = /restroom|toilet|bathroom/.test((category || '').toString().toLowerCase());
+                        const isParking = /parking|garage|lot/.test((category || '').toString().toLowerCase());
+                        const isExpanded = expandedCategory === category;
+                        const hasSubcategories = isRestroom || isParking;
+                        
+                        return (
+                            <div key={category} style={{ marginTop: 'var(--spacing-x-small)' }}>
+                                <div className="categories__category" style={{ 
+                                    animation: 'dropIn 0.3s ease-out',
+                                    animationFillMode: 'both'
+                                }}>
+                                    <button onClick={() => {
+                                        if (hasSubcategories) {
+                                            setExpandedCategory(isExpanded ? null : category);
+                                            getFilteredLocations(category);
+                                        } else {
+                                            setExpandedCategory(null);
+                                            getFilteredLocations(category);
+                                        }
+                                    }}>
+                                        <img src={categoryInfo.iconUrl} alt="" />
+                                        {categoryInfo.displayName}
+                                    </button>
+                                </div>
+                                
+                                {/* Show subcategories inline if expanded */}
+                                {isExpanded && njitList.length > 0 && (
+                                    <div className="categories__subcategories">
+                                        {njitList.map((item) => {
+                                            const itemIsParking = item.amenity === 'parking';
+                                            const iconLabel = itemIsParking ? 'P' : 'WC';
+                                            
+                                            return (
+                                                <div key={item.id} className="categories__subcategory">
+                                                    <button onClick={() => onNjitItemClicked(item)}>
+                                                        <div className="overlay-item__icon" data-amenity={item.amenity} style={{
+                                                            width: '28px',
+                                                            height: '28px',
+                                                            fontSize: '12px'
+                                                        }}>{iconLabel}</div>
+                                                        <div className="overlay-item__content">
+                                                            <div style={{ fontSize: '13px', fontWeight: '500' }}>{item.name}</div>
+                                                            <div style={{ fontSize: '11px', opacity: 0.8 }}>
+                                                                {itemIsParking ? t('Parking') : (item.building ? `${t('Restroom')} · ${item.building}` : t('Restroom'))}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             )}
 
             {/* Message shown if no search results were found */}
@@ -791,30 +847,7 @@ function Search({ onSetSize, isOpen }) {
                 </div>
             )}
 
-            {/* NJIT overlay list for Restrooms/Parking */}
-            {njitList.length > 0 && (
-                <div className="search__results search__overlay-results prevent-scroll" {...scrollableContentSwipePrevent}>
-                    {njitList.map(item => {
-                        const isParking = item.amenity === 'parking';
-                        const iconLabel = isParking ? 'P' : 'WC';
-                        const subtitle = isParking
-                            ? t('Parking')
-                            : item.building
-                                ? `${t('Restroom')} · ${item.building}`
-                                : t('Restroom');
 
-                        return (
-                            <button key={item.id} className="overlay-item" onClick={() => onNjitItemClicked(item)}>
-                                <div className="overlay-item__icon" data-amenity={item.amenity}>{iconLabel}</div>
-                                <div className="overlay-item__content">
-                                    <div className="overlay-item__title">{item.name}</div>
-                                    <div className="overlay-item__subtitle">{subtitle}</div>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
 
             { /* Keyboard */}
 

@@ -122,6 +122,9 @@ const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) =
 
     return (
         <div className="weather-header">
+            <div className="weather-header-search">
+                {/* Placeholder div for search - the actual search modal will render here */}
+            </div>
             <div className="weather-header-content">
                 <div className="time-date-section">
                     <span className="time">{formatTime()}</span>

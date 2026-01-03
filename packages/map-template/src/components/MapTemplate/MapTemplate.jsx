@@ -229,6 +229,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
     const [, setGmApiKey] = useRecoilState(gmApiKeyState);
     const [, setMapboxAccessToken] = useRecoilState(mapboxAccessTokenState);
     const [isMapReady, setMapReady] = useRecoilState(isMapReadyState);
+    const [minimumLoadTimeReached, setMinimumLoadTimeReached] = useState(false);
     const [venuesInSolution, setVenuesInSolution] = useRecoilState(venuesInSolutionState);
     const [currentLocation, setCurrentLocation] = useRecoilState(currentLocationState);
     const categories = useRecoilValue(categoriesState);
@@ -336,6 +337,17 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
             }
         }
     }, [language, appConfig, currentLanguage, setCurrentLanguage]);
+
+    /*
+     * Set minimum loading time to ensure splash screen shows for at least 3 seconds
+     */
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setMinimumLoadTimeReached(true);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     /*
      * If the app is inactive, run code to reset UI and state.
@@ -854,7 +866,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
     ${(venuesInSolution.length > 1 && showVenueSelector) ? '' : 'mapsindoors-map--hide-venue-selector'}
     ${showPositionControl ? 'mapsindoors-map--show-my-position' : 'mapsindoors-map--hide-my-position'}`}>
         <Notification />
-        {!isMapReady && <SplashScreen />}
+        {(!isMapReady || !minimumLoadTimeReached || categories.length === 0 || venuesInSolution.length === 0) && <SplashScreen />}
         {venuesInSolution.length > 1 && showVenueSelector && <VenueSelector
             onOpen={() => pushAppView(appStates.VENUE_SELECTOR)}
             onClose={() => goBack()}

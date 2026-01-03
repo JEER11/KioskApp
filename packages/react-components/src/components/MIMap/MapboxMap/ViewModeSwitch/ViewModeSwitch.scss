@@ -2,10 +2,12 @@ $desktop-breakpoint: 992px;
 
 .view-mode-switch {
     display: grid;
-    background-color: white;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
     height: fit-content;
-    border-radius: var(--spacing-small);
-    border: 1px solid #E6E6E6;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
     grid-auto-flow: row; // Stack buttons vertically
     width: fit-content; // Only take up needed space
     
@@ -17,7 +19,13 @@ $desktop-breakpoint: 992px;
         display: grid;
         align-items: center;
         justify-content: center;
-        border: 2px solid var(--tailwind-colors-white, white);
+        border: 2px solid rgba(255, 255, 255, 0.1);
         background-clip: padding-box;
+        
+        svg, path, * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+        }
     }
 }

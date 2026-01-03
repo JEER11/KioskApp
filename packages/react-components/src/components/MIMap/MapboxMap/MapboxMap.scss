@@ -9,11 +9,20 @@ $desktop-breakpoint: 992px;
     .mapboxgl-ctrl {
         &-group {
             margin: 10px var(--spacing-small) 30px 0 !important;
-            border-radius: var(--rounding-large);
-            box-shadow: 0 0 0 var(--spacing-xxx-small) #e5e7eb !important;
+            border-radius: 8px !important;
+            background-color: rgba(0, 0, 0, 0.75) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
 
             button {
                 padding: var(--spacing-large); // UX design
+                background-color: transparent !important;
+                border-color: rgba(255, 255, 255, 0.1) !important;
+                
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                }
             }
         }
 
@@ -22,6 +31,7 @@ $desktop-breakpoint: 992px;
             background-repeat: no-repeat;
             background-size: 20px 20px;
             background-position: center center;
+            filter: brightness(0) invert(1);
         }
 
         &-zoom-out {
@@ -29,6 +39,7 @@ $desktop-breakpoint: 992px;
             background-repeat: no-repeat;
             background-size: 20px 20px;
             background-position: center center;
+            filter: brightness(0) invert(1);
         }
 
         &-icon {

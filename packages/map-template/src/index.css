@@ -48,12 +48,15 @@ mi-search input::placeholder {
   color: #999999 !important;
 }
 
-/* Override MapsIndoors web component buttons */
+/* Override MapsIndoors web component buttons with translucent style */
 mi-my-position button,
 mi-floor-selector button {
-  background-color: #000000 !important;
-  color: #dc143c !important;
-  border-color: #3a3a3a !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 8px !important;
 }
 
 mi-my-position button svg,
@@ -62,26 +65,40 @@ mi-my-position button svg path,
 mi-my-position svg path,
 mi-my-position button svg *,
 mi-my-position svg * {
-  color: #dc143c !important;
-  fill: #dc143c !important;
-  stroke: #dc143c !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 /* Target shadow DOM parts for MapsIndoors components */
 mi-my-position::part(button),
 mi-floor-selector::part(button),
 mi-floor-selector::part(list) {
-  background-color: #000000 !important;
-  color: #dc143c !important;
-  border-color: #3a3a3a !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 8px !important;
 }
 
 mi-my-position::part(icon),
 mi-my-position::part(icon) path,
 mi-my-position::part(icon) * {
-  color: #dc143c !important;
-  fill: #dc143c !important;
-  stroke: #dc143c !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Floor selector list items */
+mi-floor-selector::part(list-item) {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+mi-floor-selector::part(list-item):hover {
+  background-color: rgba(0, 0, 0, 0.8) !important;
 }
 
 /* Override all white backgrounds globally */

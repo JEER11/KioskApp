@@ -21,29 +21,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #3a3a3a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--rounding-large);
     width: var(--spacing-xxx-large);
     height: var(--spacing-xxx-large);
-    background: #000000;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
     transition: background-color 0.2s, border-color 0.2s;
-    color: #dc143c;
+    color: #ffffff;
     font: inherit;
 
     svg, img, path, * {
-      color: #dc143c !important;
-      fill: #dc143c !important;
-      stroke: #dc143c !important;
+      color: #ffffff !important;
+      fill: #ffffff !important;
+      stroke: #ffffff !important;
     }
 
     &:hover {
-      background-color: #1a1a1a;
-      border: 1px solid #555555;
+      background-color: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
   }
 
   &__container {
-    background: #000000;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
     border-radius: var(--rounding-large);
     display: flex;
     flex-direction: column;
@@ -102,7 +107,7 @@
 
     &:hover,
     &--selected {
-      background: #1a1a1a;
+      background: rgba(255, 255, 255, 0.1);
     }
   }
 }
