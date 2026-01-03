@@ -48,7 +48,10 @@
     }
 
     &__container {
-        background: #000000;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         border-radius: var(--rounding-large);
         display: flex;
         flex-direction: column;
@@ -75,7 +78,7 @@
 }
 
 .building-list {
-    background: #000000;
+    background: transparent;
     border-radius: var(--rounding-large);
     padding: var(--spacing-x-small);
     overflow-y: auto;
@@ -85,16 +88,28 @@
     z-index: var(--z-index-sticky);
     max-height: 20rem; // Limit height for long building lists
 
-    // Hide scrollbar on mobile devices
-    @media (max-width: 768px) {
-        scrollbar-width: none;
+    // Modern scrollbar styling
+    &::-webkit-scrollbar {
+        width: 8px;
     }
 
-    // Subtle scrollbar for desktop
-    @media (min-width: 769px) {
-        scrollbar-width: thin;
-        scrollbar-color: var(--tailwind-colors-gray-300) transparent;
+    &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
     }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(220, 20, 60, 0.6);
+        border-radius: 4px;
+        
+        &:hover {
+            background: rgba(220, 20, 60, 0.8);
+        }
+    }
+
+    // Firefox scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: rgba(220, 20, 60, 0.6) rgba(255, 255, 255, 0.05);
 
     &__item {
         background: none;

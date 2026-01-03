@@ -53,7 +53,7 @@ mi-my-position button,
 mi-floor-selector button {
   background-color: rgba(0, 0, 0, 0.75) !important;
   backdrop-filter: blur(10px) !important;
-  color: #ffffff !important;
+  color: #dc143c !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
   border-radius: 8px !important;
@@ -65,9 +65,9 @@ mi-my-position button svg path,
 mi-my-position svg path,
 mi-my-position button svg *,
 mi-my-position svg * {
-  color: #ffffff !important;
-  fill: #ffffff !important;
-  stroke: #ffffff !important;
+  color: #dc143c !important;
+  fill: #dc143c !important;
+  stroke: #dc143c !important;
 }
 
 /* Target shadow DOM parts for MapsIndoors components */
@@ -76,7 +76,7 @@ mi-floor-selector::part(button),
 mi-floor-selector::part(list) {
   background-color: rgba(0, 0, 0, 0.75) !important;
   backdrop-filter: blur(10px) !important;
-  color: #ffffff !important;
+  color: #dc143c !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important;
   border-radius: 8px !important;
@@ -85,9 +85,22 @@ mi-floor-selector::part(list) {
 mi-my-position::part(icon),
 mi-my-position::part(icon) path,
 mi-my-position::part(icon) * {
-  color: #ffffff !important;
-  fill: #ffffff !important;
-  stroke: #ffffff !important;
+  color: #dc143c !important;
+  fill: #dc143c !important;
+  stroke: #dc143c !important;
+}
+
+/* Force floor selector button icon to be red */
+.mi-floor-selector__button,
+.mi-floor-selector__button--open,
+.mi-floor-selector__button--closed {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(97%) saturate(7471%) hue-rotate(355deg) brightness(89%) contrast(111%) !important;
+}
+
+mi-floor-selector .mi-floor-selector__button,
+mi-floor-selector .mi-floor-selector__button--open,
+mi-floor-selector .mi-floor-selector__button--closed {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(97%) saturate(7471%) hue-rotate(355deg) brightness(89%) contrast(111%) !important;
 }
 
 /* Floor selector list items */

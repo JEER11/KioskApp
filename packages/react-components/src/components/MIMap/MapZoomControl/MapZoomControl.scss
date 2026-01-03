@@ -3,8 +3,10 @@
     flex-direction: column;
     border-radius: var(--rounding-large, 8px);
     overflow: hidden;
-    border: 1px solid #3a3a3a;
-    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 
     &__button {
         display: flex;
@@ -13,7 +15,7 @@
         width: var(--spacing-xxx-large, 48px);
         height: var(--spacing-xxx-large, 48px);
         border: none;
-        background: #000000;
+        background: transparent;
         cursor: pointer;
         padding: var(--spacing-x-small, 8px);
         color: #ffffff;
@@ -21,11 +23,11 @@
         transition: background-color 0.2s;
 
         &:hover {
-            background-color: #1a1a1a;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         &:active {
-            background-color: #2a2a2a;
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         &:focus {
@@ -53,7 +55,7 @@
         }
 
         &:not(:last-child) {
-            border-bottom: 1px solid #3a3a3a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
     }
 }

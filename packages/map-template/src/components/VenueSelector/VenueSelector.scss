@@ -11,7 +11,10 @@ $align-offset: 2px;
 .venue-selector {
     &__content {
         position: absolute;
-        background-color: #000000;
+        background-color: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         z-index: var(--z-index-popup);
         overflow-y: hidden;
         display: grid;
@@ -30,7 +33,7 @@ $align-offset: 2px;
         height: calc($button-height + 2 * var(--spacing-small));
 
         h1 {
-            color: var(--color-gray-90);
+            color: #ffffff;
             font-size: var(--font-size-small);
             margin: 0;
             text-align: center; // Center text
@@ -47,6 +50,29 @@ $align-offset: 2px;
     &__list {
         overflow-y: auto;
         padding: var(--spacing-medium);
+        
+        // Modern scrollbar styling
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(220, 20, 60, 0.6);
+            border-radius: 4px;
+            
+            &:hover {
+                background: rgba(220, 20, 60, 0.8);
+            }
+        }
+
+        // Firefox scrollbar
+        scrollbar-width: thin;
+        scrollbar-color: rgba(220, 20, 60, 0.6) rgba(255, 255, 255, 0.05);
     }
 
     &__button {
