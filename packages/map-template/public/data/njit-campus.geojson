@@ -4,13 +4,25 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Campus Center Restroom",
+        "name": "Campus Center Women's Restroom",
         "amenity": "toilets",
-        "image": "https://via.placeholder.com/400x250?text=Campus+Center+Restroom"
+        "image": "https://via.placeholder.com/400x250?text=Campus+Center+Women's+Restroom"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1786, 40.7430]
+        "coordinates": [-74.17804891730285, 40.7430159766256]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campus Center Men's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=Campus+Center+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17799319004237, 40.74309914004893]
       }
     },
     {
@@ -40,13 +52,97 @@
     {
       "type": "Feature",
       "properties": {
+        "name": "Faculty Memorial Hall Women's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=FMH+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17904765478941, 40.74203141814198]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Faculty Memorial Hall Men's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=FMH+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17856228542894, 40.74179629657664]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Faculty Memorial Hall All-Gender Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=FMH+All-Gender+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1790308251933, 40.74206797111608]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tiernan Hall Women's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17944957720216, 40.742199247677654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tiernan Hall Men's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1795568655563, 40.74221652125596]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ECE Building Women's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=ECE+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17862457788208, 40.74145388831046]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ECE Building Men's Restroom",
+        "amenity": "toilets",
+        "image": "https://via.placeholder.com/400x250?text=ECE+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1786897099707, 40.741377622970724]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "name": "Science and Technology Parking Garage",
         "amenity": "parking",
         "image": "https://via.placeholder.com/400x250?text=ST+Parking+Garage"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1790, 40.7415]
+        "coordinates": [-74.18210547561043, 40.743119595625096]
       }
     },
     {
@@ -58,7 +154,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1768, 40.7418]
+        "coordinates": [-74.17796379424192, 40.74045366870485]
       }
     },
     {
@@ -70,7 +166,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1782, 40.7412]
+        "coordinates": [-74.17917199532151, 40.741575699838826]
       }
     },
     {
@@ -82,7 +178,55 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1792, 40.7424]
+        "coordinates": [-74.1775483677129, 40.74360241251276]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NJIT Parking Lot 16",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=NJIT+Parking+Lot+16"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1817968013533, 40.74408405216255]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NJIT Parking Deck",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=NJIT+Parking+Deck"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17843069050636, 40.7402141104446]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Essex County College Parking Lot",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=Essex+County+College+Parking+Lot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1808666659123, 40.73991866485187]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Essex County College Parking Deck",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=Essex+County+College+Parking+Deck"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.18084586094373, 40.739918794346146]
       }
     },
     {
@@ -94,7 +238,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.17985, 40.74278]
+        "coordinates": [-74.17690553992043, 40.74285401990941]
       }
     },
     {
@@ -106,7 +250,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.17860, 40.74300]
+        "coordinates": [-74.17839274838578, 40.74305716282688]
       }
     },
     {
@@ -118,7 +262,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.17945, 40.74286]
+        "coordinates": [-74.17730583579504, 40.74293215225468]
       }
     },
     {
@@ -130,7 +274,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1783, 40.7436]
+        "coordinates": [-74.17876435736274, 40.74141297826167]
       }
     },
     {
@@ -142,7 +286,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1771, 40.7425]
+        "coordinates": [-74.18054034715016, 40.74102290039694]
       }
     },
     {
@@ -154,7 +298,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1774, 40.7440]
+        "coordinates": [-74.17849122719646, 40.74253420362278]
       }
     },
     {
@@ -166,7 +310,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1779, 40.7436]
+        "coordinates": [-74.17943222189625, 40.74413522805793]
       }
     },
     {
@@ -178,7 +322,77 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.1766, 40.7427]
+        "coordinates": [-74.18043957683709, 40.742355477483784]
+      }
+    },    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fenster Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Fenster+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17695832114396, 40.74250325491228]
+      }
+    },    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tiernan Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17945040466692, 40.74175770088645]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Faculty Memorial Hall",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Faculty+Memorial+Hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17869765832067, 40.74192193983928]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central King Building",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1775609566086, 40.74211277890102]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Robert W. Van Houten Library",
+        "category": "building",
+        "image": "https://via.placeholder.com/400x250?text=Robert+W.+Van+Houten+Library"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17794817036413, 40.74378003351004]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NJIT West Parking Deck",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=NJIT+West+Parking+Deck"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.18211156653679, 40.7430632317067]
       }
     }
   ]

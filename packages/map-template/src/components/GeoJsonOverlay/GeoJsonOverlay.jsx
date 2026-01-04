@@ -4,6 +4,9 @@ import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import mapTypeState from '../../atoms/mapTypeState';
 import { mapTypes } from '../../constants/mapTypes';
 import selectedCategoryState from '../../atoms/selectedCategoryState';
+import femaleSvg from '../../assets/restroomrestroom/Tfemale.svg';
+import maleSvg from '../../assets/restroomrestroom/Tmale.svg';
+import bothGenderSvg from '../../assets/restroomrestroom/Tbothgender.svg';
 
 /**
  * Renders a GeoJSON overlay on the underlying base map (Mapbox or Google Maps).
@@ -422,16 +425,121 @@ function GeoJsonOverlay() {
         };
         window.addEventListener('njit-focus', onFocus);
 
+        // Handle showing multiple restrooms for a building
+        const onShowRestrooms = (event) => {
+            const { building, restrooms } = event.detail || {};
+            if (!restrooms || !Array.isArray(restrooms)) return;
+
+            if (mapType === mapTypes.Mapbox) {
+                const map = mapsIndoorsInstance.getMap();
+                if (!map) return;
+                
+                // Load gender-specific icons from imported SVG files
+                const loadIcon = (name, svgPath) => {
+                    if (!map.hasImage(name)) {
+                        const img = new Image();
+                        img.onload = () => map.addImage(name, img);
+                        img.src = svgPath;
+                    }
+                };
+                
+                loadIcon('restroom-female', femaleSvg);
+                loadIcon('restroom-male', maleSvg);
+                loadIcon('restroom-all', bothGenderSvg);
+                
+                // Create a marker source for gender-specific restrooms
+                const sourceId = 'njit-restroom-markers';
+                const features = restrooms.map(r => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: r.coords },
+                    properties: {
+                        name: r.name,
+                        gender: r.gender,
+                        building: building
+                    }
+                }));
+                
+                const featureCollection = { type: 'FeatureCollection', features };
+                
+                if (map.getSource(sourceId)) {
+                    map.getSource(sourceId).setData(featureCollection);
+                } else {
+                    map.addSource(sourceId, { type: 'geojson', data: featureCollection });
+                }
+                
+                // Add gender-specific icon layer
+                if (!map.getLayer('njit-restroom-markers')) {
+                    map.addLayer({
+                        id: 'njit-restroom-markers',
+                        type: 'symbol',
+                        source: sourceId,
+                        layout: {
+                            'icon-image': [
+                                'match',
+                                ['get', 'gender'],
+                                'female', 'restroom-female',
+                                'male', 'restroom-male',
+                                'all', 'restroom-all',
+                                'restroom-all'
+                            ],
+                            'icon-size': 1,
+                            'icon-anchor': 'bottom',
+                            'icon-allow-overlap': true
+                        }
+                    });
+                }
+                
+            } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
+                const map = mapsIndoorsInstance?.getMap?.();
+                if (!map) return;
+                
+                // Clear existing markers
+                if (window.njitRestroomMarkers) {
+                    window.njitRestroomMarkers.forEach(m => m.setMap(null));
+                }
+                window.njitRestroomMarkers = [];
+                
+                // Create gender-specific markers using imported SVG files
+                restrooms.forEach(r => {
+                    const [lng, lat] = r.coords;
+                    let svgPath;
+                    
+                    if (r.gender === 'female') {
+                        svgPath = femaleSvg;
+                    } else if (r.gender === 'male') {
+                        svgPath = maleSvg;
+                    } else {
+                        svgPath = bothGenderSvg;
+                    }
+                    
+                    const marker = new window.google.maps.Marker({
+                        map,
+                        position: { lat, lng },
+                        icon: {
+                            url: svgPath,
+                            scaledSize: new window.google.maps.Size(32, 42),
+                            anchor: new window.google.maps.Point(16, 42)
+                        },
+                        title: r.name
+                    });
+                    
+                    window.njitRestroomMarkers.push(marker);
+                });
+            }
+        };
+        window.addEventListener('njit-show-restrooms', onShowRestrooms);
+
         return () => {
             aborted = true;
             if (mapType === mapTypes.Mapbox && mapsIndoorsInstance) {
                 const map = mapsIndoorsInstance.getMap();
                 if (map) {
-                    ['njit-points', 'njit-outline', 'njit-building-fill', 'njit-parking-fill', 'njit-labels'].forEach(id => {
+                    ['njit-points', 'njit-outline', 'njit-building-fill', 'njit-parking-fill', 'njit-labels', 'njit-restroom-markers', 'njit-restroom-icons'].forEach(id => {
                         if (map.getLayer(id)) map.removeLayer(id);
                     });
                     if (map.getSource('njit-geojson')) map.removeSource('njit-geojson');
                     if (map.getSource('njit-highlight-point')) map.removeSource('njit-highlight-point');
+                    if (map.getSource('njit-restroom-markers')) map.removeSource('njit-restroom-markers');
                     if (map.getLayer('njit-restroom-highlight')) map.removeLayer('njit-restroom-highlight');
                     if (map.getLayer('njit-building-highlight')) map.removeLayer('njit-building-highlight');
                 }
@@ -444,7 +552,12 @@ function GeoJsonOverlay() {
                 googleHighlightCircleRef.current.setMap(null);
                 googleHighlightCircleRef.current = null;
             }
+            if (window.njitRestroomMarkers) {
+                window.njitRestroomMarkers.forEach(m => m.setMap(null));
+                window.njitRestroomMarkers = [];
+            }
             window.removeEventListener('njit-focus', onFocus);
+            window.removeEventListener('njit-show-restrooms', onShowRestrooms);
         };
     }, [mapsIndoorsInstance, mapType, selectedCategory]);
 
