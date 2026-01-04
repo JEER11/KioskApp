@@ -6,6 +6,18 @@
     position: absolute;
     z-index: var(--z-index-top);
     background-color: var(--brand-colors-white-100);
+    
+    /* Make MapsPeople branding subtle without affecting NJIT logo */
+    a[href*="mapspeople"],
+    a[href*="mapsindoors"],
+    *[class*="attribution"],
+    *[class*="copyright"],
+    *[class*="powered"] {
+        opacity: 0.1 !important;
+        font-size: 8px !important;
+        transform: scale(0.5) !important;
+        z-index: 1 !important;
+    }
 
     &__logo {
         width: 100%;

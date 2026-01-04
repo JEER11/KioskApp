@@ -3,3 +3,59 @@
     height: 100%;
     background-color: #000000;
 }
+
+/* Make MapsPeople branding subtle and below UI controls */
+a[href*="mapsindoors"],
+a[href*="mapspeople"],
+.mapsindoors-branding,
+.mapspeople-branding,
+[class*="attribution"],
+[class*="branding"],
+[class*="watermark"] {
+    opacity: 0.2 !important;
+    z-index: 1 !important;
+    position: relative !important;
+    font-size: 10px !important;
+    transform: scale(0.7) !important;
+    pointer-events: none !important;
+}
+
+/* Specifically target MapsPeople text content */
+*:not(.splash-screen__logo):not(img)[class*="logo"],
+*[class*="powered"],
+*[class*="copyright"] {
+    opacity: 0.2 !important;
+    font-size: 9px !important;
+    z-index: 1 !important;
+}
+
+/* Make branding inside search more transparent and smaller */
+mi-search *[class*="brand"],
+mi-search *[class*="attribution"],
+mi-search a[href*="mapspeople"],
+mi-search a[href*="mapsindoors"] {
+    opacity: 0.15 !important;
+    font-size: 9px !important;
+    transform: scale(0.6) !important;
+    z-index: 1 !important;
+}
+
+/* Target MapsPeople text on splash screen without affecting NJIT logo */
+.splash-screen a[href*="mapspeople"],
+.splash-screen a[href*="mapsindoors"],
+.splash-screen *[class*="brand"]:not(.splash-screen__logo),
+.splash-screen *[class*="attribution"] {
+    opacity: 0.1 !important;
+    font-size: 8px !important;
+    transform: scale(0.5) !important;
+    z-index: 1 !important;
+}
+
+/* Ensure map attribution stays below UI and is subtle */
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-logo,
+.gm-style-cc,
+.gmnoprint {
+    opacity: 0.2 !important;
+    z-index: 1 !important;
+}

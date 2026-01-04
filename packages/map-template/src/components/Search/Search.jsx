@@ -1,5 +1,6 @@
 import './Search.scss';
 import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import appConfigState from '../../atoms/appConfigState';
 import categoriesState from '../../atoms/categoriesState';
@@ -17,7 +18,6 @@ import languageState from '../../atoms/languageState';
 import { useTranslation } from 'react-i18next';
 import kioskLocationState from '../../atoms/kioskLocationState';
 import getDesktopPaddingBottom from '../../helpers/GetDesktopPaddingBottom';
-import { createPortal } from 'react-dom';
 import useKeyboardState from '../../atoms/useKeyboardState';
 import Keyboard from '../WebComponentWrappers/Keyboard/Keyboard';
 import searchInputState from '../../atoms/searchInputState';
@@ -884,26 +884,27 @@ function Search({ onSetSize, isOpen }) {
             ref={searchRef}
             style={calculateContainerStyle()}>
 
-            { /* Search info which includes legend button if in a Kiosk context. */}
+            { /* Search input field rendered in weather header via portal */ }
+            {document.getElementById('weather-header-search-portal') && createPortal(
+                <div className="search__info" style={{ gridTemplateColumns: isKioskContext && showLegendButton ? 'min-content 1fr' : 'auto' }}>
+                    {isKioskContext && showLegendButton && <button className="search__legend" onClick={() => setShowLegendDialog(true)} aria-label={t('Show legend')}><Legend /></button>}
 
-            <div className="search__info" style={{ gridTemplateColumns: isKioskContext && showLegendButton ? 'min-content 1fr' : 'auto' }}>
-                {isKioskContext && showLegendButton && <button className="search__legend" onClick={() => setShowLegendDialog(true)} aria-label={t('Show legend')}><Legend /></button>}
-
-                { /* Search field that allows users to search for locations (MapsIndoors Locations and external) */}
-                <label className="search__label">
-                    <span>{t('Search by name, category, building...')}</span>
-                    <SearchField
-                        ref={searchFieldRef}
-                        mapsindoors={!(/restroom|toilet|bathroom|parking|garage|lot/.test((selectedCategory || '').toString().toLowerCase()))}
-                        placeholder={t('Search by name, category, building...')}
-                        results={locations => onResults(locations)}
-                        clicked={() => searchFieldClicked()}
-                        cleared={() => cleared()}
-                        category={selectedCategory}
-                        disabled={!isOpen} // Disabled when not open to prevent content jumping, enabled when open for keyboard accessibility
-                    />
-                </label>
-            </div>
+                    <label className="search__label">
+                        <span>{t('Search by name, category, building...')}</span>
+                        <SearchField
+                            ref={searchFieldRef}
+                            mapsindoors={!(/restroom|toilet|bathroom|parking|garage|lot/.test((selectedCategory || '').toString().toLowerCase()))}
+                            placeholder={t('Search by name, category, building...')}
+                            results={locations => onResults(locations)}
+                            clicked={() => searchFieldClicked()}
+                            cleared={() => cleared()}
+                            category={selectedCategory}
+                            disabled={!isOpen}
+                        />
+                    </label>
+                </div>,
+                document.getElementById('weather-header-search-portal')
+            )}
 
             {/* Vertical list of Categories */}
             {/* Show full category list if (kiosk mode and showCategoriesUnderSearch is true) OR input is in focus, and only when searchResults are empty */}
