@@ -11,6 +11,7 @@ import Venue from './Venue/Venue';
 import currentVenueNameState from '../../atoms/currentVenueNameState';
 import isLocationClickedState from '../../atoms/isLocationClickedState';
 import venueWasSelectedState from '../../atoms/venueWasSelectedState';
+import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import PropTypes from 'prop-types';
 
 VenueSelector.propTypes = {
@@ -34,6 +35,7 @@ function VenueSelector({ onOpen, onClose, active }) {
     const venueSelectorContentRef = useRef(null);
     const venuesInSolution = useRecoilValue(venuesInSolutionState);
     const [, setVenueWasSelected] = useRecoilState(venueWasSelectedState);
+    const mapsIndoorsInstance = useRecoilValue(mapsIndoorsInstanceState);
 
     const currentVenueName = useRecoilValue(currentVenueNameState);
 
@@ -49,6 +51,39 @@ function VenueSelector({ onOpen, onClose, active }) {
     const selectVenue = venue => {
         console.log('Venue selected:', venue.name, 'with geometry:', venue.geometry);
         setVenueWasSelected(true);
+        
+        // Dispatch njit-focus event to highlight the building on the map and pan to it
+        if (venue.geometry && venue.geometry.coordinates) {
+            const [lng, lat] = venue.geometry.coordinates;
+            
+            // Pan the map to the building coordinates
+            const map = mapsIndoorsInstance?.getMap?.();
+            if (map) {
+                // Check if it's Mapbox or Google Maps
+                if (map.flyTo) {
+                    // Mapbox
+                    map.flyTo({ 
+                        center: [lng, lat], 
+                        zoom: 18,
+                        essential: true
+                    });
+                } else if (typeof window.google !== 'undefined' && window.google.maps && map.setCenter) {
+                    // Google Maps
+                    map.setCenter({ lat, lng });
+                    map.setZoom(18);
+                }
+            }
+            
+            // Dispatch highlight event
+            window.dispatchEvent(new CustomEvent('njit-focus', {
+                detail: { 
+                    coords: [lng, lat],
+                    building: venue.name
+                }
+            }));
+            console.log('Dispatched njit-focus event for', venue.name, 'at coords:', [lng, lat]);
+        }
+        
         toggle();
     };
 
