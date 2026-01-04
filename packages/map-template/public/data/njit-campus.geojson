@@ -394,6 +394,114 @@
         "type": "Point",
         "coordinates": [-74.18211156653679, 40.7430632317067]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 1",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1803141870905, 40.742341055864]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 2",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17947216576324, 40.74220208504062]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 3",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1790975444705, 40.74195373047082]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 4",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1785564248254, 40.741811813157426]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 5",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17782279144635, 40.7421863165232]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 6",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+6"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17806473434675, 40.742799314867746]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 7",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+7"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17788522827657, 40.743816367171895]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 8",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17721923482692, 40.74311271055131]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elevator 9",
+        "amenity": "elevator",
+        "image": "https://via.placeholder.com/400x250?text=Elevator+9"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17863967398546, 40.74146490288614]
+      }
     }
   ]
 }

@@ -89,8 +89,8 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
     const [, setErrorMessage] = useRecoilState(notificationMessageState);
     const hideNonMatches = useRecoilValue(hideNonMatchesState);
     const appConfig = useRecoilValue(appConfigState);
-    const [isViewSelectorVisible, setIsViewSelectorVisible] = useState(false);
-    const [isLanguageSelectorVisible, setIsLanguageSelectorVisible] = useState(false);
+    const [isViewSelectorVisible, setIsViewSelectorVisible] = useState(true);
+    const [isLanguageSelectorVisible, setIsLanguageSelectorVisible] = useState(true);
     const isKiosk = useIsKioskContext();
     useLiveData(apiKey);
 

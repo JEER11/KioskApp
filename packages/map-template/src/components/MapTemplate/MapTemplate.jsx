@@ -63,6 +63,7 @@ import PropTypes from 'prop-types';
 import { ZoomLevelValues } from '../../constants/zoomLevelValues.js';
 import { useOnRouteFinished } from '../../hooks/useOnRouteFinished.js';
 import notificationMessageState from '../../atoms/notificationMessageState.js';
+import { addElevatorPin, removeElevatorPin, isElevator } from '../../helpers/addElevatorPin.js';
 
 // Local image overrides for venue cards (served from /public/Building)
 const customVenueImages = {
@@ -663,12 +664,27 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
      */
     useEffect(() => {
         if (currentLocation && currentLocation.id !== kioskOriginLocationId) {
-            if (mapsIndoorsInstance?.selectLocation) {
-                mapsIndoorsInstance.selectLocation(currentLocation);
+            // For elevators, don't use the default MapsIndoors highlight (blue circle)
+            // Instead, show our custom elevator pin
+            if (isElevator(currentLocation)) {
+                const map = mapsIndoorsInstance?.getMap?.();
+                if (map) {
+                    addElevatorPin(map, currentLocation);
+                }
+            } else {
+                // For non-elevators, use the default MapsIndoors highlight
+                if (mapsIndoorsInstance?.selectLocation) {
+                    mapsIndoorsInstance.selectLocation(currentLocation);
+                }
             }
         } else {
+            // Deselect location and remove elevator pin
             if (mapsIndoorsInstance?.deselectLocation) {
                 mapsIndoorsInstance.deselectLocation();
+            }
+            const map = mapsIndoorsInstance?.getMap?.();
+            if (map) {
+                removeElevatorPin(map);
             }
         }
     }, [currentLocation]);

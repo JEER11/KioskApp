@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './WeatherHeader.css';
+import { 
+    WiDaySunny, 
+    WiNightClear, 
+    WiDayCloudy, 
+    WiNightAltCloudy,
+    WiCloudy, 
+    WiSnow, 
+    WiFog,
+    WiDayRain,
+    WiNightRain,
+    WiDayThunderstorm,
+    WiNightThunderstorm
+} from 'react-icons/wi';
 
 const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -45,10 +58,50 @@ const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) =
         return () => clearInterval(weatherInterval);
     }, [location, apiKey]);
 
+    // Get weather condition class for styling
+    const getWeatherClass = () => {
+        if (!weather || !weather.weather || weather.weather.length === 0) {
+            return 'sunny-day';
+        }
+
+        const weatherCode = weather.weather[0].id;
+        const isDay = weather.weather[0].icon.includes('d');
+        const hour = currentTime.getHours();
+        const isSunsetSunrise = (hour >= 5 && hour <= 7) || (hour >= 17 && hour <= 19);
+
+        // Thunderstorm
+        if (weatherCode >= 200 && weatherCode < 300) {
+            return 'thunderstorm';
+        }
+        // Rain/Drizzle
+        if ((weatherCode >= 300 && weatherCode < 400) || (weatherCode >= 500 && weatherCode < 600)) {
+            return isDay ? 'rainy-day' : 'rainy-night';
+        }
+        // Snow
+        if (weatherCode >= 600 && weatherCode < 700) {
+            return 'snowy';
+        }
+        // Fog/Mist
+        if (weatherCode >= 700 && weatherCode < 800) {
+            return 'foggy';
+        }
+        // Clear
+        if (weatherCode === 800) {
+            if (isSunsetSunrise) return 'sunset';
+            return isDay ? 'sunny-day' : 'clear-night';
+        }
+        // Cloudy
+        if (weatherCode > 800 && weatherCode < 900) {
+            return isDay ? 'cloudy-day' : 'cloudy-night';
+        }
+
+        return isDay ? 'sunny-day' : 'clear-night';
+    };
+
     // Get weather icon based on weather condition and time of day
     const getWeatherIcon = () => {
         if (!weather || !weather.weather || weather.weather.length === 0) {
-            return '☀️'; // Default sun icon
+            return <WiDaySunny />; // Default sun icon
         }
 
         const weatherCode = weather.weather[0].id;
@@ -56,40 +109,40 @@ const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) =
 
         // Thunderstorm (200-232)
         if (weatherCode >= 200 && weatherCode < 300) {
-            return '⛈️';
+            return isDay ? <WiDayThunderstorm /> : <WiNightThunderstorm />;
         }
         // Drizzle (300-321)
         if (weatherCode >= 300 && weatherCode < 400) {
-            return '🌦️';
+            return isDay ? <WiDayRain /> : <WiNightRain />;
         }
         // Rain (500-531)
         if (weatherCode >= 500 && weatherCode < 600) {
-            return '🌧️';
+            return isDay ? <WiDayRain /> : <WiNightRain />;
         }
         // Snow (600-622)
         if (weatherCode >= 600 && weatherCode < 700) {
-            return '❄️';
+            return <WiSnow />;
         }
         // Atmosphere (701-781) - fog, mist, etc.
         if (weatherCode >= 700 && weatherCode < 800) {
-            return '🌫️';
+            return <WiFog />;
         }
         // Clear (800)
         if (weatherCode === 800) {
-            return isDay ? '☀️' : '🌙';
+            return isDay ? <WiDaySunny /> : <WiNightClear />;
         }
         // Clouds (801-804)
         if (weatherCode > 800 && weatherCode < 900) {
             if (weatherCode === 801) {
-                return isDay ? '🌤️' : '🌙';
+                return isDay ? <WiDayCloudy /> : <WiNightAltCloudy />;
             } else if (weatherCode === 802) {
-                return '⛅';
+                return isDay ? <WiDayCloudy /> : <WiNightAltCloudy />;
             } else {
-                return '☁️';
+                return <WiCloudy />;
             }
         }
 
-        return isDay ? '☀️' : '🌙';
+        return isDay ? <WiDaySunny /> : <WiNightClear />;
     };
 
     // Format time as HH:MM
@@ -116,8 +169,8 @@ const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) =
         if (!weather || !weather.main) {
             return '--';
         }
-        const fahrenheit = (weather.main.temp * 9/5) + 32;
-        return Math.round(fahrenheit);
+        // API already returns temperature in Fahrenheit (units=imperial)
+        return Math.round(weather.main.temp);
     };
 
     return (
@@ -133,7 +186,9 @@ const WeatherHeader = ({ location = { lat: 40.7420, lon: -74.1780 }, apiKey }) =
                 
                 {!loading && (
                     <div className="weather-section">
-                        <div className="weather-icon">{getWeatherIcon()}</div>
+                        <div className={`weather-icon ${getWeatherClass()}`}>
+                            <span className="icon-wrapper">{getWeatherIcon()}</span>
+                        </div>
                         <div className="temperature">{getTemperature()}°F</div>
                     </div>
                 )}

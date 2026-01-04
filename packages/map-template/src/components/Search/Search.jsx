@@ -169,7 +169,8 @@ function Search({ onSetSize, isOpen }) {
         // Be robust to odd keys like "Parking_" or localized labels
         const isOverlayRestroom = /restroom|toilet|bathroom/.test(categoryText) || /restroom|toilet|bathroom/.test(displayNameText);
         const isOverlayParking = /parking|garage|lot/.test(categoryText) || /parking|garage|lot/.test(displayNameText) || categoryText.startsWith('parking');
-        console.log('isOverlayRestroom:', isOverlayRestroom, 'isOverlayParking:', isOverlayParking);
+        const isOverlayElevator = /elevator|lift/.test(categoryText) || /elevator|lift/.test(displayNameText);
+        console.log('isOverlayRestroom:', isOverlayRestroom, 'isOverlayParking:', isOverlayParking, 'isOverlayElevator:', isOverlayElevator);
 
         // Creates a selected categoriers tree, where first category in the array is parent and second one is child
         // Ensure category is unique before pushing to selectedCategories.current
@@ -186,7 +187,7 @@ function Search({ onSetSize, isOpen }) {
         setSelectedCategory(category)
 
         // For NJIT overlay-only categories OR standard MapsIndoors categories that should show as expandable lists
-        if (isOverlayRestroom || isOverlayParking) {
+        if (isOverlayRestroom || isOverlayParking || isOverlayElevator) {
             // Helper: compute a simple centroid for Polygon/MultiPolygon
             const getCentroid = (geom) => {
                 try {
@@ -204,9 +205,10 @@ function Search({ onSetSize, isOpen }) {
             // Filter overlay features
             const filtered = njitFeatures.filter(f => {
                 const a = (f.properties?.amenity || '').toLowerCase();
-                return isOverlayRestroom
-                    ? (a === 'toilets' || a === 'toilet' || a === 'restroom')
-                    : (a === 'parking');
+                if (isOverlayRestroom) return (a === 'toilets' || a === 'toilet' || a === 'restroom');
+                if (isOverlayParking) return (a === 'parking');
+                if (isOverlayElevator) return (a === 'elevator' || a === 'lift');
+                return false;
             });
 
             console.log('Filtering for', categoryText, '- Found:', filtered.length, 'items');
@@ -270,6 +272,30 @@ function Search({ onSetSize, isOpen }) {
                         amenity: 'parking'
                     };
                 }).filter(item => Array.isArray(item.coords));
+            } else if (isOverlayElevator) {
+                // Elevator: show all elevators on map only, no list
+                list = filtered.map(f => {
+                    const center = f.geometry?.type === 'Point' ? f.geometry.coordinates : getCentroid(f.geometry);
+                    const name = f.properties?.name || t('Elevator');
+                    return {
+                        id: f.id || `${name}-${center?.join(',')}`,
+                        name,
+                        coords: center,
+                        amenity: 'elevator'
+                    };
+                }).filter(item => Array.isArray(item.coords));
+                
+                // Show all elevators on the map immediately
+                window.dispatchEvent(new CustomEvent('njit-show-all-elevators', { 
+                    detail: { elevators: list } 
+                }));
+                
+                // Don't show list for elevators, only map pins
+                setNjitList([]);
+                setSearchResults([]);
+                setFilteredLocations([]);
+                setSize(snapPoints.MIN);
+                return;
             }
 
             setNjitList(list);
@@ -370,6 +396,38 @@ function Search({ onSetSize, isOpen }) {
                     detail: { 
                         building: item.name,
                         restrooms: item.restrooms
+                    } 
+                }));
+            }
+            return;
+        }
+
+        // Handle elevator - show custom elevator pin
+        if (item.amenity === 'elevator') {
+            const map = mapsIndoorsInstance?.getMap?.();
+            if (!map || !item?.coords) return;
+            const [lng, lat] = item.coords;
+            
+            // Mapbox
+            if (map?.flyTo) {
+                map.flyTo({ center: [lng, lat], zoom: 19 });
+                // Dispatch event to show elevator pin
+                window.dispatchEvent(new CustomEvent('njit-show-elevator', { 
+                    detail: { 
+                        coords: [lng, lat],
+                        name: item.name
+                    } 
+                }));
+                return;
+            }
+            // Google
+            if (typeof window.google !== 'undefined' && window.google.maps && map?.setCenter) {
+                map.setCenter({ lat, lng });
+                map.setZoom(19);
+                window.dispatchEvent(new CustomEvent('njit-show-elevator', { 
+                    detail: { 
+                        coords: [lng, lat],
+                        name: item.name
                     } 
                 }));
             }
@@ -860,8 +918,8 @@ function Search({ onSetSize, isOpen }) {
                         const displayNameLower = (categoryInfo.displayName || '').toString().toLowerCase();
                         const isRestroom = /restroom|toilet|bathroom/.test(categoryLower) || /restroom|toilet|bathroom/.test(displayNameLower);
                         const isParking = /parking|garage|lot/.test(categoryLower) || /parking|garage|lot/.test(displayNameLower);
-                        const isMeetingRoom = /meeting|conference/.test(categoryLower) || /meeting|conference/.test(displayNameLower);
-                        const isCanteen = /canteen|cafeteria|dining/.test(categoryLower) || /canteen|cafeteria|dining/.test(displayNameLower);
+                        const isMeetingRoom = /meeting|conference|study|studying/.test(categoryLower) || /meeting|conference|study|studying/.test(displayNameLower);
+                        const isCanteen = /canteen|cafeteria|dining|food/.test(categoryLower) || /canteen|cafeteria|dining|food/.test(displayNameLower);
                         const isElevator = /elevator|lift/.test(categoryLower) || /elevator|lift/.test(displayNameLower);
                         const isExpanded = expandedCategory === category;
                         const hasSubcategories = isRestroom || isParking || isMeetingRoom || isCanteen || isElevator;
@@ -889,7 +947,7 @@ function Search({ onSetSize, isOpen }) {
                                         }
                                     }}>
                                         <img src={categoryInfo.iconUrl} alt="" />
-                                        {categoryInfo.displayName}
+                                        {isMeetingRoom ? 'Study Spaces' : isCanteen ? 'Food' : categoryInfo.displayName}
                                     </button>
                                 </div>
                                 
@@ -899,8 +957,8 @@ function Search({ onSetSize, isOpen }) {
                                         {njitList.map((item) => {
                                             const itemIsParking = item.amenity === 'parking';
                                             const itemIsRestroomBuilding = item.amenity === 'restroom-building';
-                                            const itemIsMeetingRoom = /meeting|conference/.test(item.amenity);
-                                            const itemIsCanteen = /canteen|cafeteria|dining/.test(item.amenity);
+                                            const itemIsMeetingRoom = /meeting|conference|study|studying/.test(item.amenity);
+                                            const itemIsCanteen = /canteen|cafeteria|dining|food/.test(item.amenity);
                                             const itemIsElevator = /elevator|lift/.test(item.amenity);
                                             
                                             // Handle restroom building - show just building name
@@ -928,8 +986,8 @@ function Search({ onSetSize, isOpen }) {
                                             // Determine icon label for other items
                                             let iconLabel = 'WC';
                                             if (itemIsParking) iconLabel = 'P';
-                                            else if (itemIsMeetingRoom) iconLabel = 'M';
-                                            else if (itemIsCanteen) iconLabel = 'C';
+                                            else if (itemIsMeetingRoom) iconLabel = 'S';
+                                            else if (itemIsCanteen) iconLabel = 'F';
                                             else if (itemIsElevator) iconLabel = 'E';
                                             else if (item.location) iconLabel = '📍'; // Default for other MapsIndoors locations
                                             

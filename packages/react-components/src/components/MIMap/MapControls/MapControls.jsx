@@ -204,6 +204,8 @@ function MapControls({ mapType, mapsIndoorsInstance, mapInstance, onPositionCont
         });
     }, [excludedElements, shouldRenderElement, isDesktop]);
 
+    // Render all layouts simultaneously, but use CSS to show/hide based on screen size
+    // This ensures portal containers are always available in the DOM
     if (isKiosk) {
         if (enableAccessibilityKioskControls) {
             return (
@@ -216,11 +218,11 @@ function MapControls({ mapType, mapsIndoorsInstance, mapInstance, onPositionCont
                     <div className="map-controls-container kiosk bottom-right">
                         {uiElements.venueSelector}
                         {uiElements.viewSelector}
+                        {uiElements.languageSelector}
                         {uiElements.myPosition}
                         {shouldRenderElement('zoomControls') && (
                             <MapZoomControl mapType={mapType} mapInstance={mapInstance} />
                         )}
-                        {uiElements.languageSelector}
                         {shouldRenderElement('textSizeButton') && (
                             <TextSizeButton mapsIndoorsInstance={mapsIndoorsInstance} />
                         )}
@@ -252,12 +254,13 @@ function MapControls({ mapType, mapsIndoorsInstance, mapInstance, onPositionCont
                 </>
             );
         }
-    } else if (isDesktop) {
-        {/* For desktop layout, render the controls in the correct container based on the layout */ }
+    } else {
+        // Single set of controls that repositions based on screen size via CSS
+        // This prevents duplicate portal containers
         return (
             <>
-                {/* Top right desktop controls */}
-                <div className="map-controls-container desktop top-right">
+                {/* Top right controls - visible on desktop, repositioned on mobile */}
+                <div className="map-controls-container universal top-right">
                     {uiElements.venueSelector}
                     {uiElements.viewSelector}
                     {uiElements.languageSelector}
@@ -266,28 +269,17 @@ function MapControls({ mapType, mapsIndoorsInstance, mapInstance, onPositionCont
                     {uiElements.floorSelector}
                 </div>
 
-                {/* Bottom right desktop controls */}
-                <div className="map-controls-container desktop bottom-right">
+                {/* Top left controls - for elements that move to left on mobile */}
+                <div className="map-controls-container universal top-left">
+                    {uiElements.viewModeSwitch}
+                </div>
+
+                {/* Bottom right controls - desktop only */}
+                <div className="map-controls-container desktop-only bottom-right">
                     {shouldRenderElement('zoomControls') && (
                         <MapZoomControl mapType={mapType} mapInstance={mapInstance} />
                     )}
                     {uiElements.resetView}
-                </div>
-            </>
-        );
-    } else {
-        {/* For mobile layout, we split controls into two columns */ }
-        return (
-            <>
-                <div className="map-controls-left-column mobile-column">
-                    {uiElements.venueSelector}
-                    {uiElements.viewModeSwitch}
-                    {uiElements.viewSelector}
-                    {uiElements.languageSelector}
-                </div>
-                <div className="map-controls-right-column mobile-column">
-                    {uiElements.myPosition}
-                    {uiElements.floorSelector}
                 </div>
             </>
         );

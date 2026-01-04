@@ -4,6 +4,7 @@ import { defineCustomElements } from '@mapsindoors/components/dist/esm/loader.js
 import MIMap from '@mapsindoors/react-components/src/components/MIMap/MIMap';
 import fakeData from './fakeData';
 import addBlueDot from './tools/addBlueDot';
+import addElevatorPin, { isElevator, removeElevatorPin } from './tools/addElevatorPin';
 import Header from './Header/Header';
 import Search from './Search/Search';
 import LocationDetails from './LocationDetails/LocationDetails';
@@ -26,6 +27,7 @@ function App() {
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [selectedLocationInitiator, setSelectedLocationInitiator] = useState(null);
     const [locationDetailsHeight, setLocationDetailsHeight] = useState(0);
+    const [mapboxMapInstance, setMapboxMapInstance] = useState(null);
 
     /**
      * Callback for when the MapsIndoors instance is initialized.
@@ -34,6 +36,8 @@ function App() {
         setMapsIndoorsInstance(initializedMapsIndoorsInstance);
 
         const mapboxMap = initializedMapsIndoorsInstance.getMap();
+        setMapboxMapInstance(mapboxMap);
+        
         mapboxMap.on('style.load', () => {
             // Add fake blue dot signalling the current device position.
             // This is NOT using the built in MapsIndoors positioning feature, but is just a faked visual representation.
@@ -46,6 +50,14 @@ function App() {
         initializedMapsIndoorsInstance.on('click', (location) => {
             setSelectedLocationInitiator(selectedLocationInitiatorType.MAP_CLICK);
             setSelectedLocation(location);
+            
+            // If the clicked location is an elevator, show a pin at its location
+            if (isElevator(location)) {
+                addElevatorPin(mapboxMap, location);
+            } else {
+                // Remove elevator pin if a non-elevator location is clicked
+                removeElevatorPin(mapboxMap);
+            }
         });
     };
 
@@ -59,6 +71,14 @@ function App() {
     const onSearchResultClicked = (location) => {
         setSelectedLocationInitiator(selectedLocationInitiatorType.SEARCH_RESULT_CLICK);
         setSelectedLocation(location);
+        
+        // If the clicked location is an elevator, show a pin at its location
+        if (mapboxMapInstance && isElevator(location)) {
+            addElevatorPin(mapboxMapInstance, location);
+        } else if (mapboxMapInstance) {
+            // Remove elevator pin if a non-elevator location is selected
+            removeElevatorPin(mapboxMapInstance);
+        }
     };
 
     /*
@@ -68,11 +88,19 @@ function App() {
         if (!mapsIndoorsInstance) return;
 
         if (selectedLocation) {
-            // Make the Location visually appear as selected on the map.
-            mapsIndoorsInstance.selectLocation(selectedLocation);
+            // For elevators, don't use the default MapsIndoors highlight (blue circle)
+            // Instead, we'll show our custom elevator pin
+            if (!isElevator(selectedLocation)) {
+                // Make the Location visually appear as selected on the map.
+                mapsIndoorsInstance.selectLocation(selectedLocation);
+            }
         } else {
             // Deselect the Location on the map.
             mapsIndoorsInstance.deselectLocation();
+            // Remove elevator pin when location is deselected
+            if (mapboxMapInstance) {
+                removeElevatorPin(mapboxMapInstance);
+            }
         }
     }, [selectedLocation]); // eslint-disable-line react-hooks/exhaustive-deps
 

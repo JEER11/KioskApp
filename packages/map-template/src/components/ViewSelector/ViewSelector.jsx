@@ -131,6 +131,12 @@ function ViewSelector({ isViewSelectorDisabled, isViewSelectorVisible }) {
             window.mapsindoors.services.VenuesService.getBuildings(venueId)
                 .then(buildingsData => {
                     setBuildingsData(buildingsData);
+                })
+                .catch(error => {
+                    // If we can't fetch buildings (e.g., invalid venue ID), clear the buildings data
+                    // This happens when "venues" are actually buildings in a custom setup
+                    console.warn('ViewSelector: Unable to fetch buildings for venue:', venueId, error);
+                    setBuildingsData([]);
                 });
         }
     }, [venueId]);
@@ -176,7 +182,8 @@ function ViewSelector({ isViewSelectorDisabled, isViewSelectorVisible }) {
     }, [isExpanded, isDesktop]);
 
     // Early return if the current venue has one building or visibility of View Selector is set to false
-    if (buildings.length <= 1 || isViewSelectorVisible === false) {
+    // ALSO: Return null if we can't fetch valid building data (likely because "venues" are actually buildings)
+    if (buildings.length <= 1 || isViewSelectorVisible === false || !portalContainer) {
         return null;
     }
 
