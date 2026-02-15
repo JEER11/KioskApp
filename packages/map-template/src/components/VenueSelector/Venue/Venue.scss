@@ -1,0 +1,51 @@
+@import '../../../variables.scss';
+
+.venue {
+    all: unset;
+    width: calc(100% - var(--spacing-medium));
+    margin: 0 var(--spacing-x-small) var(--spacing-x-small) var(--spacing-x-small);
+    border-radius: var(--rounding-x-large);
+    color: var(--color-white-base);
+    position: relative;
+    background: linear-gradient(#b8b8b8, #5e5e5e);
+
+    &__image {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: 50% 50%;
+        border-radius: var(--rounding-x-large);
+
+        &:hover {
+            border: 2px solid var(--brand-colors-dark-pine-100);
+        }
+    }
+
+    &__content {
+        position: absolute;
+        bottom: 0;
+        top: 50%;
+        padding: var(--spacing-medium);
+        border-radius: var(--rounding-x-large);
+        font-size: var(--font-size-small);
+        background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: var(--spacing-medium);
+    }
+
+    &__current {
+        border: 1px solid white;
+        border-radius: var(--rounding-large);
+        padding: var(--spacing-x-small);
+    }
+
+    @media (min-width: $desktop-breakpoint) {
+        margin: 0 var(--spacing-medium) var(--spacing-medium) var(--spacing-medium);
+        width: calc(100% - (2 * var(--spacing-medium)));
+    }
+}

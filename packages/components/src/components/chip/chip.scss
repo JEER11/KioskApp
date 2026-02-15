@@ -1,0 +1,38 @@
+@use "~@mapsindoors/midt/build/css/variables";
+
+.chip {
+  display: flex;
+  background-color: var(--tailwind-colors-gray-50);
+  border: 1px solid var(--tailwind-colors-gray-200);
+  padding: 0 var(--spacing-xx-small);
+  border-radius: var(--spacing-x-small);
+  align-items: center;
+  color: var(--tailwind-colors-neutral-500);
+  font-family: var(--font-family-system);
+  font-size: var(--font-size-medium);
+  height: var(--spacing-xxx-large);
+  width: fit-content;
+  cursor: default;
+
+  &:hover {
+    background-color: var(--tailwind-colors-gray-100);
+  }
+
+  &--active {
+    color: var(--brand-colors-white-100);
+
+    &:hover {
+      filter: brightness(90%);
+    }
+  }
+
+  &__content {
+    padding: 0 var(--spacing-small);
+    white-space: nowrap;
+  }
+
+  &__icon {
+    width: var(--spacing-x-large);
+    height: var(--spacing-x-large);
+  }
+}

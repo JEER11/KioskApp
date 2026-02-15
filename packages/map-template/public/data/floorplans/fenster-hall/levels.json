@@ -1,0 +1,5 @@
+{
+  "levels": [
+    { "id": "L1", "name": "Level 1", "file": "/data/floorplans/fenster-hall/level1.geojson" }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Computer Lab", "type": "room" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178600, 40.742800],
+          [-74.178560, 40.742800],
+          [-74.178560, 40.742780],
+          [-74.178600, 40.742780],
+          [-74.178600, 40.742800]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Corridor", "type": "area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178560, 40.742800],
+          [-74.178510, 40.742840],
+          [-74.178520, 40.742860],
+          [-74.178570, 40.742820],
+          [-74.178560, 40.742800]
+        ]]
+      }
+    }
+  ]
+}

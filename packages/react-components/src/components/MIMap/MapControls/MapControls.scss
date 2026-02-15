@@ -1,0 +1,68 @@
+// Base styles for map controls
+%control-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-medium);
+
+    // Hide empty portal containers to prevent unwanted spacing
+    > div:empty {
+        display: none;
+    }
+}
+
+// Universal layout - works for both desktop and mobile with CSS positioning
+.map-controls-container.universal.top-right {
+    @extend %control-container;
+    top: var(--spacing-medium);
+    right: var(--spacing-medium);
+    left: auto;
+    
+    // On mobile, hide view mode switch (it appears in top-left)
+    @media (max-width: 991px) {
+        .viewmode-switch-portal {
+            display: none !important;
+        }
+    }
+}
+
+.map-controls-container.universal.top-left {
+    @extend %control-container;
+    top: var(--spacing-medium);
+    left: var(--spacing-medium);
+    right: auto;
+    
+    // Hide on desktop (elements shown in top-right instead)
+    @media (min-width: 992px) {
+        display: none !important;
+    }
+}
+
+// Desktop-only bottom controls
+.map-controls-container.desktop-only.bottom-right {
+    @extend %control-container;
+    bottom: calc(3 * var(--spacing-medium));
+    right: calc(1 * var(--spacing-medium));
+    left: auto;
+    
+    // Hide on mobile
+    @media (max-width: 991px) {
+        display: none !important;
+    }
+}
+
+// Kiosk layout - top right
+.map-controls-container.kiosk.top-right {
+    @extend %control-container;
+    top: var(--spacing-medium);
+    right: var(--spacing-medium);
+    left: auto;
+}
+
+// Kiosk layout - bottom right
+.map-controls-container.kiosk.bottom-right {
+    @extend %control-container;
+    bottom: calc(3 * var(--spacing-medium));
+    right: calc(1 * var(--spacing-medium));
+    left: auto;
+}
