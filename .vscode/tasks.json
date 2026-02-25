@@ -13,18 +13,7 @@
       "isBackground": true,
       "problemMatcher": []
     },
-    {
-      "label": "Run Demo Office (Vite dev server)",
-      "type": "shell",
-      "command": "PowerShell",
-      "args": [
-        "-NoProfile",
-        "-Command",
-        "Push-Location \"C:\\Users\\jeral\\OneDrive\\Documents\\Apps & school\\School\\KioskApp\\web-ui-main\\packages\\demo-office\"; node \"..\\..\\node_modules\\vite\\bin\\vite.js\""
-      ],
-      "isBackground": true,
-      "problemMatcher": []
-		},
+    
 		{
 			"label": "KioskApp RunWeb",
 			"type": "shell",
