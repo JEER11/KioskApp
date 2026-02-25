@@ -1,0 +1,3 @@
+[submodule "KioskApp"]
+	path = KioskApp
+	url = https://github.com/JEER11/KioskApp.git
