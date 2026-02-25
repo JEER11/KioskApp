@@ -1,0 +1,62 @@
+.map-zoom-control {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--rounding-large, 8px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+
+    &__button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--spacing-xxx-large, 48px);
+        height: var(--spacing-xxx-large, 48px);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: var(--spacing-x-small, 8px);
+        color: #ffffff;
+        font: inherit;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        &:focus {
+            outline: 2px solid #0066cc;
+            outline-offset: -2px;
+        }
+
+        &:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+            color: #dc143c !important;
+            fill: #dc143c !important;
+            stroke: #dc143c !important;
+
+            path, * {
+                color: #dc143c !important;
+                fill: #dc143c !important;
+                stroke: #dc143c !important;
+            }
+        }
+
+        &:not(:last-child) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+}
+

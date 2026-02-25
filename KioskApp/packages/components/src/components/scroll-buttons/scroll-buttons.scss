@@ -1,0 +1,51 @@
+@use '~@mapsindoors/midt/build/scss/variables';
+@use "~@mapsindoors/midt/font";
+@use "~@mapsindoors/midt/color";
+@use "~@mapsindoors/midt/margin";
+@use "~@mapsindoors/midt/sizing";
+@use "~@mapsindoors/midt/background-color";
+@use "~@mapsindoors/midt/border";
+
+@import "../../global/global";
+@import "../../../../../node_modules/@mapsindoors/css/buttons.css";
+
+.scroll-buttons {
+    height: 100%;
+    @include sizing.width(xxxx-large);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: variables.$spacing-medium;
+
+    .btn {
+        margin: 0;
+        padding: 0;
+        background: none; // override default gradient
+        @include sizing.width(xxxx-large);
+        @include sizing.height(xxxx-large);
+        @include background-color.white(white);
+        border: none;
+        border-radius: variables.$spacing-x-small;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mi-icon {
+            @include sizing.width(x-large);
+        }
+
+        &:hover {
+            background: none; // override default gradient
+            @include background-color.white(white);
+            cursor: pointer;
+        }
+
+        &:disabled {
+            opacity: 1;
+            mi-icon {
+                background-color: #a5a9af;
+            }
+        }
+    }
+}

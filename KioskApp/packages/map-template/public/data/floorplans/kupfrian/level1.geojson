@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Lobby", "type": "area" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178600, 40.742800],
+          [-74.178520, 40.742790],
+          [-74.178510, 40.742840],
+          [-74.178590, 40.742850],
+          [-74.178600, 40.742800]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Lecture Hall A", "type": "room" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178520, 40.742790],
+          [-74.178480, 40.742790],
+          [-74.178480, 40.742830],
+          [-74.178510, 40.742840],
+          [-74.178520, 40.742790]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Restroom", "type": "room" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.178590, 40.742850],
+          [-74.178560, 40.742850],
+          [-74.178560, 40.742870],
+          [-74.178590, 40.742870],
+          [-74.178590, 40.742850]
+        ]]
+      }
+    }
+  ]
+}

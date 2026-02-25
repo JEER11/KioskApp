@@ -1,0 +1,86 @@
+@use '~@mapsindoors/midt/background-color';
+@use '~@mapsindoors/midt/border';
+@use '~@mapsindoors/midt/sizing';
+@use '~@mapsindoors/midt/font';
+@use '~@mapsindoors/midt/color';
+@use '~@mapsindoors/midt/padding';
+@use "~@mapsindoors/midt/build/scss/variables";
+
+mi-search {
+    display: block;
+    position: relative;
+
+    input[type="search"] {
+        @include border.radius(large);
+        @include background-color.white(white);
+        @include padding.left(xx-large);
+        @include sizing.height(xxx-large);
+        @include font.size(medium);
+        @include padding.right(xx-large);
+        @include font.family(system);
+        appearance: none;
+        width: 100%;
+        position: relative;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMS43MSAxMUgxMi41TDE3LjQ5IDE2TDE2IDE3LjQ5TDExIDEyLjVWMTEuNzFMMTAuNzMgMTEuNDNDOS41OSAxMi40MSA4LjExIDEzIDYuNSAxM0MyLjkxIDEzIDAgMTAuMDkgMCA2LjVDMCAyLjkxIDIuOTEgMCA2LjUgMEMxMC4wOSAwIDEzIDIuOTEgMTMgNi41QzEzIDguMTEgMTIuNDEgOS41OSAxMS40MyAxMC43M0wxMS43MSAxMVpNMiA2LjVDMiA4Ljk5IDQuMDEgMTEgNi41IDExQzguOTkgMTEgMTEgOC45OSAxMSA2LjVDMTEgNC4wMSA4Ljk5IDIgNi41IDJDNC4wMSAyIDIgNC4wMSAyIDYuNVoiIGZpbGw9IiM4RDk4QUEiLz4KPC9zdmc+Cg==");
+        background-repeat: no-repeat;
+        background-position: variables.$spacing-medium center;
+        border-color: #E6E6E6;
+        color: var(--tailwind-colors-neutral-500);
+        border: 1px solid var(--tailwind-colors-gray-200);
+
+        &:focus {
+            @include border.blue(60);
+            box-shadow: 0 0 0 2px #cfe0fc; /* blue 20 */
+        }
+
+        // Disable pointer events when the input element is disabled to allow click events to fall through to the parent element.
+        &[disabled] {
+            pointer-events: none;
+        }
+    }
+
+    /*
+     * The search field must have a clear button that is visible at all times.
+     * Since most browsers implement a clear button that is only visible when the input field has content,
+     * we hide all native implementations and present our own.
+     */
+
+    input::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+    }
+
+    input::-ms-clear {
+        display: none;
+    }
+
+    input::-moz-search-clear-button {
+        // Available from Firefox version 81
+        -moz-appearance: none;
+    }
+
+    button {
+        position: absolute;
+        right: 14px; /* relates to input field height and button size: button should be placed with equal distance to top, right and bottom */
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        @include background-color.gray(60);
+        @include border.radius(circle);
+        @include padding.all(none);
+        border-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:focus {
+            outline: 0;
+        }
+
+        svg {
+            fill: white;
+            width: 10px;
+            height: 10px;
+        }
+    }
+}
