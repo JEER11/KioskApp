@@ -822,6 +822,9 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 // due to the logic of displaying directions right away when selecting a location on the map, when in kiosk mode.
                 if (location.id !== kioskOriginLocationId) {
                     setCurrentLocation(location);
+                    // Open the Wayfinding view so the route is calculated from the user's
+                    // position to the clicked location (or allow the user to pick origin).
+                    pushAppView(appStates.WAYFINDING);
                 }
                 break;
             case mapClickActions.SetWayfindingLocation:
