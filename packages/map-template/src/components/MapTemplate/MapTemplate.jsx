@@ -116,11 +116,12 @@ function applyCustomVenuePresentation(venues, appConfig) {
 
         // Create a new venue object to avoid immutability issues
         const newVenue = Object.assign({}, venue);
-        newVenue.name = override.name;
-        
+        // Preserve original venue `name`/IDs to avoid breaking MapsIndoors API calls.
+        // Use `displayName` for kiosk-friendly presentation instead.
+        newVenue.displayName = override.name;
         if (newVenue.venueInfo) {
             newVenue.venueInfo = Object.assign({}, venue.venueInfo);
-            newVenue.venueInfo.name = override.name;
+            // Keep venueInfo.name intact for backend/API consistency; provide displayName separately.
         }
         
         // CRITICAL: Fix venue geometry to point to correct NJIT building location
@@ -305,6 +306,35 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
 
     const finishRoute = useOnRouteFinished();
     const [, setErrorMessage] = useRecoilState(notificationMessageState);
+
+    // Listen for NJIT focus events (dispatched by GeoJsonOverlay/VenueSelector/Search)
+    // and convert them into a MapsIndoors-like location so wayfinding can be triggered.
+    useEffect(() => {
+        function onNjitFocus(evt) {
+            const detail = evt?.detail || {};
+            const coords = detail.coords;
+            const building = detail.building || detail.name || 'Selected location';
+            if (!coords || !Array.isArray(coords) || coords.length !== 2) return;
+
+            const pseudoLocation = {
+                id: `njit-${building.replace(/\s+/g, '_')}`,
+                properties: { name: building },
+                geometry: { type: 'Point', coordinates: coords }
+            };
+
+            try {
+                // Set as current location and open wayfinding so the route is computed from user position to this location
+                setCurrentLocation(pseudoLocation);
+                pushAppView(appStates.WAYFINDING);
+                console.log('NJIT focus converted to MapsIndoors location:', pseudoLocation);
+            } catch (e) {
+                console.warn('Failed to handle njit-focus event', e);
+            }
+        }
+
+        window.addEventListener('njit-focus', onNjitFocus);
+        return () => window.removeEventListener('njit-focus', onNjitFocus);
+    }, [pushAppView, setCurrentLocation, appStates]);
 
     /**
      * Ensure that MapsIndoors Web SDK is available.

@@ -42,7 +42,7 @@ function Venue({ venue, isCurrent, onVenueClicked }) {
     return <button className="venue" onClick={() => onVenueClicked()}>
         <div className="venue__image" style={style}></div>
         <div className="venue__content">
-            <div>{venue.venueInfo.name}</div>
+            <div>{venue.displayName || venue.venueInfo.name}</div>
             {isCurrent && <div className="venue__current">{t('Current')}</div>}
         </div>
     </button>

@@ -256,7 +256,10 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         // Ensure building outlines can be visible by default
         // (honors SDK/app config display rules)
 
-        miInstance.on('click', location => onLocationClick(location));
+        miInstance.on('click', location => {
+            try { console.log('MIMap click event, location:', location && location.properties && location.properties.name ? location.properties.name : location); } catch(e) { console.warn('MIMap click log error', e); }
+            onLocationClick(location);
+        });
         miInstance.once('building_changed', () => onBuildingChanged(miInstance))
         miInstance.on('floor_changed', () => onTileStyleChanged(miInstance));
 
@@ -284,17 +287,21 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
 
         setMapsIndoorsInstance(miInstance);
 
+        // Log all position_received events for diagnostics and set user position
         if (positionControl.nodeName === 'MI-MY-POSITION') {
             // The Web Component needs to set up the listener with addEventListener
             positionControl.addEventListener('position_received', positionInfo => {
-                if (positionInfo.detail.accurate === true) {
-                    setUserPosition(positionInfo.detail.position);
+                try { console.log('position_received (webcomponent):', positionInfo.detail); } catch(e) { console.warn('position_received (webcomponent) log error', e); }
+                // Accept the position regardless of the 'accurate' flag for debugging; store it if available
+                if (positionInfo.detail) {
+                    setUserPosition(positionInfo.detail.position || positionInfo.detail);
                 }
             });
         } else {
             positionControl.on('position_received', positionInfo => {
-                if (positionInfo.accurate === true) {
-                    setUserPosition(positionInfo.position);
+                try { console.log('position_received (sdk):', positionInfo); } catch(e) { console.warn('position_received (sdk) log error', e); }
+                if (positionInfo) {
+                    setUserPosition(positionInfo.position || positionInfo);
                 }
             });
         }
