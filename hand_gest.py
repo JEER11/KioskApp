@@ -1,3 +1,5 @@
+# not complete, trouble with zoom in feature
+
 import cv2
 import mediapipe as mp
 import math
