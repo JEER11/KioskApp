@@ -430,7 +430,7 @@ function LocationDetails({ onBack, onStartWayfinding, onSetSize, onStartDirectio
                     {location.properties.imageURL && <img ref={locationImageRef} alt="" src={location.properties.imageURL} className="location-details__image" />}
 
                     {/* Location categories */}
-                    {Object.keys(location.properties.categories).length > 0 && <p className="location-details__categories">
+                    {location.properties?.categories && Object.keys(location.properties.categories).length > 0 && <p className="location-details__categories">
                         {Object.values(location.properties.categories).map((category, index, array) => {
                             return <React.Fragment key={category}>{category}{index < array.length - 1 && <>・</>}</React.Fragment>
                         })}

@@ -41,7 +41,10 @@ function toFeature(row) {
       if (Array.isArray(ring) && ring.length >= 4) {
         return { type: 'Feature', properties: props, geometry: { type: 'Polygon', coordinates: [ring] } };
       }
-    } catch {}
+    } catch (e) {
+      // ignore malformed polygon entries in CSV
+      void e;
+    }
   }
 
   const lon = Number(row.lon);

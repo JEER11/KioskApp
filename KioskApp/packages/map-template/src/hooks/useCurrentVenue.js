@@ -110,7 +110,7 @@ export const useCurrentVenue = () => {
         window.mapsindoors.services.LocationsService.getLocations({ venue: venueName }).then(locationsInVenue => {
             let uniqueCategories = new Map();
             for (const location of locationsInVenue) {
-                const keys = Object.keys(location.properties.categories);
+                const keys = location?.properties?.categories ? Object.keys(location.properties.categories) : [];
 
                 for (const key of keys) {
                     // Get the categories from the App Config that have a matching key.

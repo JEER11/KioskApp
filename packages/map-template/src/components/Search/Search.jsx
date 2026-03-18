@@ -121,6 +121,8 @@ function Search({ onSetSize, isOpen }) {
 
     const [isInputFieldInFocus, setIsInputFieldInFocus] = useState(false);
 
+    
+
     const selectedCategoriesArray = useRef([]);
 
     const [childKeys, setChildKeys] = useState([]);
@@ -226,10 +228,10 @@ function Search({ onSetSize, isOpen }) {
                     let buildingName = name;
                     let gender = 'all'; // 'male', 'female', or 'all'
                     
-                    if (name.includes("Women's") || name.includes('Female')) {
+                    if (name.includes('Women\'s') || name.includes('Female')) {
                         gender = 'female';
                         buildingName = name.replace(/Women's|Female/gi, '').replace(/Restroom/gi, '').trim();
-                    } else if (name.includes("Men's") || name.includes('Male')) {
+                    } else if (name.includes('Men\'s') || name.includes('Male')) {
                         gender = 'male';
                         buildingName = name.replace(/Men's|Male/gi, '').replace(/Restroom/gi, '').trim();
                     } else if (name.includes('All-Gender')) {
@@ -912,7 +914,7 @@ function Search({ onSetSize, isOpen }) {
     // If a category is expanded, only show that category (accordion behaviour).
     const filteredCategories = categories.filter(([, categoryInfo]) => {
         const displayName = categoryInfo.displayName?.toLowerCase() || '';
-        return !(displayName.includes("men's") || displayName.includes("women's"));
+        return !(displayName.includes('men\'s') || displayName.includes('women\'s'));
     });
     const visibleCategories = expandedCategory
         ? filteredCategories.filter(([cat]) => cat === expandedCategory)

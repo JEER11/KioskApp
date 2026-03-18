@@ -415,6 +415,27 @@ function Wayfinding({ onStartDirections, onBack, directionsToLocation, direction
         }
     }, [isActive, directionsToLocation, directionsFromLocation]);
 
+    // Developer test: set origin to ECE Building and activate TO field so you can click any building as destination
+    function testSetOriginECE() {
+        // Approximate coordinates — adjust if you want campus-accurate points
+        const ece = {
+            id: 'ECE_BUILDING',
+            geometry: { type: 'Point', coordinates: [-74.1760, 40.7395] },
+            properties: { name: 'ECE Building', type: 'building', floor: 0 }
+        };
+
+        // Set origin only, clear destination and make TO the active search field so map clicks set destination
+        fromFieldRef.current.setDisplayText(ece.properties.name);
+        setOriginLocation(ece);
+        setDestinationLocation();
+        toFieldRef.current.clear && toFieldRef.current.clear();
+        setActiveSearchField(searchFieldIdentifiers.TO);
+        setHasFoundRoute(true);
+        setSearchResults([]);
+        setSearchTriggered(false);
+        setShowMyPositionOption(false);
+    }
+
     /*
      * React on changes on the selected map type.
      */
@@ -479,6 +500,11 @@ function Wayfinding({ onStartDirections, onBack, directionsToLocation, direction
                         />
                     </label>
                 </div>
+                {import.meta.env.DEV && <div style={{ padding: '8px 16px' }}>
+                    <button type="button" onClick={() => testSetOriginECE()} style={{ padding: '6px 12px' }}>
+                        {t('Set origin to ECE (click map for destination)')}
+                    </button>
+                </div>}
             </div>
             {!hasFoundRoute && <p className="wayfinding__error">{t('No route found')}</p>}
             {!hasSearchResults && !showMyPositionOption && <p className="wayfinding__error">{t('Nothing was found')}</p>}
