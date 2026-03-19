@@ -7,6 +7,8 @@ import initI18n from '../../i18n/initialize.js';
 import './MapTemplate.scss';
 import { mapClickActions } from '../../constants/mapClickActions.js';
 import MapWrapper from '../MapWrapper/MapWrapper';
+import EnsureDirectionsService from '../EnsureDirectionsService/EnsureDirectionsService';
+import DevInitDirections from '../DevInitDirections/DevInitDirections';
 import SplashScreen from '../SplashScreen/SplashScreen';
 import VenueSelector from '../VenueSelector/VenueSelector';
 import BottomSheet from '../BottomSheet/BottomSheet';
@@ -311,6 +313,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
     // and convert them into a MapsIndoors-like location so wayfinding can be triggered.
     useEffect(() => {
         function onNjitFocus(evt) {
+            console.log('MapTemplate received njit-focus', evt && evt.detail);
             const detail = evt?.detail || {};
             const coords = detail.coords;
             const building = detail.building || detail.name || 'Selected location';
@@ -323,10 +326,12 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
             };
 
             try {
-                // Set as current location and open wayfinding so the route is computed from user position to this location
+                // Set as current location but DO NOT open the Wayfinding UI automatically.
+                // Routes are computed by the MapWrapper on `njit-route-to` events; opening
+                // the Wayfinding/Directions UI is intentionally suppressed to keep the map-only
+                // experience while still drawing routes.
                 setCurrentLocation(pseudoLocation);
-                pushAppView(appStates.WAYFINDING);
-                console.log('NJIT focus converted to MapsIndoors location:', pseudoLocation);
+                console.log('NJIT focus converted to MapsIndoors location (UI suppressed):', pseudoLocation);
             } catch (e) {
                 console.warn('Failed to handle njit-focus event', e);
             }
@@ -335,6 +340,21 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
         window.addEventListener('njit-focus', onNjitFocus);
         return () => window.removeEventListener('njit-focus', onNjitFocus);
     }, [pushAppView, setCurrentLocation, appStates]);
+
+    // Listen for requests to open the Directions view (dispatched after a route is computed)
+    useEffect(() => {
+        function onNjitOpenDirections() {
+            console.log('MapTemplate: njit-open-directions received');
+            try {
+                pushAppView(appStates.DIRECTIONS);
+            } catch (e) {
+                console.warn('Failed to open Directions view for njit-open-directions', e);
+            }
+        }
+
+        window.addEventListener('njit-open-directions', onNjitOpenDirections);
+        return () => window.removeEventListener('njit-open-directions', onNjitOpenDirections);
+    }, [pushAppView, appStates]);
 
     /**
      * Ensure that MapsIndoors Web SDK is available.
@@ -967,6 +987,8 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
             }}
             devicePosition={devicePosition}
         />
+        <EnsureDirectionsService />
+        <DevInitDirections />
     </div>
 }
 

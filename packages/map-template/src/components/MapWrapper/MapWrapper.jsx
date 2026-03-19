@@ -7,6 +7,7 @@ import useLiveData from '../../hooks/useLivedata';
 import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import userPositionState from '../../atoms/userPositionState';
 import directionsServiceState from '../../atoms/directionsServiceState';
+import directionsResponseState from '../../atoms/directionsResponseState';
 import mapTypeState from '../../atoms/mapTypeState';
 import apiKeyState from '../../atoms/apiKeyState';
 import gmApiKeyState from '../../atoms/gmApiKeyState';
@@ -47,8 +48,7 @@ MapWrapper.propTypes = {
 };
 
 /**
- * Private variable used for storing the tile style.
- * Implemented due to the impossibility to use the React useState hook.
+ * Private variable used for storing the tile style. Implemented due to the impossibility to use the React useState hook.
  */
 let _tileStyle;
 
@@ -77,8 +77,9 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
     const mapboxAccessToken = useRecoilValue(mapboxAccessTokenState);
     const [mapType, setMapType] = useRecoilState(mapTypeState);
     const [mapsIndoorsInstance, setMapsIndoorsInstance] = useRecoilState(mapsIndoorsInstanceState);
-    const [, setUserPosition] = useRecoilState(userPositionState);
+    const [userPosition, setUserPosition] = useRecoilState(userPositionState);
     const [, setDirectionsService] = useRecoilState(directionsServiceState);
+    const directionsService = useRecoilValue(directionsServiceState);
     const filteredLocations = useRecoilValue(filteredLocationsState);
     const filteredLocationsByExternalIDs = useRecoilValue(filteredLocationsByExternalIDState);
     const tileStyle = useRecoilValue(tileStyleState);
@@ -86,6 +87,7 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
     const pitch = useRecoilValue(pitchState);
     const [, setPositionControl] = useRecoilState(positionControlState);
     const solution = useRecoilValue(solutionState);
+    const [, setDirectionsResponse] = useRecoilState(directionsResponseState);
     const [, setErrorMessage] = useRecoilState(notificationMessageState);
     const hideNonMatches = useRecoilValue(hideNonMatchesState);
     const appConfig = useRecoilValue(appConfigState);
@@ -94,36 +96,43 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
     const isKiosk = useIsKioskContext();
     useLiveData(apiKey);
 
+    // Wait for the underlying map provider to be ready before calling operations
+    // that require the provider's canvas/context (Mapbox) or google.maps (Google).
+    function waitForProviderReady(miInstance, timeout = 5000) {
+        const start = Date.now();
+        return new Promise((resolve, reject) => {
+            function check() {
+                try {
+                    const mapView = miInstance && miInstance.getMapView && miInstance.getMapView();
+                    if (mapView) {
+                        const map = mapView.getMap && mapView.getMap();
+                        // Mapbox: map.getCanvas && canvas.getContext
+                        if (map && typeof map.getCanvas === 'function') {
+                            const canvas = map.getCanvas();
+                            if (canvas && typeof canvas.getContext === 'function') return resolve();
+                        }
+                        // Google: global google.maps should be available and map.getDiv exists
+                        if (window.google && window.google.maps && map && typeof map.getDiv === 'function') {
+                            const div = map.getDiv();
+                            if (div) return resolve();
+                        }
+                    }
+                } catch (e) {
+                    // ignore and retry
+                }
+
+                if (Date.now() - start > timeout) return reject(new Error('map provider readiness timeout'));
+                requestAnimationFrame(check);
+            }
+            check();
+        });
+    }
+
     const [mapPositionInvestigating, mapPositionKnown] = useMapBoundsDeterminer();
 
     useEffect(() => {
         if (!solution || (gmApiKey === null && mapboxAccessToken === null)) return;
 
-        /*
-        Which map type to load (Mapbox or Google Maps) is determined here, based on following decision table:
-        (note that some combinations can result in no map being loaded at all)
-
-        -----------------------------------------------------------------------------------------------------------------
-        useMapProviderModule     Mapbox module enabled      Mapbox Access Token      Google Maps API key      Map to load
-        prop value               on solution                is available             is available
-        -----------------------------------------------------------------------------------------------------------------
-        true                     ✅                         ✅                       ✅                      Mapbox
-        true                     ✅                         ✅                       ❌                      Mapbox
-        true                     ✅                         ❌                       ✅                      None
-        true                     ✅                         ❌                       ❌                      None
-        true                     ❌                         ✅                       ✅                      Google Maps
-        true                     ❌                         ✅                       ❌                      None
-        true                     ❌                         ❌                       ✅                      Google Maps
-        true                     ❌                         ❌                       ❌                      None
-        false                    ✅                         ✅                       ✅                      Mapbox
-        false                    ✅                         ✅                       ❌                      Mapbox
-        false                    ✅                         ❌                       ✅                      Google Maps
-        false                    ✅                         ❌                       ❌                      Google Maps
-        false                    ❌                         ✅                       ✅                      Mapbox
-        false                    ❌                         ✅                       ❌                      Mapbox
-        false                    ❌                         ❌                       ✅                      Google Maps
-        false                    ❌                         ❌                       ❌                      Google Maps
-         */
 
         let mapTypeToUse;
         const isMapboxModuleEnabled = solution.modules.map(module => module.toLowerCase()).includes('mapbox');
@@ -260,8 +269,18 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
             try { console.log('MIMap click event, location:', location && location.properties && location.properties.name ? location.properties.name : location); } catch(e) { console.warn('MIMap click log error', e); }
             onLocationClick(location);
         });
-        miInstance.once('building_changed', () => onBuildingChanged(miInstance))
-        miInstance.on('floor_changed', () => onTileStyleChanged(miInstance));
+        miInstance.once('building_changed', () => {
+            waitForProviderReady(miInstance).then(() => onBuildingChanged(miInstance)).catch((err) => {
+                console.warn('MapWrapper: provider readiness wait failed, calling onBuildingChanged anyway', err);
+                onBuildingChanged(miInstance);
+            });
+        });
+        miInstance.on('floor_changed', () => {
+            waitForProviderReady(miInstance).then(() => onTileStyleChanged(miInstance)).catch((err) => {
+                console.warn('MapWrapper: provider readiness wait failed for floor_changed', err);
+                onTileStyleChanged(miInstance);
+            });
+        });
 
         setMapsIndoorsInstance(miInstance);
 
@@ -284,6 +303,8 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         }
         const directionsService = new window.mapsindoors.services.DirectionsService(externalDirectionsProvider);
         setDirectionsService(directionsService);
+        // Expose for debugging in browser console
+        try { window._njit_directionsService = directionsService; console.log('Exposed directionsService on window._njit_directionsService'); } catch (e) { /* ignore */ }
 
         setMapsIndoorsInstance(miInstance);
 
@@ -309,6 +330,256 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
 
         onViewModeSwitchKnown(viewModeSwitchVisible);
     }
+
+    // Fallback: if overlay layers are not present, detect clicks near NJIT features using the loaded GeoJSON.
+    useEffect(() => {
+        if (!mapsIndoorsInstance) return;
+        try {
+            const mapView = mapsIndoorsInstance.getMapView && mapsIndoorsInstance.getMapView();
+            const map = mapView && mapView.getMap && mapView.getMap();
+            if (!map) return;
+
+            const clickHandler = (e) => {
+                try {
+                    const lng = e.lngLat?.lng ?? (e.latLng && e.latLng.lng && e.latLng.lng());
+                    const lat = e.lngLat?.lat ?? (e.latLng && e.latLng.lat && e.latLng.lat());
+                    if (typeof lng !== 'number' || typeof lat !== 'number') return;
+                    const gj = window._njit_geojson;
+                    if (!gj || !Array.isArray(gj.features)) return;
+
+                    // find nearest feature centroid within threshold (meters)
+                    const toRad = v => v * Math.PI / 180;
+                    const earthRadius = 6371000; // meters
+                    const distanceMeters = (lat1, lon1, lat2, lon2) => {
+                        const dLat = toRad(lat2 - lat1);
+                        const dLon = toRad(lon2 - lon1);
+                        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        return earthRadius * c;
+                    };
+
+                    let best = null;
+                    for (const feat of gj.features) {
+                        const geom = feat.geometry;
+                        if (!geom) continue;
+                        let cx, cy;
+                        if (geom.type === 'Point') {
+                            cx = geom.coordinates[1];
+                            cy = geom.coordinates[0];
+                        } else if (geom.type === 'Polygon') {
+                            const coords = geom.coordinates[0] && geom.coordinates[0][0] ? geom.coordinates[0][0] : geom.coordinates[0];
+                            if (!coords) continue;
+                            // approximate centroid by averaging ring
+                            const avg = coords.reduce((acc, c) => [acc[0] + c[1], acc[1] + c[0]], [0,0]);
+                            cx = avg[0] / coords.length;
+                            cy = avg[1] / coords.length;
+                        } else if (geom.type === 'MultiPolygon') {
+                            const coords = geom.coordinates.flat(2);
+                            if (!coords || coords.length === 0) continue;
+                            const avg = coords.reduce((acc, c) => [acc[0] + c[1], acc[1] + c[0]], [0,0]);
+                            cx = avg[0] / coords.length;
+                            cy = avg[1] / coords.length;
+                        } else continue;
+
+                        const d = distanceMeters(lat, lng, cx, cy);
+                        if (!best || d < best.d) best = { d, feat, cx, cy };
+                    }
+
+                    const threshold = 40; // meters
+                    if (best && best.d <= threshold) {
+                        const featureProps = best.feat.properties || {};
+                            const buildingName = featureProps.building || featureProps.name || featureProps.alt_name;
+                            if (buildingName) {
+                                window.dispatchEvent(new CustomEvent('njit-route-to', { detail: { name: buildingName, coords: [best.cy, best.cx] } }));
+                            }
+                        }
+                    } catch (err) { void err; }
+            };
+
+            // attach handler for mapbox or google
+            if (typeof map.on === 'function') {
+                map.on('click', clickHandler);
+                return () => { try { map.off('click', clickHandler); } catch (e) { void e; } };
+            } else if (map && typeof map.addListener === 'function') {
+                const listener = map.addListener('click', (e) => clickHandler(e));
+                return () => { try { listener.remove(); } catch (e) { void e; } };
+            }
+        } catch (e) { void e; }
+    }, [mapsIndoorsInstance]);
+
+    // Listen for NJIT overlay route requests and compute a route using the existing DirectionsService.
+    // For testing we force the origin to the ECE building coordinates.
+    // Register listener immediately and queue requests until directionsService is ready.
+    useEffect(() => {
+        console.log('MapWrapper registering njit-route-to listener');
+        const ECE_ORIGIN = { lng: -74.17876435736274, lat: 40.74141297826167 };
+
+        // Keep a mutable reference to the latest directionsService so the handler can use it even if it changes later
+        let dsRef = directionsService;
+        const updateDsRef = () => { dsRef = directionsService; };
+        updateDsRef();
+
+        const handler = (evt) => {
+            console.log('MapWrapper handler invoked for njit-route-to', evt && evt.detail);
+            try {
+                console.log('njit-route-to received', evt && evt.detail);
+                const detail = evt?.detail || {};
+                const coords = detail.coords;
+                if (!coords || !Array.isArray(coords) || coords.length < 2) return;
+                const destLng = coords[0];
+                const destLat = coords[1];
+
+                // Prefer live user position when available. Fall back to ECE building (no "test" label).
+                let originLocation;
+                if (userPosition && userPosition.coords) {
+                    originLocation = {
+                        id: 'USER_POSITION',
+                        geometry: { type: 'Point', coordinates: [userPosition.coords.longitude, userPosition.coords.latitude] },
+                        properties: { name: 'My position' }
+                    };
+                } else {
+                    originLocation = { geometry: { type: 'Point', coordinates: [ECE_ORIGIN.lng, ECE_ORIGIN.lat] }, properties: { name: 'ECE Building' } };
+                }
+
+                // Prefer an explicit entrance point from our campus GeoJSON if available
+                let destinationLocation = { geometry: { type: 'Point', coordinates: [destLng, destLat] }, properties: { name: detail.name || detail.building || 'Destination' } };
+                try {
+                    const gj = window._njit_geojson;
+                    if (gj && Array.isArray(gj.features)) {
+                        const findByCodeOrName = (feat) => {
+                            const p = feat.properties || {};
+                            if (detail.code && p.code && p.code.toLowerCase() === detail.code.toLowerCase()) return true;
+                            if (detail.name && p.name && p.name.toLowerCase().includes(detail.name.toLowerCase())) return true;
+                            // match by coordinates (feature geometry centroid)
+                            if (feat.geometry && feat.geometry.type === 'Point') {
+                                const [fx, fy] = feat.geometry.coordinates;
+                                if (Math.abs(fx - destLng) < 0.00001 && Math.abs(fy - destLat) < 0.00001) return true;
+                            }
+                            return false;
+                        };
+
+                        const matched = gj.features.find(findByCodeOrName);
+                        if (matched && matched.properties && Array.isArray(matched.properties.entrances) && matched.properties.entrances.length > 0) {
+                            const entr = matched.properties.entrances[0];
+                            if (entr && Array.isArray(entr.coordinates) && entr.coordinates.length >= 2) {
+                                const [entrLng, entrLat] = entr.coordinates;
+                                destinationLocation = { geometry: { type: 'Point', coordinates: [entrLng, entrLat] }, properties: { name: matched.properties.name || destinationLocation.properties.name, code: matched.properties.code, entrance: entr } };
+                                console.log('MapWrapper: routing to matched entrance for', matched.properties.name, 'at', entr.coordinates);
+                            }
+                        }
+                    }
+                } catch (err) { console.warn('MapWrapper: error matching feature entrances', err); }
+
+                const ds = dsRef;
+                console.log('MapWrapper: directionsService present?', !!ds, ds);
+                if (!ds) {
+                    console.warn('DirectionsService not ready yet — queueing route request');
+                    window._njit_pending_route = { originLocation, destinationLocation };
+                    return;
+                }
+
+                const routeParams = {
+                    origin: { lat: originLocation.geometry.coordinates[1], lng: originLocation.geometry.coordinates[0] },
+                    destination: { lat: destinationLocation.geometry.coordinates[1], lng: destinationLocation.geometry.coordinates[0] },
+                    travelMode: 'WALKING'
+                };
+                console.log('MapWrapper: calling getRoute with', routeParams);
+                try {
+                    ds.getRoute(routeParams).then(directionsResult => {
+                        console.log('MapWrapper: getRoute resolved', directionsResult);
+                        if (!directionsResult || !directionsResult.legs) return;
+                        const totalDistance = directionsResult.legs.reduce((acc, cur) => acc + (cur.distance?.value || 0), 0);
+                        const totalTime = directionsResult.legs.reduce((acc, cur) => acc + (cur.duration?.value || 0), 0);
+                        console.log('MapWrapper: setting directionsResponse');
+                        setDirectionsResponse({ originLocation, destinationLocation, totalDistance, totalTime, directionsResult });
+                        // Render route on the map even when Directions UI is suppressed
+                        try {
+                            if (window.mapsindoors && mapsIndoorsInstance) {
+                                let mapRenderer = window._njit_map_renderer;
+                                if (!mapRenderer) {
+                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                    window._njit_map_renderer = mapRenderer;
+                                    console.log('MapWrapper: created _njit_map_renderer');
+                                }
+                                mapRenderer.setRoute(directionsResult).then(() => {
+                                    console.log('MapWrapper: map renderer setRoute succeeded');
+                                }).catch(err => console.error('MapWrapper: map renderer setRoute failed', err));
+                            }
+                        } catch (err) { console.error('MapWrapper: failed to render route on map', err); }
+                    }).catch(err => {
+                        console.error('MapWrapper: getRoute rejected', err);
+                    });
+                } catch (err) {
+                    console.error('MapWrapper: getRoute threw', err);
+                }
+            } catch (err) {
+                console.error('njit-route-to handler error', err);
+            }
+        };
+
+        window.addEventListener('njit-route-to', handler);
+
+        // Poll until directionsService becomes available and process any queued request
+        const intervalId = setInterval(() => {
+            updateDsRef();
+            if (dsRef && window._njit_pending_route) {
+                const p = window._njit_pending_route;
+                try {
+                    // If queued destination corresponds to a campus feature with an entrance, prefer that entrance
+                    let destLat = p.destinationLocation.geometry.coordinates[1];
+                    let destLng = p.destinationLocation.geometry.coordinates[0];
+                    try {
+                        const gj = window._njit_geojson;
+                        if (gj && Array.isArray(gj.features)) {
+                            const pName = p.destinationLocation.properties?.name;
+                            const matched = gj.features.find(f => (f.properties && pName && f.properties.name && f.properties.name.toLowerCase().includes(pName.toLowerCase())) || (f.geometry && f.geometry.type === 'Point' && Math.abs(f.geometry.coordinates[0] - p.destinationLocation.geometry.coordinates[0]) < 0.00001 && Math.abs(f.geometry.coordinates[1] - p.destinationLocation.geometry.coordinates[1]) < 0.00001));
+                            if (matched && matched.properties && Array.isArray(matched.properties.entrances) && matched.properties.entrances.length > 0) {
+                                const entr = matched.properties.entrances[0];
+                                if (entr && Array.isArray(entr.coordinates) && entr.coordinates.length >= 2) {
+                                    destLng = entr.coordinates[0];
+                                    destLat = entr.coordinates[1];
+                                    console.log('MapWrapper: queued route using matched entrance for', matched.properties.name, 'at', entr.coordinates);
+                                }
+                            }
+                        }
+                    } catch (err) { console.warn('MapWrapper: error matching queued destination to entrance', err); }
+
+                    const queuedParams = {
+                        origin: { lat: p.originLocation.geometry.coordinates[1], lng: p.originLocation.geometry.coordinates[0] },
+                        destination: { lat: destLat, lng: destLng },
+                        travelMode: 'WALKING'
+                    };
+                    console.log('MapWrapper: processing queued route with', queuedParams);
+                    dsRef.getRoute(queuedParams).then(directionsResult => {
+                        console.log('MapWrapper: queued getRoute resolved', directionsResult);
+                        if (!directionsResult || !directionsResult.legs) return;
+                        const totalDistance = directionsResult.legs.reduce((acc, cur) => acc + (cur.distance?.value || 0), 0);
+                        const totalTime = directionsResult.legs.reduce((acc, cur) => acc + (cur.duration?.value || 0), 0);
+                        setDirectionsResponse({ originLocation: p.originLocation, destinationLocation: p.destinationLocation, totalDistance, totalTime, directionsResult });
+                        try {
+                            if (window.mapsindoors && mapsIndoorsInstance) {
+                                let mapRenderer = window._njit_map_renderer;
+                                if (!mapRenderer) {
+                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                    window._njit_map_renderer = mapRenderer;
+                                    console.log('MapWrapper: created _njit_map_renderer (queued)');
+                                }
+                                mapRenderer.setRoute(directionsResult).then(() => {
+                                    console.log('MapWrapper: queued map renderer setRoute succeeded');
+                                }).catch(err => console.error('MapWrapper: queued map renderer setRoute failed', err));
+                            }
+                        } catch (err) { console.error('MapWrapper: failed to render queued route on map', err); }
+                        window._njit_pending_route = null;
+                    }).catch(err => console.error('Queued njit-route-to failed', err));
+                } catch (err) { console.error(err); }
+            }
+        }, 500);
+
+        return () => {
+            window.removeEventListener('njit-route-to', handler);
+            clearInterval(intervalId);
+        };
+    }, [directionsService, setDirectionsResponse]);
 
     /*
      * React on changes in the tile style prop.

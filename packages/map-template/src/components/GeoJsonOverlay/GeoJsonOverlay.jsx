@@ -65,6 +65,7 @@ function GeoJsonOverlay() {
                 };
                 if (Array.isArray(geojson?.features)) {
                     geojson = { ...geojson, features: geojson.features.filter(featureInBounds) };
+                    try { window._njit_geojson = geojson; console.log('GeoJsonOverlay: stored njit geojson on window._njit_geojson with', geojson.features.length, 'features'); } catch (e) { /* ignore */ }
                 }
 
                 if (mapType === mapTypes.Mapbox) {
@@ -468,6 +469,13 @@ function GeoJsonOverlay() {
                                     window.dispatchEvent(new CustomEvent('njit-focus', {
                                         detail: { building: buildingName, coords: [lng, lat] }
                                     }));
+
+                                    // Also dispatch a route request event for click-to-route testing (ECE origin)
+                                    try {
+                                        window.dispatchEvent(new CustomEvent('njit-route-to', {
+                                            detail: { name: buildingName, coords: [lng, lat] }
+                                        }));
+                                    } catch (err) { /* ignore */ }
                                 }
 
                                 // Always attempt to center/zoom the map to the clicked location
@@ -586,6 +594,15 @@ function GeoJsonOverlay() {
                                     map.setZoom(17);
                                 }
                             }
+                            // Also dispatch route request event when feature clicked (Google data layer)
+                            try {
+                                const buildingName = e.feature.getProperty('building') || e.feature.getProperty('name') || e.feature.getProperty('alt_name');
+                                const lng = e.latLng.lng();
+                                const lat = e.latLng.lat();
+                                if (buildingName && typeof lng === 'number' && typeof lat === 'number') {
+                                    window.dispatchEvent(new CustomEvent('njit-route-to', { detail: { name: buildingName, coords: [lng, lat] } }));
+                                }
+                            } catch (err) { /* ignore */ }
                         } catch (err) { void err; }
                     });
                 }

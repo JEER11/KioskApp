@@ -352,6 +352,28 @@ function Wayfinding({ onStartDirections, onBack, directionsToLocation, direction
         }
     }, []);
 
+    // Dev: listen for external dev hooks to set origin programmatically
+    useEffect(() => {
+        function onDevSetOrigin(evt) {
+            if (!evt?.detail?.location) return;
+            const loc = evt.detail.location;
+
+            // Mirror logic from testSetOriginECE
+            fromFieldRef.current?.setDisplayText(loc.properties?.name || 'Origin');
+            setOriginLocation(loc);
+            setDestinationLocation();
+            toFieldRef.current?.clear && toFieldRef.current.clear();
+            setActiveSearchField(searchFieldIdentifiers.TO);
+            setHasFoundRoute(true);
+            setSearchResults([]);
+            setSearchTriggered(false);
+            setShowMyPositionOption(false);
+        }
+
+        window.addEventListener('dev-set-origin', onDevSetOrigin);
+        return () => window.removeEventListener('dev-set-origin', onDevSetOrigin);
+    }, []);
+
     /*
      * React on changes on the wayfindingLocation, meaning that the user has clicked on a MapsIndoors Location on the map.
      * This Location should now be used as the origin or destination location, depending on which search field is active.

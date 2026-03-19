@@ -234,7 +234,16 @@
       "properties": {
         "name": "Eberhardt Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Eberhardt+Hall"
+        "code": "EBER",
+        "image": "https://via.placeholder.com/400x250?text=Eberhardt+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17690553992043, 40.74285401990941],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -246,7 +255,16 @@
       "properties": {
         "name": "Campus Center",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Campus+Center"
+        "code": "CTR",
+        "image": "https://via.placeholder.com/400x250?text=Campus+Center",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17839274838578, 40.74305716282688],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -258,7 +276,16 @@
       "properties": {
         "name": "Cullimore Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Cullimore+Hall"
+        "code": "CULM",
+        "image": "https://via.placeholder.com/400x250?text=Cullimore+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17730583579504, 40.74293215225468],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -270,7 +297,16 @@
       "properties": {
         "name": "ECE Building",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=ECE+Building"
+        "code": "ECEC",
+        "image": "https://via.placeholder.com/400x250?text=ECE+Building",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17876435736274, 40.74141297826167],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -282,7 +318,16 @@
       "properties": {
         "name": "Greek Village",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Greek+Village"
+        "code": "GRB",
+        "image": "https://via.placeholder.com/400x250?text=Greek+Village",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.18054034715016, 40.74102290039694],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -294,7 +339,16 @@
       "properties": {
         "name": "Kupfrian Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Kupfrian+Hall"
+        "code": "KUPF",
+        "image": "https://via.placeholder.com/400x250?text=Kupfrian+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17849122719646, 40.74253420362278],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -318,7 +372,16 @@
       "properties": {
         "name": "Wellness Center",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Wellness+Center"
+        "code": "WEC",
+        "image": "https://via.placeholder.com/400x250?text=Wellness+Center",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.18043957683709, 40.742355477483784],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -329,7 +392,16 @@
       "properties": {
         "name": "Fenster Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Fenster+Hall"
+        "code": "FENS",
+        "image": "https://via.placeholder.com/400x250?text=Fenster+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17695832114396, 40.74250325491228],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -340,7 +412,16 @@
       "properties": {
         "name": "Tiernan Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall"
+        "code": "TIER",
+        "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17945040466692, 40.74175770088645],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -352,7 +433,16 @@
       "properties": {
         "name": "Faculty Memorial Hall",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Faculty+Memorial+Hall"
+        "code": "FMH",
+        "image": "https://via.placeholder.com/400x250?text=Faculty+Memorial+Hall",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.17869765832067, 40.74192193983928],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -364,7 +454,16 @@
       "properties": {
         "name": "Central King Building",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Central+King+Building"
+        "code": "CKB",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building",
+        "entrances": [
+          {
+            "type": "Point",
+            "coordinates": [-74.1775609566086, 40.74211277890102],
+            "floor": null,
+            "label": "main entrance"
+          }
+        ]
       },
       "geometry": {
         "type": "Point",

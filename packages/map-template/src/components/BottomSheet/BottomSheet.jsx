@@ -87,10 +87,11 @@ function BottomSheet({ directionsFromLocation, directionsToLocation, pushAppView
      */
     useEffect(() => {
         if (currentLocation) {
-            const isDetailed = currentLocation.properties.imageURL
-                || currentLocation.properties.description
-                || currentLocation.properties.additionalDetails
-                || Object.keys(currentLocation.properties.categories).length > 0;
+            const locationProps = currentLocation.properties || {};
+            const isDetailed = locationProps.imageURL
+                || locationProps.description
+                || locationProps.additionalDetails
+                || Object.keys(locationProps.categories || {}).length > 0;
 
             setCurrentLocationIsDetailed(isDetailed);
         }

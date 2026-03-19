@@ -32,6 +32,10 @@ import appConfigState from '../../atoms/appConfigState';
 
 let directionsRenderer;
 
+// Prefer a single renderer instance to avoid creating multiple SDK listeners.
+// Reuse the `directionsRenderer` variable declared above for a single shared instance.
+
+
 Directions.propTypes = {
     isOpen: PropTypes.bool,
     onBack: PropTypes.func,
@@ -111,38 +115,85 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
             // 6 percent of smallest of viewport height or width
             const padding = Math.min(window.innerHeight, window.innerWidth) * 0.06;
 
-            // Set the directions renderer and the route to null, in order to avoid multiple routes shown simultaneously.
-            directionsRenderer?.setRoute(null);
-            directionsRenderer = null;
+            // Create or reuse a single DirectionsRenderer instance and set the route.
+            try {
+                Promise.all([getBottomPadding(padding), getLeftPadding(padding)])
+                    .then(([bottomPadding, leftPadding]) => {
+                        if (!mapsIndoorsInstance || !window.mapsindoors) {
+                            console.warn('Directions: mapsIndoorsInstance or window.mapsindoors missing; aborting renderer creation');
+                            return;
+                        }
 
-            Promise.all([getBottomPadding(padding), getLeftPadding(padding)]).then(([bottomPadding, leftPadding]) => {
-                directionsRenderer = new window.mapsindoors.directions.DirectionsRenderer({
-                    mapsIndoors: mapsIndoorsInstance,
-                    fitBounds: isKioskContext ? false : true,
-                    fitBoundsPadding: isKioskContext ? undefined : {
-                        top: padding,
-                        bottom: bottomPadding,
-                        left: leftPadding,
-                        right: padding
-                    }
-                });
+                        const createRendererIfNeeded = async () => {
+                            if (!directionsRenderer) {
+                                // wait for underlying provider readiness (canvas/div)
+                                const start = Date.now();
+                                const timeout = 3000;
+                                const wait = () => new Promise((resolve, reject) => {
+                                    function check() {
+                                        try {
+                                            const mapView = mapsIndoorsInstance.getMapView && mapsIndoorsInstance.getMapView();
+                                            const map = mapView && mapView.getMap && mapView.getMap();
+                                            if (map) {
+                                                if (typeof map.getCanvas === 'function') {
+                                                    const canvas = map.getCanvas();
+                                                    if (canvas && typeof canvas.getContext === 'function') return resolve();
+                                                }
+                                                if (window.google && window.google.maps && typeof map.getDiv === 'function') {
+                                                    const div = map.getDiv();
+                                                    if (div) return resolve();
+                                                }
+                                            }
+                                        } catch (e) { /* retry */ }
+                                        if (Date.now() - start > timeout) return reject(new Error('provider readiness timeout'));
+                                        requestAnimationFrame(check);
+                                    }
+                                    check();
+                                });
 
-                directionsRenderer.setRoute(directions.directionsResult).then(() => {
-                    // Set the step index to be 0 in order to display the correct instruction on the map.
-                    directionsRenderer.setStepIndex(0);
-                });
+                                wait().catch((err) => { console.warn('Directions: provider readiness wait failed', err); });
 
-                destinationInfoElement.current.location = directions.destinationLocation;
+                                console.log('Directions: creating DirectionsRenderer with padding', { top: padding, bottom: bottomPadding, left: leftPadding, right: padding });
+                                directionsRenderer = new window.mapsindoors.directions.DirectionsRenderer({
+                                    mapsIndoors: mapsIndoorsInstance,
+                                    fitBounds: isKioskContext ? false : true,
+                                    fitBoundsPadding: isKioskContext ? undefined : {
+                                        top: padding,
+                                        bottom: bottomPadding,
+                                        left: leftPadding,
+                                        right: padding
+                                    }
+                                });
+                            }
 
-                // If the destination is My Position, then set the display rule to null.
-                if (directions.destinationLocation.id === 'USER_POSITION') {
-                    setDestinationDisplayRule(null)
-                } else {
-                    setDestinationDisplayRule(mapsIndoorsInstance.getDisplayRule(directions.destinationLocation));
-                }
+                            try {
+                                console.log('Directions: calling directionsRenderer.setRoute');
+                                directionsRenderer.setRoute(directions.directionsResult)
+                                    .then(() => {
+                                        console.log('Directions: setRoute resolved, setting step index to 0');
+                                        directionsRenderer.setStepIndex(0);
+                                    })
+                                    .catch((err) => console.error('Directions: setRoute rejected', err));
+                            } catch (err) {
+                                console.error('Directions: exception while calling setRoute', err);
+                            }
 
-                setMinZoom(null);
-            });
+                            destinationInfoElement.current.location = directions.destinationLocation;
+
+                            if (directions.destinationLocation.id === 'USER_POSITION') {
+                                setDestinationDisplayRule(null)
+                            } else {
+                                setDestinationDisplayRule(mapsIndoorsInstance.getDisplayRule(directions.destinationLocation));
+                            }
+
+                            setMinZoom(null);
+                        };
+
+                        createRendererIfNeeded();
+                    });
+            } catch (err) {
+                console.error('Directions: unexpected error creating renderer', err);
+            }
         }
     }, [isOpen, directions, mapsIndoorsInstance, travelMode, shuttleBusOn]);
 
@@ -235,9 +286,22 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
      * Stop rendering directions on the map.
      */
     function stopRendering() {
-        directionsRenderer?.setRoute(null);
-        directionsRenderer = null;
+        try {
+            directionsRenderer?.setRoute(null);
+        } catch (e) { void e; }
     }
+
+    // Cleanup on unmount: remove route and free renderer
+    useEffect(() => {
+        return () => {
+            try {
+                if (directionsRenderer) {
+                    directionsRenderer.setRoute(null);
+                    directionsRenderer = null;
+                }
+            } catch (e) { void e; }
+        };
+    }, []);
 
     /**
      * Reset the substeps to 0 and close the substeps.

@@ -13,6 +13,11 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  <script>
+    // Early diagnostics: log NJIT overlay events to ensure they are dispatched
+    window.addEventListener('njit-route-to', function(e) { console.log('GLOBAL njit-route-to', e && e.detail); });
+    window.addEventListener('njit-focus', function(e) { console.log('GLOBAL njit-focus', e && e.detail); });
+  </script>
   <script type="module" src="/src/index.jsx"></script>
 </body>
 

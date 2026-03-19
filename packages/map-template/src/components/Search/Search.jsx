@@ -476,6 +476,10 @@ function Search({ onSetSize, isOpen }) {
             map.flyTo({ center: [lng, lat], zoom: 18 });
             // Notify overlay to highlight restroom and building area
             window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat], building: item.name } }));
+            // Also request a route from forced ECE origin to this overlay building
+            try {
+                window.dispatchEvent(new CustomEvent('njit-route-to', { detail: { name: item.name, coords: [lng, lat] } }));
+            } catch (err) { /* ignore */ }
             return;
         }
         // Google
@@ -483,6 +487,9 @@ function Search({ onSetSize, isOpen }) {
             map.setCenter({ lat, lng });
             map.setZoom(18);
             window.dispatchEvent(new CustomEvent('njit-focus', { detail: { coords: [lng, lat], building: item.name } }));
+            try {
+                window.dispatchEvent(new CustomEvent('njit-route-to', { detail: { name: item.name, coords: [lng, lat] } }));
+            } catch (err) { /* ignore */ }
         }
     }
 
