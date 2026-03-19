@@ -419,7 +419,7 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         const updateDsRef = () => { dsRef = directionsService; };
         updateDsRef();
 
-        const handler = (evt) => {
+        const handler = async (evt) => {
             console.log('MapWrapper handler invoked for njit-route-to', evt && evt.detail);
             try {
                 console.log('njit-route-to received', evt && evt.detail);
@@ -460,11 +460,56 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
 
                         const matched = gj.features.find(findByCodeOrName);
                         if (matched && matched.properties && Array.isArray(matched.properties.entrances) && matched.properties.entrances.length > 0) {
-                            const entr = matched.properties.entrances[0];
-                            if (entr && Array.isArray(entr.coordinates) && entr.coordinates.length >= 2) {
-                                const [entrLng, entrLat] = entr.coordinates;
-                                destinationLocation = { geometry: { type: 'Point', coordinates: [entrLng, entrLat] }, properties: { name: matched.properties.name || destinationLocation.properties.name, code: matched.properties.code, entrance: entr } };
-                                console.log('MapWrapper: routing to matched entrance for', matched.properties.name, 'at', entr.coordinates);
+                            // Prefer using the directions provider to pick the entrance with the shortest walking route.
+                            const entrances = matched.properties.entrances;
+                            const originLng = originLocation.geometry.coordinates[0];
+                            const originLat = originLocation.geometry.coordinates[1];
+
+                            let chosen = null;
+                            // If directions service is ready, compute real walking route to each entrance and pick smallest distance
+                            if (dsRef) {
+                                try {
+                                    const promises = entrances.map(async (entr) => {
+                                        if (!entr || !Array.isArray(entr.coordinates) || entr.coordinates.length < 2) return null;
+                                        const [eLng, eLat] = entr.coordinates;
+                                        try {
+                                            const route = await dsRef.getRoute({ origin: { lat: originLat, lng: originLng }, destination: { lat: eLat, lng: eLng }, travelMode: 'WALKING' });
+                                            if (route && route.legs) {
+                                                const total = route.legs.reduce((acc, cur) => acc + (cur.distance?.value || 0), 0);
+                                                return { entr, eLng, eLat, total, route };
+                                            }
+                                        } catch (e) {
+                                            return { entr, eLng, eLat, total: Number.MAX_SAFE_INTEGER };
+                                        }
+                                        return null;
+                                    });
+                                    const results = await Promise.all(promises);
+                                    const valid = results.filter(r => r && typeof r.total === 'number');
+                                    if (valid.length > 0) chosen = valid.reduce((a, b) => a.total <= b.total ? a : b);
+                                } catch (err) { console.warn('MapWrapper: route-based entrance selection failed', err); }
+                            }
+
+                            // Fallback to straight-line nearest entrance when DS not available or route-based failed
+                            if (!chosen) {
+                                const toRad = v => v * Math.PI / 180;
+                                const haversine = (lat1, lon1, lat2, lon2) => {
+                                    const R = 6371000;
+                                    const dLat = toRad(lat2 - lat1);
+                                    const dLon = toRad(lon2 - lon1);
+                                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                                    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                                };
+                                for (const entr of entrances) {
+                                    if (!entr || !Array.isArray(entr.coordinates) || entr.coordinates.length < 2) continue;
+                                    const [eLng, eLat] = entr.coordinates;
+                                    const d = haversine(originLat, originLng, eLat, eLng);
+                                    if (!chosen || d < chosen.d) chosen = { d, entr, eLng, eLat };
+                                }
+                            }
+
+                            if (chosen) {
+                                destinationLocation = { geometry: { type: 'Point', coordinates: [chosen.eLng, chosen.eLat] }, properties: { name: matched.properties.name || destinationLocation.properties.name, code: matched.properties.code, entrance: chosen.entr } };
+                                console.log('MapWrapper: routing to chosen entrance for', matched.properties.name, 'at', chosen.entr.coordinates, 'distance_m/route_cost=', chosen.d ?? chosen.total);
                             }
                         }
                     }
@@ -534,12 +579,58 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
                             const pName = p.destinationLocation.properties?.name;
                             const matched = gj.features.find(f => (f.properties && pName && f.properties.name && f.properties.name.toLowerCase().includes(pName.toLowerCase())) || (f.geometry && f.geometry.type === 'Point' && Math.abs(f.geometry.coordinates[0] - p.destinationLocation.geometry.coordinates[0]) < 0.00001 && Math.abs(f.geometry.coordinates[1] - p.destinationLocation.geometry.coordinates[1]) < 0.00001));
                             if (matched && matched.properties && Array.isArray(matched.properties.entrances) && matched.properties.entrances.length > 0) {
-                                const entr = matched.properties.entrances[0];
-                                if (entr && Array.isArray(entr.coordinates) && entr.coordinates.length >= 2) {
-                                    destLng = entr.coordinates[0];
-                                    destLat = entr.coordinates[1];
-                                    console.log('MapWrapper: queued route using matched entrance for', matched.properties.name, 'at', entr.coordinates);
-                                }
+                                // If directions service is available, compute real walking route to each entrance and pick shortest
+                                try {
+                                    const entrances = matched.properties.entrances;
+                                    const originLngQ = p.originLocation.geometry.coordinates[0];
+                                    const originLatQ = p.originLocation.geometry.coordinates[1];
+                                    if (dsRef) {
+                                        (async () => {
+                                            const promises = entrances.map(async (entr) => {
+                                                if (!entr || !Array.isArray(entr.coordinates) || entr.coordinates.length < 2) return null;
+                                                const [eLng, eLat] = entr.coordinates;
+                                                try {
+                                                    const route = await dsRef.getRoute({ origin: { lat: originLatQ, lng: originLngQ }, destination: { lat: eLat, lng: eLng }, travelMode: 'WALKING' });
+                                                    if (route && route.legs) {
+                                                        const total = route.legs.reduce((acc, cur) => acc + (cur.distance?.value || 0), 0);
+                                                        return { entr, eLng, eLat, total, route };
+                                                    }
+                                                } catch (e) {
+                                                    return { entr, eLng, eLat, total: Number.MAX_SAFE_INTEGER };
+                                                }
+                                                return null;
+                                            });
+                                            const results = await Promise.all(promises);
+                                            const valid = results.filter(r => r && typeof r.total === 'number');
+                                            if (valid.length > 0) {
+                                                const best = valid.reduce((a, b) => a.total <= b.total ? a : b);
+                                                // Use the chosen route directly to render and store response
+                                                try {
+                                                    const directionsResult = best.route;
+                                                    if (directionsResult && directionsResult.legs) {
+                                                        const totalDistance = directionsResult.legs.reduce((acc, cur) => acc + (cur.distance?.value || 0), 0);
+                                                        const totalTime = directionsResult.legs.reduce((acc, cur) => acc + (cur.duration?.value || 0), 0);
+                                                        setDirectionsResponse({ originLocation: p.originLocation, destinationLocation: p.destinationLocation, totalDistance, totalTime, directionsResult });
+                                                        if (window.mapsindoors && mapsIndoorsInstance) {
+                                                            let mapRenderer = window._njit_map_renderer;
+                                                            if (!mapRenderer) {
+                                                                mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                                                window._njit_map_renderer = mapRenderer;
+                                                                console.log('MapWrapper: created _njit_map_renderer (queued)');
+                                                            }
+                                                            mapRenderer.setRoute(directionsResult).then(() => {
+                                                                console.log('MapWrapper: queued map renderer setRoute succeeded (route-based)');
+                                                            }).catch(err => console.error('MapWrapper: queued map renderer setRoute failed', err));
+                                                        }
+                                                        window._njit_pending_route = null;
+                                                        // Skip the default queued getRoute flow since we've already processed
+                                                        return;
+                                                    }
+                                                } catch (err) { console.warn('MapWrapper: error using best route for queued processing', err); }
+                                            }
+                                        })().catch(err => console.warn('MapWrapper: route-based queued selection failed', err));
+                                    }
+                                } catch (err) { console.warn('MapWrapper: error choosing queued entrance via route-based selection', err); }
                             }
                         }
                     } catch (err) { console.warn('MapWrapper: error matching queued destination to entrance', err); }

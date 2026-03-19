@@ -237,12 +237,7 @@
         "code": "EBER",
         "image": "https://via.placeholder.com/400x250?text=Eberhardt+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17690553992043, 40.74285401990941],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17693518470841, 40.742865939792], "floor": null, "label": "entrance 1" }
         ]
       },
       "geometry": {
@@ -258,12 +253,8 @@
         "code": "CTR",
         "image": "https://via.placeholder.com/400x250?text=Campus+Center",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17839274838578, 40.74305716282688],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17865973212787, 40.74295140268298], "floor": null, "label": "entrance 1" },
+          { "type": "Point", "coordinates": [-74.1779699131785, 40.74276239807465], "floor": null, "label": "entrance 2" }
         ]
       },
       "geometry": {
@@ -279,12 +270,7 @@
         "code": "CULM",
         "image": "https://via.placeholder.com/400x250?text=Cullimore+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17730583579504, 40.74293215225468],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.177442787346, 40.7430450830275], "floor": null, "label": "entrance 1" }
         ]
       },
       "geometry": {
@@ -342,12 +328,8 @@
         "code": "KUPF",
         "image": "https://via.placeholder.com/400x250?text=Kupfrian+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17849122719646, 40.74253420362278],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17877904044232, 40.74243533664731], "floor": null, "label": "entrance 1" },
+          { "type": "Point", "coordinates": [-74.17848619278395, 40.74271309242552], "floor": null, "label": "entrance 2" }
         ]
       },
       "geometry": {
@@ -360,7 +342,11 @@
       "properties": {
         "name": "Makerspace",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Makerspace"
+        "code": "MAKER",
+        "image": "https://via.placeholder.com/400x250?text=Makerspace",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17953126129576, 40.74406456477195], "floor": null, "label": "main entrance" }
+        ]
       },
       "geometry": {
         "type": "Point",
@@ -395,12 +381,7 @@
         "code": "FENS",
         "image": "https://via.placeholder.com/400x250?text=Fenster+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17695832114396, 40.74250325491228],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17754257244988, 40.74262434218685], "floor": null, "label": "entrance 1" }
         ]
       },
       "geometry": {
@@ -415,12 +396,9 @@
         "code": "TIER",
         "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17945040466692, 40.74175770088645],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17925627372436, 40.74195378097202], "floor": null, "label": "entrance 1" },
+          { "type": "Point", "coordinates": [-74.17919770419269, 40.74213128312493], "floor": null, "label": "entrance 2" },
+          { "type": "Point", "coordinates": [-74.17952309047979, 40.74176970416499], "floor": null, "label": "entrance 3" }
         ]
       },
       "geometry": {
@@ -436,12 +414,10 @@
         "code": "FMH",
         "image": "https://via.placeholder.com/400x250?text=Faculty+Memorial+Hall",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.17869765832067, 40.74192193983928],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17860333186778, 40.74168917039875], "floor": null, "label": "entrance 1" },
+          { "type": "Point", "coordinates": [-74.17911744220139, 40.74183051530639], "floor": null, "label": "entrance 2" },
+          { "type": "Point", "coordinates": [-74.17896993374892, 40.74209676885414], "floor": null, "label": "entrance 3" },
+          { "type": "Point", "coordinates": [-74.17851222370508, 40.74196035513391], "floor": null, "label": "entrance 4" }
         ]
       },
       "geometry": {
@@ -457,12 +433,9 @@
         "code": "CKB",
         "image": "https://via.placeholder.com/400x250?text=Central+King+Building",
         "entrances": [
-          {
-            "type": "Point",
-            "coordinates": [-74.1775609566086, 40.74211277890102],
-            "floor": null,
-            "label": "main entrance"
-          }
+          { "type": "Point", "coordinates": [-74.17788589719163, 40.74217495426585], "floor": null, "label": "entrance 1" },
+          { "type": "Point", "coordinates": [-74.17741634761646, 40.74222261536282], "floor": null, "label": "entrance 2" },
+          { "type": "Point", "coordinates": [-74.17694904470113, 40.741844730008694], "floor": null, "label": "entrance 3" }
         ]
       },
       "geometry": {
@@ -475,7 +448,11 @@
       "properties": {
         "name": "Robert W. Van Houten Library",
         "category": "building",
-        "image": "https://via.placeholder.com/400x250?text=Robert+W.+Van+Houten+Library"
+        "code": "LIB",
+        "image": "https://via.placeholder.com/400x250?text=Robert+W.+Van+Houten+Library",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17827330530123, 40.74387354436952], "floor": null, "label": "main entrance" }
+        ]
       },
       "geometry": {
         "type": "Point",
