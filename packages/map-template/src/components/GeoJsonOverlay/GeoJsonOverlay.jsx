@@ -453,10 +453,24 @@ function GeoJsonOverlay() {
                             }
                             
                             const content = buildPopupContent(properties);
-                            new window.mapboxgl.Popup({ closeOnClick: true })
-                                .setLngLat(e.lngLat)
-                                .setHTML(content)
-                                .addTo(map);
+                            try {
+                                const popup = new window.mapboxgl.Popup({ closeOnClick: true, className: 'njit-popup-top' })
+                                    .setLngLat(e.lngLat)
+                                    .setHTML(content)
+                                    .addTo(map);
+                                const el = popup && typeof popup.getElement === 'function' ? popup.getElement() : null;
+                                if (el) {
+                                    try {
+                                        if (el.style) el.style.zIndex = String(999999);
+                                        if (el.parentNode && el.parentNode !== document.body) {
+                                            document.body.appendChild(el);
+                                        }
+                                    } catch (e) { void e; }
+                                }
+                            } catch (err) {
+                                // Fallback: create popup without zIndex if something goes wrong
+                                try { new window.mapboxgl.Popup({ closeOnClick: true }).setLngLat(e.lngLat).setHTML(content).addTo(map); } catch (e) { void e; }
+                            }
 
                             // Dispatch focus event to enable floorplans overlay and always zoom/center to the clicked point
                             try {

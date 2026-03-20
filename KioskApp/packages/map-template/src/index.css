@@ -126,3 +126,8 @@ mi-floor-selector::part(list-item):hover {
 *::-webkit-scrollbar-thumb {
   background-color: #3a3a3a;
 }
+
+/* Ensure Mapbox popups appear above header/search UI */
+.mapboxgl-popup.njit-popup-top {
+  z-index: var(--z-index-top, 999999) !important;
+}
