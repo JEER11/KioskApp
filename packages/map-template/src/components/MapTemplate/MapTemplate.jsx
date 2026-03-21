@@ -69,16 +69,24 @@ import { addElevatorPin, removeElevatorPin, isElevator } from '../../helpers/add
 
 // Local image overrides for venue cards (served from /public/Building)
 const customVenueImages = {
+    'campus bookstore': '/Building/Campusbookstore.jpg',
     'campus center': '/Building/Campuscenter.png',
+    'central king building': '/Building/CentralKingBuilding.png',
+    'colton hall': '/Building/Coltonhall.png',
     'cullimore hall': '/Building/Cullimore.png',
+    'cypress hall': '/Building/Cypress.png',
     'eberhardt hall': '/Building/Eberhardt.png',
     'ece building': '/Building/ECEb.png',
+    'fenster hall': '/Building/Fensterhall.png',
+    'gitc': '/Building/GITC.png',
     'greek village': '/Building/Greekvillage.png',
     'kupfrian hall': '/Building/Kupfrianhall.png',
     'laurel hall': '/Building/LaurelHall.png',
     'makerspace': '/Building/Makerspace.png',
     'tiernan hall': '/Building/TiernanHall.png',
-    'wellness center': '/Building/WellnessCenter.png'
+    'wellness center': '/Building/WellnessCenter.png',
+    'weston hall': '/Building/Westonhall.png',
+    'york center': '/Building/Yorkcenter.png'
 };
 
 // Resolve a venue card image. Prefer local kiosk imagery, fall back to app config.
@@ -94,16 +102,24 @@ function getVenueImage(venueName, appConfig) {
 
 // Desired display order and names for kiosk deployment
 const customVenueList = [
+    { name: 'Campus Bookstore', image: '/Building/Campusbookstore.jpg' },
     { name: 'Campus Center', image: '/Building/Campuscenter.png', coords: [-74.17839, 40.74306] },
+    { name: 'Central King Building', image: '/Building/CentralKingBuilding.png' },
+    { name: 'Colton Hall', image: '/Building/Coltonhall.png' },
     { name: 'Cullimore Hall', image: '/Building/Cullimore.png', coords: [-74.17731, 40.74293] },
+    { name: 'Cypress Hall', image: '/Building/Cypress.png' },
     { name: 'Eberhardt Hall', image: '/Building/Eberhardt.png', coords: [-74.17691, 40.74285] },
     { name: 'ECE Building', image: '/Building/ECEb.png', coords: [-74.17876, 40.74141] },
+    { name: 'Fenster Hall', image: '/Building/Fensterhall.png' },
+    { name: 'GITC', image: '/Building/GITC.png' },
     { name: 'Greek Village', image: '/Building/Greekvillage.png', coords: [-74.18054, 40.74102] },
     { name: 'Kupfrian Hall', image: '/Building/Kupfrianhall.png', coords: [-74.17849, 40.74253] },
     { name: 'Laurel Hall', image: '/Building/LaurelHall.png', coords: [-74.17690, 40.74285] },
     { name: 'Makerspace', image: '/Building/Makerspace.png', coords: [-74.17943, 40.74414] },
     { name: 'Tiernan Hall', image: '/Building/TiernanHall.png', coords: [-74.17945, 40.74176] },
-    { name: 'Wellness Center', image: '/Building/WellnessCenter.png', coords: [-74.18044, 40.74236] }
+    { name: 'Wellness Center', image: '/Building/WellnessCenter.png', coords: [-74.18044, 40.74236] },
+    { name: 'Weston Hall', image: '/Building/Westonhall.png' },
+    { name: 'York Center', image: '/Building/Yorkcenter.png' }
 ];
 
 // Apply kiosk-specific venue naming and imagery while preserving IDs
@@ -926,7 +942,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
 
     /*
      * React on changes in the category prop.
-     * Check if the category property matches with any of the existing categories.
+     * Check if category matches any existing categories.
      * Indicate the existence of the category as a prop or query parameter by setting the "setCategory" to true.
      */
     useEffect(() => {
