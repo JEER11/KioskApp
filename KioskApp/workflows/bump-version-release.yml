@@ -85,13 +85,13 @@ jobs:
 
       # The following steps will determine, based on a label, what version to bump to.
       - name: Major version bump
-        if: contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-midt.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-midt.outputs.any_changed }}
         run: npm -w @mapsindoors/midt run release -- major
       - name: Minor version bump
-        if: contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-midt.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-midt.outputs.any_changed }}
         run: npm -w @mapsindoors/midt run release -- minor
       - name: Patch version bump
-        if: contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-midt.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-midt.outputs.any_changed }}
         run: npm -w @mapsindoors/midt run release -- patch
 
       - name: Publish to npm
@@ -154,13 +154,13 @@ jobs:
 
       # The following steps will determine, based on a label, what version to bump to.
       - name: Major version bump
-        if: contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-components.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-components.outputs.any_changed }}
         run: npm -w @mapsindoors/components run release -- major
       - name: Minor version bump
-        if: contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-components.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-components.outputs.any_changed }}
         run: npm -w @mapsindoors/components run release -- minor
       - name: Patch version bump
-        if: contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-components.outputs.any_changed
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-components.outputs.any_changed }}
         run: npm -w @mapsindoors/components run release -- patch
 
       - name: Publish to npm
@@ -214,7 +214,7 @@ jobs:
     name: Release Map Template to npm
     runs-on: ubuntu-latest
     # This ensures the job only runs for Pull Requests that are merged.
-    if: github.event.pull_request.merged == true
+    if: ${{ github.event.pull_request.merged == true
     needs: ["components-release-npm"]
     env:
       token: ${{ secrets.GITHUB_TOKEN }}
@@ -231,7 +231,7 @@ jobs:
           files: packages/map-template/**
 
       - name: Run step if any file(s) in the map-template folder change
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-map-template.outputs.all_changed_files }}
         run: |
@@ -264,17 +264,17 @@ jobs:
 
       # The following steps will determine, based on a label, what version to bump to.
       - name: Major version bump
-        if: contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'major') && steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: npm -w @mapsindoors/map-template run release -- major
       - name: Minor version bump
-        if: contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'minor') && steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: npm -w @mapsindoors/map-template run release -- minor
       - name: Patch version bump
-        if: contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'patch') && steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: npm -w @mapsindoors/map-template run release -- patch
 
       - name: Publish to npm
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: npm -w @mapsindoors/map-template publish --access public
 
   # Using jsDelivr as the CDN, it will cache even @latest for up to 7 days. Specific versions are cached for up to a year, so we need to purge the CDN manually.
@@ -282,7 +282,7 @@ jobs:
     name: Purge jsDelivr cache
     runs-on: ubuntu-latest
     # This ensures the job only runs for Pull Requests that are merged.
-    if: github.event.pull_request.merged == true
+    if: ${{ github.event.pull_request.merged == true }}
     needs: ["map-template-release-npm"]
     steps:
       - name: Purge @latest version
