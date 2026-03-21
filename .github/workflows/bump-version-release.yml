@@ -34,9 +34,9 @@ jobs:
     outputs:
       has_changed_files: ${{ steps.changed-files-midt.outputs.any_changed }}
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged == true }}
+    if: ${{ github.event.pull_request.merged }}
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN || '' }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,10 +50,10 @@ jobs:
     name: Deploy to GCP
     needs: midt-release-npm
     runs-on: ubuntu-latest
-    if: ${{ needs.midt-release-npm.outputs.has_changed_files == 'true' }}
+    if: ${{ needs.midt-release-npm.outputs.has_changed_files }}
     env:
-      GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL || '' }}
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY || '' }}
+      GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
