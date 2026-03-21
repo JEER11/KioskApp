@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRecoilValue } from 'recoil';
 import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import mapTypeState from '../../atoms/mapTypeState';
@@ -20,12 +20,11 @@ function GeoJsonOverlay() {
     const selectedCategory = useRecoilValue(selectedCategoryState);
     const googleDataLayerRef = useRef(null);
     const googleHighlightCircleRef = useRef(null);
-    const [mediaMap, setMediaMap] = useState({});
 
     useEffect(() => {
         if (!mapsIndoorsInstance) return;
 
-        let aborted = false;
+        // (no abort flag needed since media/popup logic was removed)
         const lower = (selectedCategory || '').toLowerCase();
         const isRestroom = /restroom|toilet|bathroom/.test(lower);
         const isParking = /parking|garage|lot/.test(lower);
@@ -33,14 +32,7 @@ function GeoJsonOverlay() {
 
         const loadAndRender = async () => {
             try {
-                // Load media map if present
-                try {
-                    const mediaRes = await fetch('/data/njit-media.json');
-                    if (mediaRes.ok) {
-                        const mediaJson = await mediaRes.json();
-                        if (!aborted) setMediaMap(mediaJson || {});
-                    }
-                } catch (e) { void e; }
+                // Media map loading removed — popups/info windows are disabled
 
                 // Load campus GeoJSON
                 const res = await fetch('/data/njit-campus.geojson');
@@ -352,16 +344,7 @@ function GeoJsonOverlay() {
                         });
                     }
 
-                    // Add click popups (Mapbox)
-                    const buildPopupContent = (properties) => {
-                        const name = properties?.name || properties?.alt_name || 'Feature';
-                        const amenity = properties?.amenity;
-                        const key = name.toLowerCase();
-                        const img = mediaMap[key] || properties?.image;
-                        const title = amenity ? `${name} · ${amenity}` : name;
-                        const imgHtml = img ? `<div style="margin-top:6px"><img src="${img}" alt="${name}" style="max-width:240px;border-radius:6px"/></div>` : '';
-                        return `<div style="font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#222">${title}${imgHtml}</div>`;
-                    };
+                    // Click handling for Mapbox (popups intentionally removed)
 
                     const addClick = (layerId) => {
                         if (typeof window.mapboxgl === 'undefined') return;
@@ -452,25 +435,9 @@ function GeoJsonOverlay() {
                                 return; // Skip showing popup for elevators
                             }
                             
-                            const content = buildPopupContent(properties);
-                            try {
-                                const popup = new window.mapboxgl.Popup({ closeOnClick: true, className: 'njit-popup-top' })
-                                    .setLngLat(e.lngLat)
-                                    .setHTML(content)
-                                    .addTo(map);
-                                const el = popup && typeof popup.getElement === 'function' ? popup.getElement() : null;
-                                if (el) {
-                                    try {
-                                        if (el.style) el.style.zIndex = String(999999);
-                                        if (el.parentNode && el.parentNode !== document.body) {
-                                            document.body.appendChild(el);
-                                        }
-                                    } catch (e) { void e; }
-                                }
-                            } catch (err) {
-                                // Fallback: create popup without zIndex if something goes wrong
-                                try { new window.mapboxgl.Popup({ closeOnClick: true }).setLngLat(e.lngLat).setHTML(content).addTo(map); } catch (e) { void e; }
-                            }
+                            // Popup creation intentionally disabled: we only want to focus/center the map
+                            // const content = buildPopupContent(properties);
+                            // (Popups were removed to keep the map-only experience)
 
                             // Dispatch focus event to enable floorplans overlay and always zoom/center to the clicked point
                             try {
@@ -583,24 +550,9 @@ function GeoJsonOverlay() {
                     });
                     googleDataLayerRef.current = dataLayer;
 
-                    // Click info window (Google)
-                    const infoWindow = new window.google.maps.InfoWindow();
+                    // Click handler: do not open InfoWindow (keep map-only behavior)
                     dataLayer.addListener('click', (e) => {
-                        const properties = {
-                            name: e.feature.getProperty('name') || e.feature.getProperty('alt_name'),
-                            amenity: e.feature.getProperty('amenity'),
-                            image: e.feature.getProperty('image')
-                        };
-                        const key = (properties.name || '').toLowerCase();
-                        const img = mediaMap[key] || properties.image;
-                        const title = properties.amenity ? `${properties.name} · ${properties.amenity}` : (properties.name || 'Feature');
-                        const imgHtml = img ? `<div style="margin-top:6px"><img src="${img}" alt="${properties.name}" style="max-width:240px;border-radius:6px"/></div>` : '';
-                        const content = `<div style="font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#222">${title}${imgHtml}</div>`;
-                        infoWindow.setContent(content);
-                        infoWindow.setPosition(e.latLng);
-                        infoWindow.open({ map });
-
-                        // Pan/zoom the Google map to the clicked feature for clearer view
+                        // Preserve pan/zoom and event dispatching but skip showing any popup/info window
                         try {
                             if (map && typeof map.panTo === 'function') {
                                 map.panTo(e.latLng);
@@ -608,7 +560,6 @@ function GeoJsonOverlay() {
                                     map.setZoom(17);
                                 }
                             }
-                            // Also dispatch route request event when feature clicked (Google data layer)
                             try {
                                 const buildingName = e.feature.getProperty('building') || e.feature.getProperty('name') || e.feature.getProperty('alt_name');
                                 const lng = e.latLng.lng();
@@ -1011,7 +962,6 @@ function GeoJsonOverlay() {
         window.addEventListener('njit-show-restrooms', onShowRestrooms);
 
         return () => {
-            aborted = true;
             if (mapType === mapTypes.Mapbox && mapsIndoorsInstance) {
                 const map = mapsIndoorsInstance.getMap();
                 if (map) {

@@ -55,7 +55,6 @@ let _tileStyle;
 /**
  * A wrapper component around the MIMap component.
  * Contains logic for determining map provider (Google, Mapbox), map options, device position handling and setting up a directions service to use for showing directions.
- *
  * @param {Object} props
  * @param {function} [props.onLocationClick] - Function that is run when a MapsIndoors Location is clicked. the Location will be sent along as first argument.
  * @param {function} props.onMapPositionKnown - Function that is run when the map bounds was changed due to fitting to a Venue or Location.
@@ -132,7 +131,6 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
 
     useEffect(() => {
         if (!solution || (gmApiKey === null && mapboxAccessToken === null)) return;
-
 
         let mapTypeToUse;
         const isMapboxModuleEnabled = solution.modules.map(module => module.toLowerCase()).includes('mapbox');

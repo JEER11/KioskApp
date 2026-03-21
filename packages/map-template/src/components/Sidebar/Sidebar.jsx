@@ -1,15 +1,12 @@
 import { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import currentLocationState from '../../atoms/currentLocationState';
 import filteredLocationsByExternalIDState from '../../atoms/filteredLocationsByExternalIDState';
 import Modal from './Modal/Modal';
 import LocationDetails from '../LocationDetails/LocationDetails';
-import Wayfinding from '../Wayfinding/Wayfinding';
-import Directions from '../Directions/Directions';
 import Search from '../Search/Search';
 import LocationsList from '../LocationsList/LocationsList';
 import locationIdState from '../../atoms/locationIdState';
-import kioskLocationState from '../../atoms/kioskLocationState';
 import PropTypes from 'prop-types';
 
 Sidebar.propTypes = {
@@ -18,8 +15,7 @@ Sidebar.propTypes = {
     pushAppView: PropTypes.func,
     currentAppView: PropTypes.string,
     appViews: PropTypes.object,
-    filteredLocationsByExternalIDs: PropTypes.array,
-    onRouteFinished: PropTypes.func
+    filteredLocationsByExternalIDs: PropTypes.array
 };
 
 /**
@@ -35,14 +31,11 @@ Sidebar.propTypes = {
  * @param {string} props.currentAppView - Holds the current view/state of the Map Template.
  * @param {array} props.appViews - Array of all possible views.
  * @param {array} props.filteredLocationsByExternalIDs - Array of locations filtered based on the external ID.
- * @param {function} props.onRouteFinished - Callback that fires when the route has finished.
- *
  */
-function Sidebar({ directionsFromLocation, directionsToLocation, pushAppView, currentAppView, appViews, onRouteFinished }) {
+function Sidebar({ directionsFromLocation, directionsToLocation, pushAppView, currentAppView, appViews }) {
     const [currentLocation, setCurrentLocation] = useRecoilState(currentLocationState);
     const [filteredLocationsByExternalIDs, setFilteredLocationsByExternalID] = useRecoilState(filteredLocationsByExternalIDState);
     const [, setLocationId] = useRecoilState(locationIdState);
-    const kioskLocation = useRecoilValue(kioskLocationState)
 
     /*
      * React on changes on the current location and directions locations and set relevant bottom sheet.
@@ -93,17 +86,6 @@ function Sidebar({ directionsFromLocation, directionsToLocation, pushAppView, cu
         setFilteredLocationsByExternalID([]);
     }
 
-    /**
-     * Close the Directions page and navigate to the different pages based on the kioskLocation.
-     */
-    function closeDirections() {
-        if (kioskLocation) {
-            pushAppView(appViews.LOCATION_DETAILS)
-        } else {
-            pushAppView(appViews.WAYFINDING)
-        }
-    }
-
     const pages = [
         <Modal isOpen={currentAppView === appViews.SEARCH} key="SEARCH">
             <Search isOpen={currentAppView === appViews.SEARCH} />
@@ -117,26 +99,8 @@ function Sidebar({ directionsFromLocation, directionsToLocation, pushAppView, cu
         </Modal>,
         <Modal isOpen={currentAppView === appViews.LOCATION_DETAILS} key="LOCATION_DETAILS">
             <LocationDetails
-                onStartWayfinding={() => pushAppView(appViews.WAYFINDING)}
                 onBack={() => closeLocationDetails()}
-                onStartDirections={() => pushAppView(appViews.DIRECTIONS)}
                 isOpen={currentAppView === appViews.LOCATION_DETAILS}
-            />
-        </Modal>,
-        <Modal isOpen={currentAppView === appViews.WAYFINDING} key="WAYFINDING">
-            <Wayfinding
-                onStartDirections={() => pushAppView(appViews.DIRECTIONS)}
-                directionsToLocation={directionsToLocation}
-                directionsFromLocation={directionsFromLocation}
-                onBack={() => pushAppView(currentLocation ? appViews.LOCATION_DETAILS : appViews.SEARCH)}
-                isActive={currentAppView === appViews.WAYFINDING}
-            />
-        </Modal>,
-        <Modal isOpen={currentAppView === appViews.DIRECTIONS} key="DIRECTIONS">
-            <Directions
-                isOpen={currentAppView === appViews.DIRECTIONS}
-                onBack={() => closeDirections()}
-                onRouteFinished={() => onRouteFinished()}
             />
         </Modal>
     ];

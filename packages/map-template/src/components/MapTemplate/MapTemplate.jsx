@@ -102,7 +102,7 @@ function getVenueImage(venueName, appConfig) {
 
 // Desired display order and names for kiosk deployment
 const customVenueList = [
-    { name: 'Campus Bookstore', image: '/Building/Campusbookstore.jpg' },
+    { name: 'Campus Bookstore', image: '/Building/Campusbookstore.jpg', coords: [-74.17830128696572, 40.74130831036277] },
     { name: 'Campus Center', image: '/Building/Campuscenter.png', coords: [-74.17839, 40.74306] },
     { name: 'Central King Building', image: '/Building/CentralKingBuilding.png' },
     { name: 'Colton Hall', image: '/Building/Coltonhall.png' },
@@ -918,10 +918,9 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 // Do not set the current location if the clicked location is the same as the kioskOriginLocationId,
                 // due to the logic of displaying directions right away when selecting a location on the map, when in kiosk mode.
                 if (location.id !== kioskOriginLocationId) {
+                    // Only set the current location (highlight on the map) but do NOT change the app view.
+                    // This prevents the location details / popup from opening automatically on click.
                     setCurrentLocation(location);
-                    // Open the Wayfinding view so the route is calculated from the user's
-                    // position to the clicked location (or allow the user to pick origin).
-                    pushAppView(appStates.WAYFINDING);
                 }
                 break;
             case mapClickActions.SetWayfindingLocation:
@@ -1000,6 +999,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
         {!showSdkErrorFallback && venuesInSolution.length > 1 && showVenueSelector && <VenueSelector
             onOpen={() => pushAppView(appStates.VENUE_SELECTOR)}
             onClose={() => goBack()}
+            onCloseSilent={() => pushAppView(undefined)}
             active={currentAppView === appStates.VENUE_SELECTOR}
         />}
         {!showSdkErrorFallback && qrCodeLink && <QRCodeDialog />}
