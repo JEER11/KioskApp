@@ -298,6 +298,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
 
     // Indicate if the MapsIndoors JavaScript SDK is available.
     const [mapsindoorsSDKAvailable, setMapsindoorsSDKAvailable] = useState(false);
+    const [mapsindoorsSDKError, setMapsindoorsSDKError] = useState(false);
 
     const showLegendDialog = useRecoilValue(isLegendDialogVisibleState);
 
@@ -362,7 +363,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
      * @returns {Promise}
      */
     function initializeMapsIndoorsSDK() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             if (window.mapsindoors !== undefined) {
                 return resolve();
             }
@@ -372,8 +373,19 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
             miSdkApiTag.setAttribute('src', 'https://app.mapsindoors.com/mapsindoors/js/sdk/4.46.1/mapsindoors-4.46.1.js.gz');
             miSdkApiTag.setAttribute('integrity', 'sha384-UIZ8ZRvII99qxHaf7YG0mGf2g6idRr6YDVpCQkVeP+zJntNk6m+aZZ4ekFVghmDH');
             miSdkApiTag.setAttribute('crossorigin', 'anonymous');
+
+            const timeout = window.setTimeout(() => {
+                reject(new Error('MapsIndoors SDK load timed out'));
+            }, 15000);
+
+            miSdkApiTag.onerror = () => {
+                window.clearTimeout(timeout);
+                reject(new Error('MapsIndoors SDK failed to load'));
+            };
+
             document.body.appendChild(miSdkApiTag);
             miSdkApiTag.onload = () => {
+                window.clearTimeout(timeout);
                 resolve();
             }
         });
@@ -418,6 +430,11 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
     useEffect(() => {
         initializeMapsIndoorsSDK().then(() => {
             setMapsindoorsSDKAvailable(true);
+            setMapsindoorsSDKError(false);
+        }).catch((error) => {
+            console.error('Unable to initialize MapsIndoors SDK.', error);
+            setMapsindoorsSDKError(true);
+            setErrorMessage({ text: 'Internet connection required: the MapsIndoors SDK could not be loaded.', type: 'error' });
         });
 
         return () => {
@@ -933,20 +950,31 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
         }
     }, [language, appConfig, currentLanguage, setCurrentLanguage, userSelectedLanguage]);
 
+    const showSdkErrorFallback = mapsindoorsSDKError && !mapsindoorsSDKAvailable;
+    const showSplash = !showSdkErrorFallback && (!isMapReady || !minimumLoadTimeReached || categories.length === 0 || venuesInSolution.length === 0);
+
     return <div className={`mapsindoors-map
     ${currentAppView === appStates.DIRECTIONS ? 'mapsindoors-map--hide-elements' : 'mapsindoors-map--show-elements'}
     ${(venuesInSolution.length > 1 && showVenueSelector) ? '' : 'mapsindoors-map--hide-venue-selector'}
     ${showPositionControl ? 'mapsindoors-map--show-my-position' : 'mapsindoors-map--hide-my-position'}`}>
         <Notification />
-        {(!isMapReady || !minimumLoadTimeReached || categories.length === 0 || venuesInSolution.length === 0) && <SplashScreen />}
-        {venuesInSolution.length > 1 && showVenueSelector && <VenueSelector
+        {showSplash && <SplashScreen />}
+        {showSdkErrorFallback && (
+            <div className="offline-fallback" role="status" aria-live="polite">
+                <h2 className="offline-fallback__title">Internet connection required</h2>
+                <p className="offline-fallback__text">
+                    This kiosk currently depends on external map services. Reconnect to Wi-Fi or Ethernet and reload to restore full functionality.
+                </p>
+            </div>
+        )}
+        {!showSdkErrorFallback && venuesInSolution.length > 1 && showVenueSelector && <VenueSelector
             onOpen={() => pushAppView(appStates.VENUE_SELECTOR)}
             onClose={() => goBack()}
             active={currentAppView === appStates.VENUE_SELECTOR}
         />}
-        {qrCodeLink && <QRCodeDialog />}
-        {showLegendDialog && <LegendDialog />}
-        {isMapPositionInvestigating &&
+        {!showSdkErrorFallback && qrCodeLink && <QRCodeDialog />}
+        {!showSdkErrorFallback && showLegendDialog && <LegendDialog />}
+        {!showSdkErrorFallback && isMapPositionInvestigating &&
             <Fragment key={resetCount}>
                 {isDesktop &&
                     <Sidebar
@@ -970,7 +998,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 }
             </Fragment>
         }
-        <MapWrapper
+        {!showSdkErrorFallback && <MapWrapper
             useMapProviderModule={useMapProviderModule}
             onMapPositionKnown={() => mapPositionKnown()}
             onMapPositionInvestigating={() => setIsMapPositionInvestigating(true)}
@@ -986,9 +1014,9 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 setUserSelectedLanguage(true);
             }}
             devicePosition={devicePosition}
-        />
-        <EnsureDirectionsService />
-        <DevInitDirections />
+        />}
+        {!showSdkErrorFallback && <EnsureDirectionsService />}
+        {!showSdkErrorFallback && <DevInitDirections />}
     </div>
 }
 
