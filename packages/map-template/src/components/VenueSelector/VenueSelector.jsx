@@ -38,6 +38,7 @@ function VenueSelector({ onOpen, onClose, active }) {
     const mapsIndoorsInstance = useRecoilValue(mapsIndoorsInstanceState);
 
     const currentVenueName = useRecoilValue(currentVenueNameState);
+    const [, setCurrentVenueName] = useRecoilState(currentVenueNameState);
 
     const [, setIsLocationClicked] = useRecoilState(isLocationClickedState);
 
@@ -82,6 +83,13 @@ function VenueSelector({ onOpen, onClose, active }) {
                 }
             }));
             console.log('Dispatched njit-focus event for', venue.name, 'at coords:', [lng, lat]);
+
+            // Mark this venue as the current venue so the "Current" badge follows the selection
+            try {
+                if (venue && venue.name) setCurrentVenueName(venue.name);
+            } catch (e) {
+                console.warn('Failed to set current venue', e);
+            }
         }
         
         toggle();

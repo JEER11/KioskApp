@@ -349,6 +349,20 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
                 // experience while still drawing routes.
                 setCurrentLocation(pseudoLocation);
                 console.log('NJIT focus converted to MapsIndoors location (UI suppressed):', pseudoLocation);
+                // If the event includes a building name, try to mark the corresponding venue as current
+                if (building && venuesInSolution && venuesInSolution.length) {
+                    const match = venuesInSolution.find(v => {
+                        const dn = (v.displayName || v.venueInfo?.name || v.name || '').toLowerCase();
+                        return dn === String(building).toLowerCase();
+                    });
+                    if (match && match.name) {
+                        try {
+                            setCurrentVenueName(match.name);
+                        } catch (e) {
+                            console.warn('Failed to set current venue from njit-focus', e);
+                        }
+                    }
+                }
             } catch (e) {
                 console.warn('Failed to handle njit-focus event', e);
             }

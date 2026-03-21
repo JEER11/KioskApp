@@ -22,6 +22,78 @@
             border: 2px solid var(--brand-colors-dark-pine-100);
         }
     }
+    &__content {
+        position: absolute;
+        bottom: 0;
+        top: 50%;
+        padding: var(--spacing-medium);
+        border-radius: var(--rounding-x-large);
+        font-size: var(--font-size-small);
+        background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-medium);
+
+        .venue__title {
+            color: var(--color-white-base);
+            font-weight: 600;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-x-small);
+        }
+
+        .venue__current {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            padding: 6px 10px;
+            border-radius: 18px;
+            font-size: 12px;
+            color: var(--color-white-base);
+            /* position the badge overlapping the title's top-right area */
+            position: absolute;
+            top: -10px;
+            right: -6px;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .venue__right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-medium);
+            min-width: 120px;
+            justify-content: flex-end;
+        }
+
+        .venue__info {
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: var(--spacing-x-small);
+            color: var(--color-white-base);
+            font-size: 12px;
+            text-align: right;
+            max-width: 280px;
+        }
+
+        .venue__info.visible {
+            display: flex;
+        }
+
+        /* Keep phone numbers on a single line */
+        .venue__info-row {
+            white-space: nowrap;
+        }
+
+        .venue__info-hours {
+            font-weight: 400;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+    }
 
     &__content {
         position: absolute;
