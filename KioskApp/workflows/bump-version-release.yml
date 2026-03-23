@@ -240,11 +240,11 @@ jobs:
 
       # Check out the repository code.
       - uses: actions/checkout@v3
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
 
       # Set up a node environment in the container.
       - uses: actions/setup-node@v3
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
         with:
           node-version: 22.x
           registry-url: https://registry.npmjs.org/
@@ -253,13 +253,13 @@ jobs:
 
       # Build the project to ensure it's up to date. If this steps fails, the job fails.
       - name: Build
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: npm ci && npx lerna run build && cd packages/map-template && npm run build-for-npm
 
       # Set the git config in order to commit the changes later.
       # The name and email here is for the GitHub Actions user.
       - name: Set git config
-        if: steps.changed-files-map-template.outputs.any_changed == 'true'
+        if: ${{ steps.changed-files-map-template.outputs.any_changed == 'true' }}
         run: git config user.name github-actions[bot] && git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       # The following steps will determine, based on a label, what version to bump to.
