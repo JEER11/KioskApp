@@ -91,8 +91,8 @@ function Venue({ venue, isCurrent, onVenueClicked }) {
         <div className="venue__image" style={style}></div>
         <div className="venue__content">
             <div className="venue__title">
+                {isCurrent && <div className="venue__current venue__current--above">{t('Current')}</div>}
                 {venue.displayName || venue.venueInfo.name}
-                {isCurrent && <div className="venue__current">{t('Current')}</div>}
             </div>
                 <div className="venue__right">
                 {/* Info panel on the right side showing phone / opening hours when available */}
