@@ -30,7 +30,6 @@ import isNullOrUndefined from '../../helpers/isNullOrUndefined';
 import ResetKioskViewButton from '../ResetKioskViewButton/ResetKioskViewButton.jsx';
 import { useIsKioskContext } from '../../hooks/useIsKioskContext';
 import GeoJsonOverlay from '../GeoJsonOverlay/GeoJsonOverlay.jsx';
-import FloorPlansOverlay from '../FloorPlansOverlay/FloorPlansOverlay.jsx';
 
 MapWrapper.propTypes = {
     onLocationClick: PropTypes.func,
@@ -719,8 +718,6 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
         />}
         {/* Static campus overlay */}
         {apiKey && <GeoJsonOverlay />}
-        {/* Floor plans overlay for indoor viewing */}
-        {apiKey && <FloorPlansOverlay />}
         {/* Pass isWayfindingOrDirections prop to ViewSelector to disable interactions while wayfinding or directions is active*/}
         {apiKey && <>
             <ViewSelector isViewSelectorVisible={isViewSelectorVisible} isViewSelectorDisabled={isWayfindingOrDirections} />

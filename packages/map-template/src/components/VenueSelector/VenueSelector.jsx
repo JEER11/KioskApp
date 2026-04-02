@@ -144,7 +144,7 @@ function VenueSelector({ onOpen, onClose, active }) {
                     <div className="venue-selector__list">
                         {venuesInSolution.map(venue => (
                             <Venue
-                                key={venue.id}
+                                key={`${venue.id}-${venue.name}`}
                                 isCurrent={currentVenueName?.toLowerCase() === venue.name.toLowerCase()}
                                 venue={venue}
                                 onVenueClicked={() => onVenueSelected(venue)}

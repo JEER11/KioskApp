@@ -8,7 +8,7 @@ import './MapTemplate.scss';
 import { mapClickActions } from '../../constants/mapClickActions.js';
 import MapWrapper from '../MapWrapper/MapWrapper';
 import EnsureDirectionsService from '../EnsureDirectionsService/EnsureDirectionsService';
-import DevInitDirections from '../DevInitDirections/DevInitDirections';
+// import DevInitDirections from '../DevInitDirections/DevInitDirections';
 import SplashScreen from '../SplashScreen/SplashScreen';
 import VenueSelector from '../VenueSelector/VenueSelector';
 import BottomSheet from '../BottomSheet/BottomSheet';
@@ -104,7 +104,7 @@ function getVenueImage(venueName, appConfig) {
 const customVenueList = [
     { name: 'Campus Bookstore', image: '/Building/Campusbookstore.jpg', coords: [-74.17830128696572, 40.74130831036277] },
     { name: 'Campus Center', image: '/Building/Campuscenter.png', coords: [-74.17839, 40.74306] },
-    { name: 'Central King Building', image: '/Building/CentralKingBuilding.png' },
+    { name: 'Central King Building', image: '/Building/CentralKingBuilding.png', coords: [-74.1776300642595, 40.742065115911274] },
     { name: 'Colton Hall', image: '/Building/Coltonhall.png' },
     { name: 'Cullimore Hall', image: '/Building/Cullimore.png', coords: [-74.17731, 40.74293] },
     { name: 'Cypress Hall', image: '/Building/Cypress.png' },
@@ -1046,7 +1046,7 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
             devicePosition={devicePosition}
         />}
         {!showSdkErrorFallback && <EnsureDirectionsService />}
-        {!showSdkErrorFallback && <DevInitDirections />}
+        {/* DevInitDirections button removed */}
     </div>
 }
 
