@@ -51,6 +51,18 @@ MapWrapper.propTypes = {
  */
 let _tileStyle;
 
+const ROUTE_BACKDROP_STYLE = {
+    strokeColor: '#8f001a',
+    strokeOpacity: 0.34,
+    strokeWeight: 14
+};
+
+const ROUTE_LINE_STYLE = {
+    strokeColor: '#ff3b52',
+    strokeOpacity: 0.98,
+    strokeWeight: 8
+};
+
 /**
  * A wrapper component around the MIMap component.
  * Contains logic for determining map provider (Google, Mapbox), map options, device position handling and setting up a directions service to use for showing directions.
@@ -538,11 +550,18 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
                         try {
                             if (window.mapsindoors && mapsIndoorsInstance) {
                                 let mapRenderer = window._njit_map_renderer;
+                                let mapRendererBackdrop = window._njit_map_renderer_backdrop;
                                 if (!mapRenderer) {
-                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true, ...ROUTE_LINE_STYLE });
                                     window._njit_map_renderer = mapRenderer;
                                     console.log('MapWrapper: created _njit_map_renderer');
                                 }
+                                if (!mapRendererBackdrop) {
+                                    mapRendererBackdrop = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: false, ...ROUTE_BACKDROP_STYLE });
+                                    window._njit_map_renderer_backdrop = mapRendererBackdrop;
+                                    console.log('MapWrapper: created _njit_map_renderer_backdrop');
+                                }
+                                mapRendererBackdrop.setRoute(directionsResult).catch(err => console.error('MapWrapper: map backdrop setRoute failed', err));
                                 mapRenderer.setRoute(directionsResult).then(() => {
                                     console.log('MapWrapper: map renderer setRoute succeeded');
                                 }).catch(err => console.error('MapWrapper: map renderer setRoute failed', err));
@@ -610,11 +629,18 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
                                                         setDirectionsResponse({ originLocation: p.originLocation, destinationLocation: p.destinationLocation, totalDistance, totalTime, directionsResult });
                                                         if (window.mapsindoors && mapsIndoorsInstance) {
                                                             let mapRenderer = window._njit_map_renderer;
+                                                            let mapRendererBackdrop = window._njit_map_renderer_backdrop;
                                                             if (!mapRenderer) {
-                                                                mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                                                mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true, ...ROUTE_LINE_STYLE });
                                                                 window._njit_map_renderer = mapRenderer;
                                                                 console.log('MapWrapper: created _njit_map_renderer (queued)');
                                                             }
+                                                            if (!mapRendererBackdrop) {
+                                                                mapRendererBackdrop = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: false, ...ROUTE_BACKDROP_STYLE });
+                                                                window._njit_map_renderer_backdrop = mapRendererBackdrop;
+                                                                console.log('MapWrapper: created _njit_map_renderer_backdrop (queued)');
+                                                            }
+                                                            mapRendererBackdrop.setRoute(directionsResult).catch(err => console.error('MapWrapper: queued map backdrop setRoute failed', err));
                                                             mapRenderer.setRoute(directionsResult).then(() => {
                                                                 console.log('MapWrapper: queued map renderer setRoute succeeded (route-based)');
                                                             }).catch(err => console.error('MapWrapper: queued map renderer setRoute failed', err));
@@ -647,11 +673,18 @@ function MapWrapper({ onLocationClick, onMapPositionKnown, useMapProviderModule,
                         try {
                             if (window.mapsindoors && mapsIndoorsInstance) {
                                 let mapRenderer = window._njit_map_renderer;
+                                let mapRendererBackdrop = window._njit_map_renderer_backdrop;
                                 if (!mapRenderer) {
-                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true });
+                                    mapRenderer = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: true, ...ROUTE_LINE_STYLE });
                                     window._njit_map_renderer = mapRenderer;
                                     console.log('MapWrapper: created _njit_map_renderer (queued)');
                                 }
+                                if (!mapRendererBackdrop) {
+                                    mapRendererBackdrop = new window.mapsindoors.directions.DirectionsRenderer({ mapsIndoors: mapsIndoorsInstance, fitBounds: false, ...ROUTE_BACKDROP_STYLE });
+                                    window._njit_map_renderer_backdrop = mapRendererBackdrop;
+                                    console.log('MapWrapper: created _njit_map_renderer_backdrop (queued)');
+                                }
+                                mapRendererBackdrop.setRoute(directionsResult).catch(err => console.error('MapWrapper: queued map backdrop setRoute failed', err));
                                 mapRenderer.setRoute(directionsResult).then(() => {
                                     console.log('MapWrapper: queued map renderer setRoute succeeded');
                                 }).catch(err => console.error('MapWrapper: queued map renderer setRoute failed', err));

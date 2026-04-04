@@ -31,6 +31,19 @@ import shuttleBusOnState from '../../atoms/shuttleBusOnState';
 import appConfigState from '../../atoms/appConfigState';
 
 let directionsRenderer;
+let directionsBackdropRenderer;
+
+const ROUTE_BACKDROP_STYLE = {
+    strokeColor: '#8f001a',
+    strokeOpacity: 0.38,
+    strokeWeight: 14
+};
+
+const ROUTE_LINE_STYLE = {
+    strokeColor: '#ff3b52',
+    strokeOpacity: 0.98,
+    strokeWeight: 8
+};
 
 // Prefer a single renderer instance to avoid creating multiple SDK listeners.
 // Reuse the `directionsRenderer` variable declared above for a single shared instance.
@@ -157,6 +170,7 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
                                 directionsRenderer = new window.mapsindoors.directions.DirectionsRenderer({
                                     mapsIndoors: mapsIndoorsInstance,
                                     fitBounds: isKioskContext ? false : true,
+                                    ...ROUTE_LINE_STYLE,
                                     fitBoundsPadding: isKioskContext ? undefined : {
                                         top: padding,
                                         bottom: bottomPadding,
@@ -166,8 +180,18 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
                                 });
                             }
 
+                            if (!directionsBackdropRenderer) {
+                                directionsBackdropRenderer = new window.mapsindoors.directions.DirectionsRenderer({
+                                    mapsIndoors: mapsIndoorsInstance,
+                                    fitBounds: false,
+                                    ...ROUTE_BACKDROP_STYLE
+                                });
+                            }
+
                             try {
                                 console.log('Directions: calling directionsRenderer.setRoute');
+                                directionsBackdropRenderer.setRoute(directions.directionsResult)
+                                    .catch((err) => console.error('Directions: backdrop setRoute rejected', err));
                                 directionsRenderer.setRoute(directions.directionsResult)
                                     .then(() => {
                                         console.log('Directions: setRoute resolved, setting step index to 0');
@@ -288,6 +312,7 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
     function stopRendering() {
         try {
             directionsRenderer?.setRoute(null);
+            directionsBackdropRenderer?.setRoute(null);
         } catch (e) { void e; }
     }
 
@@ -298,6 +323,10 @@ function Directions({ isOpen, onBack, onSetSize, onRouteFinished, snapPointSwipe
                 if (directionsRenderer) {
                     directionsRenderer.setRoute(null);
                     directionsRenderer = null;
+                }
+                if (directionsBackdropRenderer) {
+                    directionsBackdropRenderer.setRoute(null);
+                    directionsBackdropRenderer = null;
                 }
             } catch (e) { void e; }
         };
