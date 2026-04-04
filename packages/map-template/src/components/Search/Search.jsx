@@ -35,6 +35,45 @@ import venuesInSolutionState from '../../atoms/venuesInSolutionState';
 import initialVenueNameState from '../../atoms/initialVenueNameState';
 import PropTypes from 'prop-types';
 
+const ELEVATOR_OVERLAY_LOCATIONS = [
+    { id: 'tiernan-hall-elevator-1', name: 'Tiernan Hall Elevator 1', coords: [-74.17945587633146, 40.74223919150365], amenity: 'elevator' },
+    { id: 'faculty-memorial-hall-elevator-1', name: 'Faculty Memorial Hall Elevator 1', coords: [-74.1790601620329, 40.74199946313459], amenity: 'elevator' },
+    { id: 'faculty-memorial-hall-elevator-2', name: 'Faculty Memorial Hall Elevator 2', coords: [-74.17852899273782, 40.74185153773234], amenity: 'elevator' },
+    { id: 'ece-building-elevator-1', name: 'ECE Building Elevator 1', coords: [-74.17863492771842, 40.74146803165208], amenity: 'elevator' },
+    { id: 'central-king-building-elevator-1', name: 'Central King Building Elevator 1', coords: [-74.17781860056387, 40.74219447483377], amenity: 'elevator' },
+    { id: 'central-king-building-elevator-2', name: 'Central King Building Elevator 2', coords: [-74.17748848629157, 40.741992732950884], amenity: 'elevator' },
+    { id: 'campus-center-elevator-1', name: 'Campus Center Elevator 1', coords: [-74.17810511483778, 40.7428551457308], amenity: 'elevator' },
+    { id: 'wellness-center-elevator-1', name: 'Wellness Center Elevator 1', coords: [-74.18029142919637, 40.74247413729184], amenity: 'elevator' },
+    { id: 'mechanical-engineering-elevator-1', name: 'Mechanical Engineering Elevator 1', coords: [-74.17862134987408, 40.7441834885235], amenity: 'elevator' },
+    { id: 'makerspace-elevator-1', name: 'Makerspace Elevator 1', coords: [-74.17905980077788, 40.744098355862775], amenity: 'elevator' },
+    { id: 'gitc-elevator-1', name: 'GITC Elevator 1', coords: [-74.17960180541355, 40.74443554733849], amenity: 'elevator' },
+    { id: 'robert-van-houten-library-elevator-1', name: 'Robert W. Van Houten Library Elevator 1', coords: [-74.17788277638554, 40.743832456345906], amenity: 'elevator' },
+    { id: 'cullimore-hall-elevator-1', name: 'Cullimore Hall Elevator 1', coords: [-74.17728196021774, 40.743079770123074], amenity: 'elevator' }
+];
+
+const STUDY_SPACE_OVERLAY_LOCATIONS = [
+    { id: 'york-center-study-area-1', name: 'York Center for Environmental Engineering and Science', description: 'First Floor', coords: [-74.17864781963625, 40.74075858416627], amenity: 'study-space' },
+    { id: 'central-king-building-study-area-1', name: 'Central King Building', description: 'Basement, 1st, and 3rd Floor', coords: [-74.17769164592056, 40.74209852018736], amenity: 'study-space' },
+    { id: 'campus-center-study-area-1', name: 'Campus Center', description: 'Basement, 1st, 2nd and 3rd Floor', coords: [-74.17827227389077, 40.74312345824983], amenity: 'study-space' },
+    { id: 'robert-van-houten-library-study-area-1', name: 'Robert W. Van Houten Library', description: 'All floors & Reserved rooms', coords: [-74.17802913571659, 40.743844395187885], amenity: 'study-space' },
+    { id: 'makerspace-study-area-1', name: 'Makerspace', description: 'First Floor Maker Space', coords: [-74.17884842511302, 40.743959282832066], amenity: 'study-space' },
+    { id: 'makerspace-study-area-2', name: 'Makerspace', description: 'First Floor Open Area', coords: [-74.17955606809316, 40.74416753299178], amenity: 'study-space' },
+    { id: 'kupfrian-hall-study-area-1', name: 'Kupfrian Hall', description: 'First & Second Floor', coords: [-74.1786174176951, 40.74256133133684], amenity: 'study-space' },
+    { id: 'wellness-center-study-area-1', name: 'Wellness Center', description: 'First Floor', coords: [-74.18009195958216, 40.7425547511855], amenity: 'study-space' }
+];
+
+const FOOD_OVERLAY_LOCATIONS = [
+    { id: 'a1njit-food-truck', name: 'A1NJIT Food Truck', coords: [-74.17956714372212, 40.74150019400026], amenity: 'food' },
+    { id: 'taj-mahal-food-truck', name: 'Taj Mahal Food Truck', coords: [-74.177343034262, 40.74038841141362], amenity: 'food' },
+    { id: 'gigi-halal-food-truck', name: 'Gigi Halal Food Truck', coords: [-74.18041334492794, 40.74163501004268], amenity: 'food' },
+    { id: 'good-morning-newark-halal-food-truck', name: 'Good Morning Newark Halal Food Truck', coords: [-74.17896859066158, 40.74115319839319], amenity: 'food' },
+    { id: 'smashburger', name: 'Smashburger', coords: [-74.17977131902967, 40.741379560145106], amenity: 'food' },
+    { id: 'forte-pizzeria', name: 'Forte Pizzeria', coords: [-74.17786158621051, 40.74319633198452], amenity: 'food' },
+    { id: 'highlander-pub', name: 'Highlander Pub', coords: [-74.17813609802649, 40.743048936391126], amenity: 'food' },
+    { id: 'jbj-soul-kitchen', name: 'JBJ Soul Kitchen', coords: [-74.17629992556238, 40.74202173573142], amenity: 'food' },
+    { id: 'ramen-gami', name: 'Ramen Gami', coords: [-74.17595494021685, 40.74375498467662], amenity: 'food' }
+];
+
 Search.propTypes = {
     categories: PropTypes.array,
     onSetSize: PropTypes.func,
@@ -168,11 +207,23 @@ function Search({ onSetSize, isOpen }) {
         const categoryText = (category || '').toString().toLowerCase();
         const displayNameText = (displayName || '').toString().toLowerCase();
         console.log('getFilteredLocations called with category:', category, 'displayName:', displayName);
+        const dispatchOverlayEvent = (eventName, detail) => {
+            // Category changes trigger overlay effect cleanup/re-init. Dispatch after that cycle,
+            // and once more shortly after to handle map style/image load timing.
+            window.setTimeout(() => {
+                window.dispatchEvent(new CustomEvent(eventName, { detail }));
+            }, 0);
+            window.setTimeout(() => {
+                window.dispatchEvent(new CustomEvent(eventName, { detail }));
+            }, 200);
+        };
         // Be robust to odd keys like "Parking_" or localized labels
         const isOverlayRestroom = /restroom|toilet|bathroom/.test(categoryText) || /restroom|toilet|bathroom/.test(displayNameText);
         const isOverlayParking = /parking|garage|lot/.test(categoryText) || /parking|garage|lot/.test(displayNameText) || categoryText.startsWith('parking');
         const isOverlayElevator = /elevator|lift/.test(categoryText) || /elevator|lift/.test(displayNameText);
-        console.log('isOverlayRestroom:', isOverlayRestroom, 'isOverlayParking:', isOverlayParking, 'isOverlayElevator:', isOverlayElevator);
+        const isOverlayStudySpace = /study\s*space|study|studying|meeting|conference/.test(categoryText) || /study\s*space|study|studying|meeting|conference/.test(displayNameText);
+        const isOverlayFood = /canteen|cafeteria|dining|food|restaurant/.test(categoryText) || /canteen|cafeteria|dining|food|restaurant/.test(displayNameText);
+        console.log('isOverlayRestroom:', isOverlayRestroom, 'isOverlayParking:', isOverlayParking, 'isOverlayElevator:', isOverlayElevator, 'isOverlayStudySpace:', isOverlayStudySpace, 'isOverlayFood:', isOverlayFood);
 
         // Creates a selected categoriers tree, where first category in the array is parent and second one is child
         // Ensure category is unique before pushing to selectedCategories.current
@@ -189,7 +240,7 @@ function Search({ onSetSize, isOpen }) {
         setSelectedCategory(category)
 
         // For NJIT overlay-only categories OR standard MapsIndoors categories that should show as expandable lists
-        if (isOverlayRestroom || isOverlayParking || isOverlayElevator) {
+        if (isOverlayRestroom || isOverlayParking || isOverlayElevator || isOverlayStudySpace || isOverlayFood) {
             // Helper: compute a simple centroid for Polygon/MultiPolygon
             const getCentroid = (geom) => {
                 try {
@@ -209,7 +260,6 @@ function Search({ onSetSize, isOpen }) {
                 const a = (f.properties?.amenity || '').toLowerCase();
                 if (isOverlayRestroom) return (a === 'toilets' || a === 'toilet' || a === 'restroom');
                 if (isOverlayParking) return (a === 'parking');
-                if (isOverlayElevator) return (a === 'elevator' || a === 'lift');
                 return false;
             });
 
@@ -294,9 +344,7 @@ function Search({ onSetSize, isOpen }) {
                 }).filter(item => Array.isArray(item.coords));
 
                 // Show parking icons across the map
-                window.dispatchEvent(new CustomEvent('njit-show-parking', {
-                    detail: { parkings: parkingList }
-                }));
+                dispatchOverlayEvent('njit-show-parking', { parkings: parkingList });
 
                 // Hide textual list
                 setNjitList([]);
@@ -305,24 +353,35 @@ function Search({ onSetSize, isOpen }) {
                 setSize(snapPoints.MIN);
                 return;
             } else if (isOverlayElevator) {
-                // Elevator: show all elevators on map only, no list
-                list = filtered.map(f => {
-                    const center = f.geometry?.type === 'Point' ? f.geometry.coordinates : getCentroid(f.geometry);
-                    const name = f.properties?.name || t('Elevator');
-                    return {
-                        id: f.id || `${name}-${center?.join(',')}`,
-                        name,
-                        coords: center,
-                        amenity: 'elevator'
-                    };
-                }).filter(item => Array.isArray(item.coords));
+                // Elevator: use curated campus elevator coordinates and show pins only
+                list = ELEVATOR_OVERLAY_LOCATIONS;
                 
                 // Show all elevators on the map immediately
-                window.dispatchEvent(new CustomEvent('njit-show-all-elevators', { 
-                    detail: { elevators: list } 
-                }));
+                dispatchOverlayEvent('njit-show-all-elevators', { elevators: list });
                 
                 // Don't show list for elevators, only map pins
+                setNjitList([]);
+                setSearchResults([]);
+                setFilteredLocations([]);
+                setSize(snapPoints.MIN);
+                return;
+            } else if (isOverlayStudySpace) {
+                // Study spaces: use curated coordinates and show pins only
+                list = STUDY_SPACE_OVERLAY_LOCATIONS;
+
+                dispatchOverlayEvent('njit-show-study-spaces', { studySpaces: list });
+
+                setNjitList([]);
+                setSearchResults([]);
+                setFilteredLocations([]);
+                setSize(snapPoints.MIN);
+                return;
+            } else if (isOverlayFood) {
+                // Food: use curated coordinates and show pins only
+                list = FOOD_OVERLAY_LOCATIONS;
+
+                dispatchOverlayEvent('njit-show-food', { foods: list });
+
                 setNjitList([]);
                 setSearchResults([]);
                 setFilteredLocations([]);
@@ -942,7 +1001,7 @@ function Search({ onSetSize, isOpen }) {
                         <span>{t('Search by name, category, building...')}</span>
                         <SearchField
                             ref={searchFieldRef}
-                            mapsindoors={!(/restroom|toilet|bathroom|parking|garage|lot/.test((selectedCategory || '').toString().toLowerCase()))}
+                            mapsindoors={!(/restroom|toilet|bathroom|parking|garage|lot|elevator|lift|study\s*space|study|studying|canteen|cafeteria|dining|food|restaurant/.test((selectedCategory || '').toString().toLowerCase()))}
                             placeholder={t('Search by name, category, building...')}
                             results={locations => onResults(locations)}
                             clicked={() => searchFieldClicked()}

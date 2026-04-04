@@ -4,11 +4,26 @@ import mapsIndoorsInstanceState from '../../atoms/mapsIndoorsInstanceState';
 import mapTypeState from '../../atoms/mapTypeState';
 import { mapTypes } from '../../constants/mapTypes';
 import selectedCategoryState from '../../atoms/selectedCategoryState';
+import categoriesState from '../../atoms/categoriesState';
 import femaleSvg from '../../assets/restroomrestroom/Tfemale.svg';
 import maleSvg from '../../assets/restroomrestroom/Tmale.svg';
 import bothGenderSvg from '../../assets/restroomrestroom/Tbothgender.svg';
-import elevatorIcon from '../../assets/searchIcons/elevator.png';
-import parkingSvg from '../../assets/drive.svg';
+
+const ELEVATOR_ICON = '/Elevator.png';
+const PARKING_ICON = '/Parking.png';
+const STUDY_SPACE_ICON = '/Study.png';
+const FOOD_ICON = '/Food.png';
+
+const STUDY_SPACE_OVERLAY_LOCATIONS = [
+    { id: 'york-center-study-area-1', name: 'York Center for Environmental Engineering and Science', description: 'First Floor', coords: [-74.17864781963625, 40.74075858416627] },
+    { id: 'central-king-building-study-area-1', name: 'Central King Building', description: 'Basement, 1st, and 3rd Floor', coords: [-74.17769164592056, 40.74209852018736] },
+    { id: 'campus-center-study-area-1', name: 'Campus Center', description: 'Basement, 1st, 2nd and 3rd Floor', coords: [-74.17827227389077, 40.74312345824983] },
+    { id: 'robert-van-houten-library-study-area-1', name: 'Robert W. Van Houten Library', description: 'All floors & Reserved rooms', coords: [-74.17802913571659, 40.743844395187885] },
+    { id: 'makerspace-study-area-1', name: 'Makerspace', description: 'First Floor Maker Space', coords: [-74.17884842511302, 40.743959282832066] },
+    { id: 'makerspace-study-area-2', name: 'Makerspace', description: 'First Floor Open Area', coords: [-74.17955606809316, 40.74416753299178] },
+    { id: 'kupfrian-hall-study-area-1', name: 'Kupfrian Hall', description: 'First & Second Floor', coords: [-74.1786174176951, 40.74256133133684] },
+    { id: 'wellness-center-study-area-1', name: 'Wellness Center', description: 'First Floor', coords: [-74.18009195958216, 40.7425547511855] }
+];
 
 /**
  * Renders a GeoJSON overlay on the underlying base map (Mapbox or Google Maps).
@@ -18,6 +33,7 @@ function GeoJsonOverlay() {
     const mapsIndoorsInstance = useRecoilValue(mapsIndoorsInstanceState);
     const mapType = useRecoilValue(mapTypeState);
     const selectedCategory = useRecoilValue(selectedCategoryState);
+    const categories = useRecoilValue(categoriesState);
     const googleDataLayerRef = useRef(null);
     const googleHighlightCircleRef = useRef(null);
     const [mediaMap, setMediaMap] = useState({});
@@ -26,10 +42,57 @@ function GeoJsonOverlay() {
         if (!mapsIndoorsInstance) return;
 
         let aborted = false;
-        const lower = (selectedCategory || '').toLowerCase();
+        const selectedCategoryDisplayName = categories.find(([key]) => key === selectedCategory)?.[1]?.displayName || '';
+        const lower = `${selectedCategory || ''} ${selectedCategoryDisplayName}`.toLowerCase();
         const isRestroom = /restroom|toilet|bathroom/.test(lower);
         const isParking = /parking|garage|lot/.test(lower);
         const isElevator = /elevator|lift/.test(lower);
+        const isStudySpace = /study\s*space|study|studying|meeting|conference/.test(lower);
+
+        const ensureMapImage = (map, imageId, path, onReady, maxSize = 256) => {
+            if (!map) return;
+            if (map.hasImage(imageId)) {
+                if (typeof onReady === 'function') onReady();
+                return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    if (!map.hasImage(imageId)) {
+                        const width = img.naturalWidth || img.width;
+                        const height = img.naturalHeight || img.height;
+                        const biggestSide = Math.max(width, height);
+
+                        if (biggestSide > maxSize) {
+                            const scale = maxSize / biggestSide;
+                            const targetWidth = Math.max(1, Math.round(width * scale));
+                            const targetHeight = Math.max(1, Math.round(height * scale));
+                            const canvas = document.createElement('canvas');
+                            canvas.width = targetWidth;
+                            canvas.height = targetHeight;
+                            const ctx = canvas.getContext('2d');
+                            if (ctx) {
+                                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                                map.addImage(imageId, ctx.getImageData(0, 0, targetWidth, targetHeight));
+                            } else {
+                                map.addImage(imageId, img);
+                            }
+                        } else {
+                            map.addImage(imageId, img);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed adding map image', imageId, e);
+                }
+
+                if (typeof onReady === 'function') onReady();
+            };
+            img.onerror = () => {
+                console.error('Failed loading map image', imageId, path);
+            };
+            img.src = path;
+        };
 
         const loadAndRender = async () => {
             try {
@@ -160,7 +223,7 @@ function GeoJsonOverlay() {
                         ensureImage('restroom-male', maleSvg);
                         ensureImage('restroom-all', bothGenderSvg);
                         // Use drive icon for parking if present
-                        ensureImage('parking-icon', parkingSvg);
+                        ensureImage('parking-icon', PARKING_ICON);
 
                         // Because Mapbox expressions cannot easily map 'female'->'restroom-female' inline here,
                         // we'll add a simple symbol layer keyed to restroom gender via 'match'.
@@ -273,12 +336,52 @@ function GeoJsonOverlay() {
                                     addElevatorLayer();
                                 }
                             };
-                            img.src = elevatorIcon;
+                            img.src = ELEVATOR_ICON;
                         } else {
                             addElevatorLayer();
                         }
                     } else {
                         if (map.getLayer('njit-elevator-icons')) map.removeLayer('njit-elevator-icons');
+                    }
+
+                    // Add study-space icon layer from curated coordinates when study category is active
+                    if (isStudySpace) {
+                        const sourceId = 'njit-study-space-markers';
+                        const featureCollection = {
+                            type: 'FeatureCollection',
+                            features: STUDY_SPACE_OVERLAY_LOCATIONS.map((space) => ({
+                                type: 'Feature',
+                                geometry: { type: 'Point', coordinates: space.coords },
+                                properties: { id: space.id, name: space.name, description: space.description }
+                            }))
+                        };
+
+                        if (map.getSource(sourceId)) {
+                            map.getSource(sourceId).setData(featureCollection);
+                        } else {
+                            map.addSource(sourceId, { type: 'geojson', data: featureCollection });
+                        }
+
+                        const addOrUpdateStudyLayer = () => {
+                            if (!map.getLayer('njit-study-space-markers')) {
+                                map.addLayer({
+                                    id: 'njit-study-space-markers',
+                                    type: 'symbol',
+                                    source: sourceId,
+                                    layout: {
+                                        'icon-image': 'study-space-icon',
+                                        'icon-size': 1.8,
+                                        'icon-anchor': 'bottom',
+                                        'icon-allow-overlap': true
+                                    }
+                                });
+                            }
+                        };
+
+                        ensureMapImage(map, 'study-space-icon', STUDY_SPACE_ICON, addOrUpdateStudyLayer);
+                    } else {
+                        if (map.getLayer('njit-study-space-markers')) map.removeLayer('njit-study-space-markers');
+                        if (map.getSource('njit-study-space-markers')) map.removeSource('njit-study-space-markers');
                     }
 
                     // Enhance building visibility using Mapbox composite source
@@ -374,7 +477,7 @@ function GeoJsonOverlay() {
                             // For elevators, show custom pin instead of popup
                             if (properties.amenity === 'elevator') {
                                 console.log('Elevator clicked! Adding pin at:', e.lngLat);
-                                console.log('Elevator icon path:', elevatorIcon);
+                                console.log('Elevator icon path:', ELEVATOR_ICON);
                                 
                                 // Remove any existing elevator pin
                                 if (map.getLayer('clicked-elevator-pin-layer')) {
@@ -421,7 +524,7 @@ function GeoJsonOverlay() {
                                     img.onerror = (err) => {
                                         console.error('Failed to load elevator icon:', err);
                                     };
-                                    img.src = elevatorIcon;
+                                    img.src = ELEVATOR_ICON;
                                 } else {
                                     console.log('Elevator icon already loaded, adding layer...');
                                     // Image already loaded, just add source and layer
@@ -554,7 +657,7 @@ function GeoJsonOverlay() {
                                 return { icon: { url: svgPath, scaledSize: new window.google.maps.Size(40, 40) } };
                             }
                             if (amenity === 'parking') {
-                                return { icon: { url: parkingSvg, scaledSize: new window.google.maps.Size(40, 40) } };
+                                return { icon: { url: PARKING_ICON, scaledSize: new window.google.maps.Size(40, 40) } };
                             }
                             // fallback to simple circle for other points
                             return {
@@ -679,7 +782,7 @@ function GeoJsonOverlay() {
                 if (!map) return;
 
                 // Load elevator icon
-                const elevatorIconPath = elevatorIcon;
+                const elevatorIconPath = ELEVATOR_ICON;
                 console.log('Loading elevator icon for search selection:', elevatorIconPath);
                 
                 const img = new Image();
@@ -745,7 +848,7 @@ function GeoJsonOverlay() {
                     map,
                     position: { lat, lng },
                     icon: {
-                        url: elevatorIcon,
+                        url: ELEVATOR_ICON,
                         scaledSize: new window.google.maps.Size(64, 84),
                         anchor: new window.google.maps.Point(32, 84)
                     },
@@ -764,17 +867,6 @@ function GeoJsonOverlay() {
                 const map = mapsIndoorsInstance.getMap();
                 if (!map) return;
                 
-                // Load elevator icon
-                const loadIcon = (name, iconPath) => {
-                    if (!map.hasImage(name)) {
-                        const img = new Image();
-                        img.onload = () => map.addImage(name, img);
-                        img.src = iconPath;
-                    }
-                };
-                
-                loadIcon('elevator-all', elevatorIcon);
-                
                 // Create a marker source for all elevators
                 const sourceId = 'njit-all-elevators-markers';
                 const features = elevators.map(e => ({
@@ -792,21 +884,24 @@ function GeoJsonOverlay() {
                 } else {
                     map.addSource(sourceId, { type: 'geojson', data: featureCollection });
                 }
-                
-                // Add elevator icon layer
-                if (!map.getLayer('njit-all-elevators-markers')) {
-                    map.addLayer({
-                        id: 'njit-all-elevators-markers',
-                        type: 'symbol',
-                        source: sourceId,
-                        layout: {
-                            'icon-image': 'elevator-all',
-                            'icon-size': 1.8,
-                            'icon-anchor': 'bottom',
-                            'icon-allow-overlap': true
-                        }
-                    });
-                }
+
+                const addOrUpdateLayer = () => {
+                    if (!map.getLayer('njit-all-elevators-markers')) {
+                        map.addLayer({
+                            id: 'njit-all-elevators-markers',
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'icon-image': 'elevator-all',
+                                'icon-size': 1.8,
+                                'icon-anchor': 'bottom',
+                                'icon-allow-overlap': true
+                            }
+                        });
+                    }
+                };
+
+                ensureMapImage(map, 'elevator-all', ELEVATOR_ICON, addOrUpdateLayer);
                 
             } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
                 const map = mapsIndoorsInstance?.getMap?.();
@@ -825,7 +920,7 @@ function GeoJsonOverlay() {
                         map,
                         position: { lat, lng },
                         icon: {
-                            url: elevatorIcon,
+                            url: ELEVATOR_ICON,
                             scaledSize: new window.google.maps.Size(64, 84),
                             anchor: new window.google.maps.Point(32, 84)
                         },
@@ -862,26 +957,23 @@ function GeoJsonOverlay() {
                     map.addSource(sourceId, { type: 'geojson', data: featureCollection });
                 }
 
-                if (!map.getLayer('njit-parking-markers')) {
-                    // Ensure parking icon is loaded
-                    if (!map.hasImage('parking-icon')) {
-                        const img = new Image();
-                        img.onload = () => { if (!map.hasImage('parking-icon')) map.addImage('parking-icon', img); };
-                        img.src = parkingSvg;
+                const addOrUpdateLayer = () => {
+                    if (!map.getLayer('njit-parking-markers')) {
+                        map.addLayer({
+                            id: 'njit-parking-markers',
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'icon-image': 'parking-icon',
+                                'icon-size': 1.8,
+                                'icon-anchor': 'bottom',
+                                'icon-allow-overlap': true
+                            }
+                        });
                     }
+                };
 
-                    map.addLayer({
-                        id: 'njit-parking-markers',
-                        type: 'symbol',
-                        source: sourceId,
-                        layout: {
-                            'icon-image': 'parking-icon',
-                            'icon-size': 1.8,
-                            'icon-anchor': 'bottom',
-                            'icon-allow-overlap': true
-                        }
-                    });
-                }
+                ensureMapImage(map, 'parking-icon', PARKING_ICON, addOrUpdateLayer);
             } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
                 const map = mapsIndoorsInstance?.getMap?.();
                 if (!map) return;
@@ -897,7 +989,11 @@ function GeoJsonOverlay() {
                     const marker = new window.google.maps.Marker({
                         map,
                         position: { lat, lng },
-                        label: { text: 'P', color: '#ffffff' },
+                        icon: {
+                            url: PARKING_ICON,
+                            scaledSize: new window.google.maps.Size(40, 52),
+                            anchor: new window.google.maps.Point(20, 52)
+                        },
                         title: p.name
                     });
                     window.njitParkingMarkers.push(marker);
@@ -905,6 +1001,138 @@ function GeoJsonOverlay() {
             }
         };
         window.addEventListener('njit-show-parking', onShowParking);
+
+        const onShowStudySpaces = (event) => {
+            const { studySpaces } = event.detail || {};
+            if (!studySpaces || !Array.isArray(studySpaces)) return;
+
+            if (mapType === mapTypes.Mapbox) {
+                const map = mapsIndoorsInstance.getMap();
+                if (!map) return;
+
+                const sourceId = 'njit-study-space-markers';
+                const features = studySpaces.map((space) => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: space.coords },
+                    properties: { name: space.name, description: space.description }
+                }));
+                const featureCollection = { type: 'FeatureCollection', features };
+
+                if (map.getSource(sourceId)) {
+                    map.getSource(sourceId).setData(featureCollection);
+                } else {
+                    map.addSource(sourceId, { type: 'geojson', data: featureCollection });
+                }
+
+                const addOrUpdateLayer = () => {
+                    if (!map.getLayer('njit-study-space-markers')) {
+                        map.addLayer({
+                            id: 'njit-study-space-markers',
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'icon-image': 'study-space-icon',
+                                'icon-size': 1.8,
+                                'icon-anchor': 'bottom',
+                                'icon-allow-overlap': true
+                            }
+                        });
+                    }
+                };
+
+                ensureMapImage(map, 'study-space-icon', STUDY_SPACE_ICON, addOrUpdateLayer);
+            } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
+                const map = mapsIndoorsInstance?.getMap?.();
+                if (!map) return;
+
+                if (window.njitStudySpaceMarkers) {
+                    window.njitStudySpaceMarkers.forEach(m => m.setMap(null));
+                }
+                window.njitStudySpaceMarkers = [];
+
+                studySpaces.forEach((space) => {
+                    const [lng, lat] = space.coords;
+                    const marker = new window.google.maps.Marker({
+                        map,
+                        position: { lat, lng },
+                        icon: {
+                            url: STUDY_SPACE_ICON,
+                            scaledSize: new window.google.maps.Size(40, 52),
+                            anchor: new window.google.maps.Point(20, 52)
+                        },
+                        title: space.description ? `${space.name} - ${space.description}` : space.name
+                    });
+                    window.njitStudySpaceMarkers.push(marker);
+                });
+            }
+        };
+        window.addEventListener('njit-show-study-spaces', onShowStudySpaces);
+
+        const onShowFood = (event) => {
+            const { foods } = event.detail || {};
+            if (!foods || !Array.isArray(foods)) return;
+
+            if (mapType === mapTypes.Mapbox) {
+                const map = mapsIndoorsInstance.getMap();
+                if (!map) return;
+
+                const sourceId = 'njit-food-markers';
+                const features = foods.map((food) => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: food.coords },
+                    properties: { name: food.name }
+                }));
+                const featureCollection = { type: 'FeatureCollection', features };
+
+                if (map.getSource(sourceId)) {
+                    map.getSource(sourceId).setData(featureCollection);
+                } else {
+                    map.addSource(sourceId, { type: 'geojson', data: featureCollection });
+                }
+
+                const addOrUpdateLayer = () => {
+                    if (!map.getLayer('njit-food-markers')) {
+                        map.addLayer({
+                            id: 'njit-food-markers',
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'icon-image': 'food-icon',
+                                'icon-size': 1.8,
+                                'icon-anchor': 'bottom',
+                                'icon-allow-overlap': true
+                            }
+                        });
+                    }
+                };
+
+                ensureMapImage(map, 'food-icon', FOOD_ICON, addOrUpdateLayer);
+            } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
+                const map = mapsIndoorsInstance?.getMap?.();
+                if (!map) return;
+
+                if (window.njitFoodMarkers) {
+                    window.njitFoodMarkers.forEach(m => m.setMap(null));
+                }
+                window.njitFoodMarkers = [];
+
+                foods.forEach((food) => {
+                    const [lng, lat] = food.coords;
+                    const marker = new window.google.maps.Marker({
+                        map,
+                        position: { lat, lng },
+                        icon: {
+                            url: FOOD_ICON,
+                            scaledSize: new window.google.maps.Size(40, 52),
+                            anchor: new window.google.maps.Point(20, 52)
+                        },
+                        title: food.name
+                    });
+                    window.njitFoodMarkers.push(marker);
+                });
+            }
+        };
+        window.addEventListener('njit-show-food', onShowFood);
 
         // Handle showing multiple restrooms for a building
         const onShowRestrooms = (event) => {
@@ -1015,13 +1243,15 @@ function GeoJsonOverlay() {
             if (mapType === mapTypes.Mapbox && mapsIndoorsInstance) {
                 const map = mapsIndoorsInstance.getMap();
                 if (map) {
-                    ['njit-point-icons','njit-parking-icons','njit-parking-markers','njit-points', 'njit-outline', 'njit-building-fill', 'njit-parking-fill', 'njit-labels', 'njit-restroom-markers', 'njit-restroom-icons', 'njit-elevator-icons', 'clicked-elevator-pin-layer', 'elevator-search-pin-layer', 'njit-all-elevators-markers'].forEach(id => {
+                    ['njit-point-icons','njit-parking-icons','njit-parking-markers','njit-study-space-markers','njit-food-markers','njit-points', 'njit-outline', 'njit-building-fill', 'njit-parking-fill', 'njit-labels', 'njit-restroom-markers', 'njit-restroom-icons', 'njit-elevator-icons', 'clicked-elevator-pin-layer', 'elevator-search-pin-layer', 'njit-all-elevators-markers'].forEach(id => {
                         if (map.getLayer(id)) map.removeLayer(id);
                     });
                     if (map.getSource('njit-geojson')) map.removeSource('njit-geojson');
                     if (map.getSource('njit-highlight-point')) map.removeSource('njit-highlight-point');
                     if (map.getSource('njit-restroom-markers')) map.removeSource('njit-restroom-markers');
                     if (map.getSource('njit-parking-markers')) map.removeSource('njit-parking-markers');
+                    if (map.getSource('njit-study-space-markers')) map.removeSource('njit-study-space-markers');
+                    if (map.getSource('njit-food-markers')) map.removeSource('njit-food-markers');
                     if (map.getSource('clicked-elevator-pin-source')) map.removeSource('clicked-elevator-pin-source');
                     if (map.getSource('elevator-search-pin-source')) map.removeSource('elevator-search-pin-source');
                     if (map.getSource('njit-all-elevators-markers')) map.removeSource('njit-all-elevators-markers');
@@ -1049,12 +1279,27 @@ function GeoJsonOverlay() {
                 window.njitAllElevatorMarkers.forEach(m => m.setMap(null));
                 window.njitAllElevatorMarkers = [];
             }
+            if (window.njitParkingMarkers) {
+                window.njitParkingMarkers.forEach(m => m.setMap(null));
+                window.njitParkingMarkers = [];
+            }
+            if (window.njitStudySpaceMarkers) {
+                window.njitStudySpaceMarkers.forEach(m => m.setMap(null));
+                window.njitStudySpaceMarkers = [];
+            }
+            if (window.njitFoodMarkers) {
+                window.njitFoodMarkers.forEach(m => m.setMap(null));
+                window.njitFoodMarkers = [];
+            }
             window.removeEventListener('njit-focus', onFocus);
             window.removeEventListener('njit-show-restrooms', onShowRestrooms);
             window.removeEventListener('njit-show-elevator', onShowElevator);
             window.removeEventListener('njit-show-all-elevators', onShowAllElevators);
+            window.removeEventListener('njit-show-parking', onShowParking);
+            window.removeEventListener('njit-show-study-spaces', onShowStudySpaces);
+            window.removeEventListener('njit-show-food', onShowFood);
         };
-    }, [mapsIndoorsInstance, mapType, selectedCategory]);
+    }, [mapsIndoorsInstance, mapType, selectedCategory, categories]);
 
     return null;
 }
