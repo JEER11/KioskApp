@@ -8,14 +8,20 @@ import elevatorIcon from '../assets/searchIcons/elevator.png';
  */
 export function addElevatorPin(mapboxMap, location) {
     if (!mapboxMap || !location) return;
+    // This helper is Mapbox-only. If we're on Google Maps, just no-op.
+    if (typeof mapboxMap.getLayer !== 'function' || typeof mapboxMap.getSource !== 'function') return;
+    if (typeof mapboxMap.addSource !== 'function' || typeof mapboxMap.addLayer !== 'function') return;
+    if (typeof mapboxMap.hasImage !== 'function' || typeof mapboxMap.addImage !== 'function') return;
     
     // Remove existing elevator pin if it exists
     removeElevatorPin(mapboxMap);
 
     // Get the coordinates from the location
-    const coordinates = location.geometry.type.toLowerCase() === 'point'
+    const geometryType = location?.geometry?.type?.toLowerCase?.();
+    const coordinates = geometryType === 'point'
         ? [location.geometry.coordinates[0], location.geometry.coordinates[1]]
-        : [location.properties.anchor.coordinates[0], location.properties.anchor.coordinates[1]];
+        : [location?.properties?.anchor?.coordinates?.[0], location?.properties?.anchor?.coordinates?.[1]];
+    if (typeof coordinates[0] !== 'number' || typeof coordinates[1] !== 'number') return;
 
     // Load the elevator icon image if not already loaded
     if (!mapboxMap.hasImage('elevator-pin-marker')) {
@@ -39,6 +45,7 @@ export function addElevatorPin(mapboxMap, location) {
  * @param {Array} coordinates - [lng, lat] coordinates
  */
 function addElevatorPinLayer(mapboxMap, coordinates) {
+    if (typeof mapboxMap.addSource !== 'function' || typeof mapboxMap.addLayer !== 'function') return;
     // Add the elevator pin as a source on the Mapbox map
     mapboxMap.addSource('elevator-pin-marker-source', {
         type: 'geojson',
@@ -73,6 +80,8 @@ function addElevatorPinLayer(mapboxMap, coordinates) {
  */
 export function removeElevatorPin(mapboxMap) {
     if (!mapboxMap) return;
+    if (typeof mapboxMap.getLayer !== 'function' || typeof mapboxMap.getSource !== 'function') return;
+    if (typeof mapboxMap.removeLayer !== 'function' || typeof mapboxMap.removeSource !== 'function') return;
     
     if (mapboxMap.getLayer('elevator-pin-marker-layer')) {
         mapboxMap.removeLayer('elevator-pin-marker-layer');
@@ -104,8 +113,8 @@ export function isElevator(location) {
     }
     
     // Check if the location has an elevator category
-    const categories = location.properties?.categories || [];
-    if (categories.some(cat => cat.toLowerCase().includes('elevator'))) {
+    const categories = Array.isArray(location.properties?.categories) ? location.properties.categories : [];
+    if (categories.some(cat => typeof cat === 'string' && cat.toLowerCase().includes('elevator'))) {
         return true;
     }
     

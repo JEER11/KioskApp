@@ -126,21 +126,22 @@ const customVenueList = [
 function applyCustomVenuePresentation(venues, appConfig) {
     // Only keep venues that are in our custom list
     return customVenueList.map((override, index) => {
-        // Use the venue at the same index, or the first venue if index exceeds venues array
-        const venue = venues[index] || venues[0];
-        if (!venue) return null;
+        // Prefer using the venue at the same index.
+        // If there is no venue at this index, fall back to the first available venue object
+        // so all custom NJIT cards are still rendered.
+        const venue = venues[index];
+        const sourceVenue = venue || venues[0];
+        if (!sourceVenue) return null;
         
         const image = getVenueImage(override?.name, appConfig) || override?.image;
 
         // Create a new venue object to avoid immutability issues
-        const newVenue = Object.assign({}, venue);
+        const newVenue = Object.assign({}, sourceVenue);
         // Preserve original venue `name`/IDs to avoid breaking MapsIndoors API calls.
         // Use `displayName` for kiosk-friendly presentation instead.
         newVenue.displayName = override.name;
-        if (newVenue.venueInfo) {
-            newVenue.venueInfo = Object.assign({}, venue.venueInfo);
-            // Keep venueInfo.name intact for backend/API consistency; provide displayName separately.
-        }
+        newVenue.venueInfo = Object.assign({}, sourceVenue.venueInfo || { name: override.name });
+        // Keep venueInfo.name intact for backend/API consistency; provide displayName separately.
         
         // CRITICAL: Fix venue geometry to point to correct NJIT building location
         if (override.coords) {
@@ -326,43 +327,20 @@ function MapTemplate({ apiKey, gmApiKey, mapboxAccessToken, venue, locationId, p
     const finishRoute = useOnRouteFinished();
     const [, setErrorMessage] = useRecoilState(notificationMessageState);
 
-    // Listen for NJIT focus events (dispatched by GeoJsonOverlay/VenueSelector/Search)
-    // and convert them into a MapsIndoors-like location so wayfinding can be triggered.
+    // Listen for NJIT focus events (dispatched by GeoJsonOverlay/VenueSelector/Search).
+    // In kiosk mode these events should only focus/pin on map and must not open
+    // location details/wayfinding popups.
     useEffect(() => {
         function onNjitFocus(evt) {
             console.log('MapTemplate received njit-focus', evt && evt.detail);
             const detail = evt?.detail || {};
             const coords = detail.coords;
-            const building = detail.building || detail.name || 'Selected location';
             if (!coords || !Array.isArray(coords) || coords.length !== 2) return;
 
-            const pseudoLocation = {
-                id: `njit-${building.replace(/\s+/g, '_')}`,
-                properties: { name: building },
-                geometry: { type: 'Point', coordinates: coords }
-            };
-
             try {
-                // Set as current location but DO NOT open the Wayfinding UI automatically.
-                // Routes are computed by the MapWrapper on `njit-route-to` events; opening
-                // the Wayfinding/Directions UI is intentionally suppressed to keep the map-only
-                // experience while still drawing routes.
-                setCurrentLocation(pseudoLocation);
-                console.log('NJIT focus converted to MapsIndoors location (UI suppressed):', pseudoLocation);
-                // If the event includes a building name, try to mark the corresponding venue as current
-                if (building && venuesInSolution && venuesInSolution.length) {
-                    const match = venuesInSolution.find(v => {
-                        const dn = (v.displayName || v.venueInfo?.name || v.name || '').toLowerCase();
-                        return dn === String(building).toLowerCase();
-                    });
-                    if (match && match.name) {
-                        try {
-                            setCurrentVenueName(match.name);
-                        } catch (e) {
-                            console.warn('Failed to set current venue from njit-focus', e);
-                        }
-                    }
-                }
+                // Ensure any existing location-details popup is closed.
+                // NJIT building cards should not open detail/wayfinding popups.
+                setCurrentLocation();
             } catch (e) {
                 console.warn('Failed to handle njit-focus event', e);
             }

@@ -50,8 +50,12 @@ function VenueSelector({ onOpen, onClose, active }) {
      * @param {object} venue
      */
     const selectVenue = venue => {
-        console.log('Venue selected:', venue.name, 'with geometry:', venue.geometry);
-        setVenueWasSelected(true);
+        const selectedLabel = venue.displayName || venue.venueInfo?.name || venue.name;
+        const isDirectVenueMatch = !!venue?.name && (!venue?.displayName || venue.displayName.toLowerCase() === venue.name.toLowerCase());
+        console.log('Venue selected:', selectedLabel, '(internal:', venue.name, ') with geometry:', venue.geometry);
+        // For remapped kiosk cards, avoid toggling venue-selected flow since we only want
+        // map focus/pin behavior (not an internal venue switch).
+        setVenueWasSelected(isDirectVenueMatch);
         
         // Dispatch njit-focus event to highlight the building on the map and pan to it
         if (venue.geometry && venue.geometry.coordinates) {
@@ -79,14 +83,16 @@ function VenueSelector({ onOpen, onClose, active }) {
             window.dispatchEvent(new CustomEvent('njit-focus', {
                 detail: { 
                     coords: [lng, lat],
-                    building: venue.name
+                    building: selectedLabel
                 }
             }));
-            console.log('Dispatched njit-focus event for', venue.name, 'at coords:', [lng, lat]);
+            console.log('Dispatched njit-focus event for', selectedLabel, 'at coords:', [lng, lat]);
 
-            // Mark this venue as the current venue so the "Current" badge follows the selection
+            // Only switch the backend current venue when this card maps directly to that venue name.
+            // For kiosk-remapped labels (displayName != internal name), forcing a venue switch can
+            // trigger unwanted loading behavior.
             try {
-                if (venue && venue.name) setCurrentVenueName(venue.name);
+                if (isDirectVenueMatch) setCurrentVenueName(venue.name);
             } catch (e) {
                 console.warn('Failed to set current venue', e);
             }
@@ -142,9 +148,9 @@ function VenueSelector({ onOpen, onClose, active }) {
                         </button>
                     </div>
                     <div className="venue-selector__list">
-                        {venuesInSolution.map(venue => (
+                        {venuesInSolution.map((venue, index) => (
                             <Venue
-                                key={`${venue.id}-${venue.name}`}
+                                key={`${venue.id || 'venue'}-${venue.name || venue.displayName || 'item'}-${index}`}
                                 isCurrent={currentVenueName?.toLowerCase() === venue.name.toLowerCase()}
                                 venue={venue}
                                 onVenueClicked={() => onVenueSelected(venue)}

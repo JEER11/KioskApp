@@ -12,7 +12,7 @@ Working examples:
 </mi-combo-box>
 
 <mi-combo-box id="combo-box">
-        <combo-box-item value="MapsPeople" text="MapsPeople"></combo-box-item>
+        <combo-box-item value="MapsssPeople" text="MapssssPeople"></combo-box-item>
         <combo-box-item value="Labore vel0" text="Labore vel-0"></combo-box-item>
         <combo-box-item value="Labore vel1" text="Labore vel-1"></combo-box-item>
         <combo-box-item value="Labore vel2" text="Labore vel-2"></combo-box-item>
