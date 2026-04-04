@@ -105,21 +105,21 @@ const customVenueList = [
     { name: 'Campus Bookstore', image: '/Building/Campusbookstore.jpg', coords: [-74.17830128696572, 40.74130831036277] },
     { name: 'Campus Center', image: '/Building/Campuscenter.png', coords: [-74.17839, 40.74306] },
     { name: 'Central King Building', image: '/Building/CentralKingBuilding.png', coords: [-74.1776300642595, 40.742065115911274] },
-    { name: 'Colton Hall', image: '/Building/Coltonhall.png' },
+    { name: 'Colton Hall', image: '/Building/Coltonhall.png', coords: [-74.17799567881143, 40.74149054188957] },
     { name: 'Cullimore Hall', image: '/Building/Cullimore.png', coords: [-74.17731, 40.74293] },
-    { name: 'Cypress Hall', image: '/Building/Cypress.png' },
+    { name: 'Cypress Hall', image: '/Building/Cypress.png', coords: [-74.1791774856381, 40.743615966339405] },
     { name: 'Eberhardt Hall', image: '/Building/Eberhardt.png', coords: [-74.17691, 40.74285] },
     { name: 'ECE Building', image: '/Building/ECEb.png', coords: [-74.17876, 40.74141] },
-    { name: 'Fenster Hall', image: '/Building/Fensterhall.png' },
-    { name: 'GITC', image: '/Building/GITC.png' },
+    { name: 'Fenster Hall', image: '/Building/Fensterhall.png', coords: [-74.17730544235317, 40.742652602249315] },
+    { name: 'GITC', image: '/Building/GITC.png', coords: [-74.17953559974751, 40.744426917829465] },
     { name: 'Greek Village', image: '/Building/Greekvillage.png', coords: [-74.18054, 40.74102] },
     { name: 'Kupfrian Hall', image: '/Building/Kupfrianhall.png', coords: [-74.17849, 40.74253] },
-    { name: 'Laurel Hall', image: '/Building/LaurelHall.png', coords: [-74.17690, 40.74285] },
+    { name: 'Laurel Hall', image: '/Building/LaurelHall.png', coords: [-74.17945931316386, 40.740704684871176] },
     { name: 'Makerspace', image: '/Building/Makerspace.png', coords: [-74.17943, 40.74414] },
     { name: 'Tiernan Hall', image: '/Building/TiernanHall.png', coords: [-74.17945, 40.74176] },
     { name: 'Wellness Center', image: '/Building/WellnessCenter.png', coords: [-74.18044, 40.74236] },
-    { name: 'Weston Hall', image: '/Building/Westonhall.png' },
-    { name: 'York Center', image: '/Building/Yorkcenter.png' }
+    { name: 'Weston Hall', image: '/Building/Westonhall.png', coords: [-74.17746732848391, 40.74099440250148] },
+    { name: 'York Center', image: '/Building/Yorkcenter.png', coords: [-74.1783970651519, 40.74080936727471] }
 ];
 
 // Apply kiosk-specific venue naming and imagery while preserving IDs
