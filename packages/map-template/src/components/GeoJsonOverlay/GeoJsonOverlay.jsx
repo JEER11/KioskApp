@@ -204,35 +204,30 @@ function GeoJsonOverlay() {
                         map.setFilter('njit-outline', outlineFilter);
                     }
 
-                    // Points/icons layer (restrooms/parking). Use symbol icons (SVG) instead of circle paints.
-                    const shouldShowPoints = isRestroom || isParking;
-                    if (shouldShowPoints) {
-                        // Create filter that explicitly excludes elevators
-                        const iconFilter = ['all', basePointFilter, amenityFilter, ['!=', ['get', 'amenity'], 'elevator']];
+                    // Points/icons layer: keep restroom and parking handling separate to avoid double-rendering.
+                    const ensureImage = (name, path) => {
+                        if (!map.hasImage(name)) {
+                            const img = new Image();
+                            img.onload = () => { if (!map.hasImage(name)) map.addImage(name, img); };
+                            img.onerror = () => { /* ignore */ };
+                            img.src = path;
+                        }
+                    };
 
-                        // Ensure restroom images are added to the map
-                        const ensureImage = (name, path) => {
-                            if (!map.hasImage(name)) {
-                                const img = new Image();
-                                img.onload = () => { if (!map.hasImage(name)) map.addImage(name, img); };
-                                img.onerror = () => { /* ignore */ };
-                                img.src = path;
-                            }
-                        };
+                    if (isRestroom) {
+                        const restroomIconFilter = ['all', basePointFilter, ['in', ['get', 'amenity'], ['literal', ['toilets', 'toilet', 'restroom']]], ['!=', ['get', 'amenity'], 'elevator']];
+
                         ensureImage('restroom-female', femaleSvg);
                         ensureImage('restroom-male', maleSvg);
                         ensureImage('restroom-all', bothGenderSvg);
-                        // Use drive icon for parking if present
-                        ensureImage('parking-icon', PARKING_ICON);
 
-                        // Because Mapbox expressions cannot easily map 'female'->'restroom-female' inline here,
-                        // we'll add a simple symbol layer keyed to restroom gender via 'match'.
+                        // Map restroom gender values to matching restroom icon assets.
                         if (!map.getLayer('njit-point-icons')) {
                             map.addLayer({
                                 id: 'njit-point-icons',
                                 type: 'symbol',
                                 source: sourceId,
-                                filter: iconFilter,
+                                filter: restroomIconFilter,
                                 layout: {
                                     'icon-image': [
                                         'match',
@@ -247,32 +242,32 @@ function GeoJsonOverlay() {
                                 }
                             });
                         } else {
-                            map.setFilter('njit-point-icons', iconFilter);
+                            map.setFilter('njit-point-icons', restroomIconFilter);
                         }
-                        // For parking, ensure a dedicated parking symbol layer exists and use parking-icon
-                        if (isParking) {
-                            if (!map.getLayer('njit-parking-icons')) {
-                                map.addLayer({
-                                    id: 'njit-parking-icons',
-                                    type: 'symbol',
-                                    source: sourceId,
-                                    filter: ['all', basePointFilter, ['==', ['get', 'amenity'], 'parking']],
-                                    layout: {
-                                        'icon-image': 'parking-icon',
-                                            'icon-size': 1.8,
-                                        'icon-anchor': 'bottom',
-                                        'icon-allow-overlap': true
-                                    }
-                                });
-                            } else {
-                                map.setFilter('njit-parking-icons', ['all', basePointFilter, ['==', ['get', 'amenity'], 'parking']]);
-                            }
-                        } else if (map.getLayer('njit-parking-icons')) {
-                            map.removeLayer('njit-parking-icons');
+                    } else if (map.getLayer('njit-point-icons')) {
+                        map.removeLayer('njit-point-icons');
+                    }
+
+                    if (isParking) {
+                        ensureImage('parking-icon', PARKING_ICON);
+                        if (!map.getLayer('njit-parking-icons')) {
+                            map.addLayer({
+                                id: 'njit-parking-icons',
+                                type: 'symbol',
+                                source: sourceId,
+                                filter: ['all', basePointFilter, ['==', ['get', 'amenity'], 'parking']],
+                                layout: {
+                                    'icon-image': 'parking-icon',
+                                    'icon-size': 2.8,
+                                    'icon-anchor': 'bottom',
+                                    'icon-allow-overlap': true
+                                }
+                            });
+                        } else {
+                            map.setFilter('njit-parking-icons', ['all', basePointFilter, ['==', ['get', 'amenity'], 'parking']]);
                         }
-                    } else {
-                        if (map.getLayer('njit-point-icons')) map.removeLayer('njit-point-icons');
-                        if (map.getLayer('njit-parking-icons')) map.removeLayer('njit-parking-icons');
+                    } else if (map.getLayer('njit-parking-icons')) {
+                        map.removeLayer('njit-parking-icons');
                     }
 
                     // Add label layer for feature names (Mapbox)
@@ -430,10 +425,26 @@ function GeoJsonOverlay() {
                                 });
                             }
                         }
-                        // Reduce clutter: hide default POI labels to avoid random lots/restrooms
+                        // Reduce clutter: hide underlying POI/parking symbol layers so only custom icons are visible.
                         ['poi-label'].forEach(layerId => {
                             if (map.getLayer(layerId)) {
                                 map.setLayoutProperty(layerId, 'visibility', 'none');
+                            }
+                        });
+                        const styleLayers = map.getStyle()?.layers || [];
+                        styleLayers.forEach((layer) => {
+                            const id = (layer?.id || '').toLowerCase();
+                            if (!id || id.startsWith('njit-')) return;
+                            if (layer?.type !== 'symbol') return;
+                            const sourceLayer = (layer?.['source-layer'] || '').toLowerCase();
+                            const isPoiOrParkingLayer =
+                                id.includes('poi') ||
+                                id.includes('parking') ||
+                                sourceLayer.includes('poi') ||
+                                sourceLayer.includes('parking');
+                            const hasIconImage = !!layer?.layout?.['icon-image'];
+                            if ((isPoiOrParkingLayer || hasIconImage) && map.getLayer(layer.id)) {
+                                map.setLayoutProperty(layer.id, 'visibility', 'none');
                             }
                         });
                     } catch (e) { /* no-op */ }
@@ -657,7 +668,7 @@ function GeoJsonOverlay() {
                                 return { icon: { url: svgPath, scaledSize: new window.google.maps.Size(40, 40) } };
                             }
                             if (amenity === 'parking') {
-                                return { icon: { url: PARKING_ICON, scaledSize: new window.google.maps.Size(40, 40) } };
+                                return { icon: { url: PARKING_ICON, scaledSize: new window.google.maps.Size(64, 64) } };
                             }
                             // fallback to simple circle for other points
                             return {
@@ -942,62 +953,21 @@ function GeoJsonOverlay() {
                 const map = mapsIndoorsInstance.getMap();
                 if (!map) return;
 
-                // Use a simple 'P' label for parking markers via symbol text
-                const sourceId = 'njit-parking-markers';
-                const features = parkings.map(p => ({
-                    type: 'Feature',
-                    geometry: { type: 'Point', coordinates: p.coords },
-                    properties: { name: p.name }
-                }));
-                const featureCollection = { type: 'FeatureCollection', features };
-
-                if (map.getSource(sourceId)) {
-                    map.getSource(sourceId).setData(featureCollection);
-                } else {
-                    map.addSource(sourceId, { type: 'geojson', data: featureCollection });
+                // Parking icons are rendered from GeoJSON via `njit-parking-icons`.
+                // Remove legacy event-driven parking marker layer to avoid double icons.
+                if (map.getLayer('njit-parking-markers')) {
+                    map.removeLayer('njit-parking-markers');
                 }
-
-                const addOrUpdateLayer = () => {
-                    if (!map.getLayer('njit-parking-markers')) {
-                        map.addLayer({
-                            id: 'njit-parking-markers',
-                            type: 'symbol',
-                            source: sourceId,
-                            layout: {
-                                'icon-image': 'parking-icon',
-                                'icon-size': 1.8,
-                                'icon-anchor': 'bottom',
-                                'icon-allow-overlap': true
-                            }
-                        });
-                    }
-                };
-
-                ensureMapImage(map, 'parking-icon', PARKING_ICON, addOrUpdateLayer);
+                if (map.getSource('njit-parking-markers')) {
+                    map.removeSource('njit-parking-markers');
+                }
             } else if (mapType === mapTypes.Google && typeof window.google !== 'undefined' && window.google.maps) {
-                const map = mapsIndoorsInstance?.getMap?.();
-                if (!map) return;
-
-                // Clear existing parking markers
+                // Google parking icons are already rendered by the GeoJSON Data layer style.
+                // Keep this handler as cleanup-only so we don't draw duplicate markers.
                 if (window.njitParkingMarkers) {
                     window.njitParkingMarkers.forEach(m => m.setMap(null));
                 }
                 window.njitParkingMarkers = [];
-
-                parkings.forEach(p => {
-                    const [lng, lat] = p.coords;
-                    const marker = new window.google.maps.Marker({
-                        map,
-                        position: { lat, lng },
-                        icon: {
-                            url: PARKING_ICON,
-                            scaledSize: new window.google.maps.Size(40, 52),
-                            anchor: new window.google.maps.Point(20, 52)
-                        },
-                        title: p.name
-                    });
-                    window.njitParkingMarkers.push(marker);
-                });
             }
         };
         window.addEventListener('njit-show-parking', onShowParking);

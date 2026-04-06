@@ -6,6 +6,7 @@
       "properties": {
         "name": "Campus Center Women's Restroom",
         "amenity": "toilets",
+        "gender": "female",
         "image": "https://via.placeholder.com/400x250?text=Campus+Center+Women's+Restroom"
       },
       "geometry": {
@@ -18,6 +19,7 @@
       "properties": {
         "name": "Campus Center Men's Restroom",
         "amenity": "toilets",
+        "gender": "male",
         "image": "https://via.placeholder.com/400x250?text=Campus+Center+Men's+Restroom"
       },
       "geometry": {
@@ -28,32 +30,9 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Fenster Hall Restroom",
-        "amenity": "toilets",
-        "image": "https://via.placeholder.com/400x250?text=Fenster+Hall+Restroom"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-74.1774, 40.7420]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "GITC Restroom",
-        "amenity": "toilets",
-        "image": "https://via.placeholder.com/400x250?text=GITC+Restroom"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-74.1789, 40.7435]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "name": "Faculty Memorial Hall Women's Restroom",
         "amenity": "toilets",
+        "gender": "female",
         "image": "https://via.placeholder.com/400x250?text=FMH+Women's+Restroom"
       },
       "geometry": {
@@ -66,6 +45,7 @@
       "properties": {
         "name": "Faculty Memorial Hall Men's Restroom",
         "amenity": "toilets",
+        "gender": "male",
         "image": "https://via.placeholder.com/400x250?text=FMH+Men's+Restroom"
       },
       "geometry": {
@@ -90,6 +70,7 @@
       "properties": {
         "name": "Tiernan Hall Women's Restroom",
         "amenity": "toilets",
+        "gender": "female",
         "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall+Women's+Restroom"
       },
       "geometry": {
@@ -102,6 +83,7 @@
       "properties": {
         "name": "Tiernan Hall Men's Restroom",
         "amenity": "toilets",
+        "gender": "male",
         "image": "https://via.placeholder.com/400x250?text=Tiernan+Hall+Men's+Restroom"
       },
       "geometry": {
@@ -114,6 +96,7 @@
       "properties": {
         "name": "ECE Building Women's Restroom",
         "amenity": "toilets",
+        "gender": "female",
         "image": "https://via.placeholder.com/400x250?text=ECE+Women's+Restroom"
       },
       "geometry": {
@@ -126,6 +109,7 @@
       "properties": {
         "name": "ECE Building Men's Restroom",
         "amenity": "toilets",
+        "gender": "male",
         "image": "https://via.placeholder.com/400x250?text=ECE+Men's+Restroom"
       },
       "geometry": {
@@ -136,13 +120,142 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Science and Technology Parking Garage",
-        "amenity": "parking",
-        "image": "https://via.placeholder.com/400x250?text=ST+Parking+Garage"
+        "name": "Robert W. Van Houten Library Women's Restroom",
+        "amenity": "toilets",
+        "gender": "female",
+        "image": "https://via.placeholder.com/400x250?text=Robert+W.+Van+Houten+Library+Women's+Restroom"
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-74.18210547561043, 40.743119595625096]
+        "coordinates": [-74.17788877440331, 40.74369847214831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Robert W. Van Houten Library Men's Restroom",
+        "amenity": "toilets",
+        "gender": "male",
+        "image": "https://via.placeholder.com/400x250?text=Robert+W.+Van+Houten+Library+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17781749669952, 40.74379198880098]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mechanical Engineering Center Women's Restroom",
+        "amenity": "toilets",
+        "gender": "female",
+        "image": "https://via.placeholder.com/400x250?text=Mechanical+Engineering+Center+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17859010456078, 40.74420662724747]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mechanical Engineering Center Men's Restroom",
+        "amenity": "toilets",
+        "gender": "male",
+        "image": "https://via.placeholder.com/400x250?text=Mechanical+Engineering+Center+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17862520239768, 40.74418003603217]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central King Building Basement Women's Restroom",
+        "amenity": "toilets",
+        "gender": "female",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building+Basement+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1772965085266, 40.741806530213225]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central King Building Basement Men's Restroom",
+        "amenity": "toilets",
+        "gender": "male",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building+Basement+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17730750094834, 40.74184632192463]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central King Building 1st-3rd Floor Women's Restroom",
+        "amenity": "toilets",
+        "gender": "female",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building+1st-3rd+Floor+Women's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17752876961586, 40.74193751944904]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central King Building 1st-3rd Floor Men's Restroom",
+        "amenity": "toilets",
+        "gender": "male",
+        "image": "https://via.placeholder.com/400x250?text=Central+King+Building+1st-3rd+Floor+Men's+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1774911264611, 40.74197481560094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Makerspace All-Gender Restroom",
+        "amenity": "toilets",
+        "gender": "all",
+        "image": "https://via.placeholder.com/400x250?text=Makerspace+All-Gender+Restroom"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17897806116697, 40.744044279077315]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "NJIT West Parking Deck",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=NJIT+West+Parking+Deck"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.18205385550274, 40.743319828864514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "249 Warren St Parking",
+        "amenity": "parking",
+        "image": "https://via.placeholder.com/400x250?text=249+Warren+St+Parking"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.18393780201909, 40.743314974349474]
       }
     },
     {
@@ -462,18 +575,6 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "NJIT West Parking Deck",
-        "amenity": "parking",
-        "image": "https://via.placeholder.com/400x250?text=NJIT+West+Parking+Deck"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-74.18211156653679, 40.7430632317067]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "name": "Elevator 1",
         "amenity": "elevator",
         "image": "https://via.placeholder.com/400x250?text=Elevator+1"
@@ -577,6 +678,118 @@
       "geometry": {
         "type": "Point",
         "coordinates": [-74.17863967398546, 40.74146490288614]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campus Bookstore",
+        "category": "building",
+        "code": "CBS",
+        "image": "/Building/Campusbookstore.jpg",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17830128696572, 40.74130831036277], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17830128696572, 40.74130831036277]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colton Hall",
+        "category": "building",
+        "code": "COLT",
+        "image": "/Building/Coltonhall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17799567881143, 40.74149054188957], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17799567881143, 40.74149054188957]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cypress Hall",
+        "category": "building",
+        "code": "CYPR",
+        "image": "/Building/Cypress.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.1791774856381, 40.743615966339405], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1791774856381, 40.743615966339405]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "GITC",
+        "category": "building",
+        "code": "GITC",
+        "image": "/Building/GITC.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17953559974751, 40.744426917829465], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17953559974751, 40.744426917829465]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Laurel Hall",
+        "category": "building",
+        "code": "LAUR",
+        "image": "/Building/LaurelHall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17945931316386, 40.740704684871176], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17945931316386, 40.740704684871176]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Weston Hall",
+        "category": "building",
+        "code": "WEST",
+        "image": "/Building/Westonhall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17746732848391, 40.74099440250148], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17746732848391, 40.74099440250148]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "York Center",
+        "category": "building",
+        "code": "YORK",
+        "image": "/Building/Yorkcenter.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.1783970651519, 40.74080936727471], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1783970651519, 40.74080936727471]
       }
     }
   ]

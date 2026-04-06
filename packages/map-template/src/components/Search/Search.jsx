@@ -34,6 +34,12 @@ import isNullOrUndefined from '../../helpers/isNullOrUndefined';
 import venuesInSolutionState from '../../atoms/venuesInSolutionState';
 import initialVenueNameState from '../../atoms/initialVenueNameState';
 import PropTypes from 'prop-types';
+import { 
+    organizeBuildingsByAmenities, 
+    searchBuildings, 
+    formatBuildingResult 
+} from '../../helpers/buildingSearchHelper';
+import { getBuildingImage } from '../../helpers/buildingImagesHelper';
 
 const ELEVATOR_OVERLAY_LOCATIONS = [
     { id: 'tiernan-hall-elevator-1', name: 'Tiernan Hall Elevator 1', coords: [-74.17945587633146, 40.74223919150365], amenity: 'elevator' },
@@ -95,6 +101,8 @@ function Search({ onSetSize, isOpen }) {
         const [njitFeatures, setNjitFeatures] = useState([]);
         const [njitList, setNjitList] = useState([]);
         const [expandedCategory, setExpandedCategory] = useState(null);
+        const [buildingsMap, setBuildingsMap] = useState({});
+        const [buildingSearchResults, setBuildingSearchResults] = useState([]);
     const appConfig = useRecoilValue(appConfigState);
 
     const { t } = useTranslation();
@@ -435,6 +443,11 @@ function Search({ onSetSize, isOpen }) {
                     if (!aborted) {
                         console.log('Loaded NJIT features:', gj.features?.length);
                         setNjitFeatures(Array.isArray(gj.features) ? gj.features : []);
+                        
+                        // Organize buildings and their amenities
+                        const organized = organizeBuildingsByAmenities(Array.isArray(gj.features) ? gj.features : []);
+                        setBuildingsMap(organized);
+                        console.log('Organized buildings:', Object.keys(organized).length);
                     }
                 } else {
                     console.error('Failed to load NJIT GeoJSON:', res.status);
@@ -588,6 +601,28 @@ function Search({ onSetSize, isOpen }) {
      * @param {boolean} fitMapBounds - If the map bounds should be adjusted to fit the locations.
      */
     function onResults(locations, fitMapBounds = false) {
+        // First check if this looks like a building search query
+        const searchQuery = searchFieldRef.current?.getValue()?.trim();
+        if (searchQuery && searchQuery.length > 1) {
+            const buildingMatches = searchBuildings(searchQuery, buildingsMap, 5);
+            
+            // If we found building matches, show them
+            if (buildingMatches.length > 0) {
+                console.log('Found building matches:', buildingMatches.length);
+                const buildingResults = buildingMatches.map(building => formatBuildingResult(building));
+                setBuildingSearchResults(buildingResults);
+                
+                // Display building results
+                setSize(snapPoints.MAX);
+                setSearchResults([]);
+                setFilteredLocations([]);
+                setShowNotFoundMessage(false);
+                return;
+            }
+        }
+        
+        // Otherwise, proceed with normal MapsIndoors search
+        setBuildingSearchResults([]);
         const displayResults = locations.slice(0, MAX_RESULTS);
 
         // Expand the sheet to occupy the entire screen
@@ -611,6 +646,89 @@ function Search({ onSetSize, isOpen }) {
                 scrollButtonsRef?.current?.updateScrollButtons();
             }, { once: true });
         }
+    }
+
+    /**
+     * Handle building search result click - pin building on map and show amenities
+     */
+    function onBuildingClicked(buildingResult) {
+        if (!buildingResult || !buildingResult.coords) return;
+        
+        const building = buildingResult.data;
+        const [lng, lat] = buildingResult.coords;
+        const map = mapsIndoorsInstance?.getMap?.();
+        
+        if (!map) return;
+        
+        // Center map on building
+        if (map?.flyTo) {
+            // Mapbox
+            map.flyTo({ center: [lng, lat], zoom: 19 });
+        } else if (typeof window.google !== 'undefined' && window.google.maps && map?.setCenter) {
+            // Google Maps
+            map.setCenter({ lat, lng });
+            map.setZoom(19);
+        }
+        
+        // Show building and its amenities on map
+        const amenities = {
+            building: buildingResult.name,
+            restrooms: building.restrooms || [],
+            elevators: building.elevators || [],
+            foods: building.foods || [],
+            parking: building.parking || []
+        };
+
+        // Dispatch events to show amenities
+        if (amenities.restrooms.length > 0) {
+            window.dispatchEvent(new CustomEvent('njit-show-restrooms', { 
+                detail: { 
+                    building: buildingResult.name,
+                    restrooms: amenities.restrooms
+                } 
+            }));
+        }
+
+        if (amenities.elevators.length > 0) {
+            window.dispatchEvent(new CustomEvent('njit-show-all-elevators', { 
+                detail: { 
+                    elevators: amenities.elevators
+                } 
+            }));
+        }
+
+        if (amenities.foods.length > 0) {
+            window.dispatchEvent(new CustomEvent('njit-show-food', {
+                detail: {
+                    foods: amenities.foods
+                }
+            }));
+        }
+
+        if (amenities.parking.length > 0) {
+            window.dispatchEvent(new CustomEvent('njit-show-parking', {
+                detail: {
+                    parking: amenities.parking
+                }
+            }));
+        }
+        
+        // Also dispatch a route event if needed
+        try {
+            window.dispatchEvent(new CustomEvent('njit-route-to', { 
+                detail: { 
+                    name: buildingResult.name, 
+                    coords: [lng, lat] 
+                } 
+            }));
+        } catch (err) { 
+            // ignore 
+        }
+        
+        // Close search
+        setSearchResults([]);
+        setBuildingSearchResults([]);
+        setSize(snapPoints.MIN);
     }
 
 
@@ -658,6 +776,7 @@ function Search({ onSetSize, isOpen }) {
      */
     function cleared() {
         setSearchResults([]);
+        setBuildingSearchResults([]);
         setShowNotFoundMessage(false);
         if (selectedCategory) {
             getFilteredLocations(selectedCategory);
@@ -1016,7 +1135,7 @@ function Search({ onSetSize, isOpen }) {
 
             {/* Vertical list of Categories */}
             {/* Show full category list if (kiosk mode and showCategoriesUnderSearch is true) OR input is in focus, and only when searchResults are empty */}
-            {(shouldShowCategoriesUnderSearch() || isInputFieldInFocus) && !showNotFoundMessage && categories.length > 0 && searchResults.length === 0 && (
+            {(shouldShowCategoriesUnderSearch() || isInputFieldInFocus) && !showNotFoundMessage && categories.length > 0 && searchResults.length === 0 && buildingSearchResults.length === 0 && (
                 <div>
                     {visibleCategories.map(([category, categoryInfo]) => {
                         const categoryLower = (category || '').toString().toLowerCase();
@@ -1139,6 +1258,88 @@ function Search({ onSetSize, isOpen }) {
 
             {/* Message shown if no search results were found */}
             {showNotFoundMessage && <p className="search__error"> {t('Nothing was found')}</p>}
+
+            {/* Building search results */}
+            {buildingSearchResults.length > 0 && (
+                <div style={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginTop: '8px'
+                }}>
+                    {buildingSearchResults.map((building) => (
+                        <div key={building.id} style={{ 
+                            marginTop: '0px', 
+                            marginLeft: '16px', 
+                            marginRight: '16px',
+                            animation: 'dropIn 0.3s ease-out',
+                            animationFillMode: 'both'
+                        }}>
+                            <button
+                                onClick={() => onBuildingClicked(building)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                                    backdropFilter: 'blur(10px)',
+                                    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.6)',
+                                    cursor: 'pointer',
+                                    transition: 'border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease',
+                                    color: '#ffffff',
+                                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.7)';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.98)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                    e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.6)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+                                }}
+                            >
+                                <div className="overlay-item__icon" data-amenity="building" style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    fontSize: '14px',
+                                    marginRight: '12px',
+                                    flexShrink: 0,
+                                    backgroundImage: `url('${getBuildingImage(building.name) || '/Building/placeholder.png'}')`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    position: 'relative'
+                                }}>
+                                </div>
+                                <div className="overlay-item__content" style={{ textAlign: 'left', flex: 1 }}>
+                                    <div style={{ 
+                                        fontSize: '14px', 
+                                        fontWeight: '500', 
+                                        marginBottom: '2px',
+                                        color: '#ffffff'
+                                    }}>
+                                        {building.name}
+                                    </div>
+                                    <div style={{ 
+                                        fontSize: '12px', 
+                                        opacity: 0.8,
+                                        color: '#ffffff'
+                                    }}>
+                                        {building.subtitle}
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* When search results are found (category is selected or search term is used) */}
             {searchResults.length > 0 && (

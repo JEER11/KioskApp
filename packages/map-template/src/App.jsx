@@ -77,6 +77,7 @@ function getPointFromPayload(payload) {
     if (typeof payload?.x === 'number' && typeof payload?.y === 'number') {
         return { x: payload.x, y: payload.y };
     }
+
     return null;
 }
 
@@ -130,11 +131,16 @@ function setNativeInputValue(element, value) {
 }
 
 function submitSearchQuery(query) {
+    if (!query) return;
+
     const input = findSearchInput();
+
     if (!input) {
         console.log('No search input found for query:', query);
         return;
     }
+
+    console.log('Submitting map search:', query);
 
     input.focus();
     setNativeInputValue(input, query);
@@ -162,6 +168,7 @@ function fireWheelZoom(deltaY) {
     const x = window.innerWidth / 2;
     const y = window.innerHeight / 2;
     const target = document.elementFromPoint(x, y);
+
     if (!target) return;
 
     const event = new WheelEvent('wheel', {
@@ -177,6 +184,7 @@ function fireWheelZoom(deltaY) {
 
 function App() {
     const [lastEvent, setLastEvent] = useState(null);
+
     const [cursor, setCursor] = useState({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
@@ -187,130 +195,228 @@ function App() {
     const dragTargetRef = useRef(null);
     const draggingDomRef = useRef(false);
 
-    const handleSocketEvent = useCallback((msg) => {
-        setLastEvent(msg);
-
+    const handleSpeechResponse = useCallback((msg) => {
         const payload = msg?.payload || {};
-        const point = getPointFromPayload(payload);
 
-        switch (msg.type) {
-            case 'cursor':
-            case 'move_cursor':
-                if (point) {
-                    setCursor((prev) => ({
-                        ...prev,
-                        x: point.x,
-                        y: point.y,
-                        visible: true,
-                    }));
-                }
-                break;
+        const query =
+            payload.target_name ||
+            payload.target_key ||
+            payload.query ||
+            payload.transcript;
 
-            case 'click':
-                if (point) {
-                    setCursor((prev) => ({
-                        ...prev,
-                        x: point.x,
-                        y: point.y,
-                        visible: true,
-                        dragging: false,
-                    }));
+        console.log('Speech response payload:', payload);
+        console.log('Voice map query:', query);
 
-                    fireClickAt(point.x, point.y);
-                }
-                break;
+        if (!query) return;
 
-            case 'drag_start':
-                if (point) {
-                    setCursor((prev) => ({
-                        ...prev,
-                        x: point.x,
-                        y: point.y,
-                        visible: true,
-                        dragging: true,
-                    }));
+        if (payload.map_action === 'show_location') {
+            submitSearchQuery(query);
+        }
 
-                    const target = document.elementFromPoint(point.x, point.y);
-                    dragTargetRef.current = target;
-                    draggingDomRef.current = true;
+        if (payload.map_action === 'route_to_location') {
+            submitSearchQuery(query);
 
-                    fireMouseEvent('pointerdown', point.x, point.y, target);
-                    fireMouseEvent('mousedown', point.x, point.y, target);
-                }
-                break;
-
-            case 'drag':
-                if (point) {
-                    setCursor((prev) => ({
-                        ...prev,
-                        x: point.x,
-                        y: point.y,
-                        visible: true,
-                        dragging: true,
-                    }));
-
-                    if (draggingDomRef.current) {
-                        fireMouseEvent('pointermove', point.x, point.y, dragTargetRef.current);
-                        fireMouseEvent('mousemove', point.x, point.y, dragTargetRef.current);
-                    }
-                }
-                break;
-
-            case 'drag_end':
-                if (point) {
-                    setCursor((prev) => ({
-                        ...prev,
-                        x: point.x,
-                        y: point.y,
-                        visible: true,
-                        dragging: false,
-                    }));
-
-                    if (draggingDomRef.current) {
-                        fireMouseEvent('pointerup', point.x, point.y, dragTargetRef.current);
-                        fireMouseEvent('mouseup', point.x, point.y, dragTargetRef.current);
-                    }
-                } else {
-                    setCursor((prev) => ({
-                        ...prev,
-                        dragging: false,
-                    }));
-                }
-
-                draggingDomRef.current = false;
-                dragTargetRef.current = null;
-                break;
-
-            case 'command':
-                console.log('Speech command:', payload);
-
-                if (payload.intent === 'search' && payload.query) {
-                    submitSearchQuery(payload.query);
-                } else if (payload.intent === 'route_to' && payload.query) {
-                    submitSearchQuery(payload.query);
-                } else if (payload.intent === 'zoom_in') {
-                    fireWheelZoom(-250);
-                } else if (payload.intent === 'zoom_out') {
-                    fireWheelZoom(250);
-                } else if (payload.intent === 'reset_view') {
-                    window.location.reload();
-                }
-                break;
-
-            default:
-                break;
+            /*
+             * This currently searches/selects the location.
+             * To draw an actual route, MapsIndoorsMap.jsx needs to expose
+             * or listen for a route command.
+             */
+            window.dispatchEvent(
+                new CustomEvent('voice-route-request', {
+                    detail: {
+                        query,
+                        targetName: payload.target_name,
+                        targetKey: payload.target_key,
+                        locationText: payload.location_text,
+                    },
+                })
+            );
         }
     }, []);
+
+    const handleSocketEvent = useCallback(
+        (msg) => {
+            setLastEvent(msg);
+
+            const payload = msg?.payload || {};
+            const point = getPointFromPayload(payload);
+
+            switch (msg.type) {
+                case 'cursor':
+                case 'move_cursor':
+                    if (point) {
+                        setCursor((prev) => ({
+                            ...prev,
+                            x: point.x,
+                            y: point.y,
+                            visible: true,
+                        }));
+                    }
+                    break;
+
+                case 'click':
+                    if (point) {
+                        setCursor((prev) => ({
+                            ...prev,
+                            x: point.x,
+                            y: point.y,
+                            visible: true,
+                            dragging: false,
+                        }));
+
+                        fireClickAt(point.x, point.y);
+                    }
+                    break;
+
+                case 'drag_start':
+                    if (point) {
+                        setCursor((prev) => ({
+                            ...prev,
+                            x: point.x,
+                            y: point.y,
+                            visible: true,
+                            dragging: true,
+                        }));
+
+                        const target = document.elementFromPoint(point.x, point.y);
+                        dragTargetRef.current = target;
+                        draggingDomRef.current = true;
+
+                        fireMouseEvent('pointerdown', point.x, point.y, target);
+                        fireMouseEvent('mousedown', point.x, point.y, target);
+                    }
+                    break;
+
+                case 'drag':
+                    if (point) {
+                        setCursor((prev) => ({
+                            ...prev,
+                            x: point.x,
+                            y: point.y,
+                            visible: true,
+                            dragging: true,
+                        }));
+
+                        if (draggingDomRef.current) {
+                            fireMouseEvent(
+                                'pointermove',
+                                point.x,
+                                point.y,
+                                dragTargetRef.current
+                            );
+                            fireMouseEvent(
+                                'mousemove',
+                                point.x,
+                                point.y,
+                                dragTargetRef.current
+                            );
+                        }
+                    }
+                    break;
+
+                case 'drag_end':
+                    if (point) {
+                        setCursor((prev) => ({
+                            ...prev,
+                            x: point.x,
+                            y: point.y,
+                            visible: true,
+                            dragging: false,
+                        }));
+
+                        if (draggingDomRef.current) {
+                            fireMouseEvent(
+                                'pointerup',
+                                point.x,
+                                point.y,
+                                dragTargetRef.current
+                            );
+                            fireMouseEvent(
+                                'mouseup',
+                                point.x,
+                                point.y,
+                                dragTargetRef.current
+                            );
+                        }
+                    } else {
+                        setCursor((prev) => ({
+                            ...prev,
+                            dragging: false,
+                        }));
+                    }
+
+                    draggingDomRef.current = false;
+                    dragTargetRef.current = null;
+                    break;
+
+                case 'command':
+                    console.log('Speech command:', payload);
+
+                    if (payload.intent === 'search' && payload.query) {
+                        submitSearchQuery(payload.query);
+                    } else if (payload.intent === 'route_to' && payload.query) {
+                        submitSearchQuery(payload.query);
+                    } else if (payload.intent === 'zoom_in') {
+                        fireWheelZoom(-250);
+                    } else if (payload.intent === 'zoom_out') {
+                        fireWheelZoom(250);
+                    } else if (payload.intent === 'reset_view') {
+                        window.location.reload();
+                    }
+                    break;
+
+                case 'speech.intent':
+                    console.log('Speech intent:', payload);
+
+                    if (payload.intent === 'search' && payload.query) {
+                        submitSearchQuery(payload.query);
+                    } else if (payload.intent === 'route_to' && payload.query) {
+                        submitSearchQuery(payload.query);
+                    } else if (payload.intent === 'answer_question') {
+                        console.log('Answer only:', payload.response);
+                    }
+                    break;
+
+                case 'response':
+                    if (msg.source === 'speech') {
+                        handleSpeechResponse(msg);
+                    }
+                    break;
+
+                case 'transcript':
+                    console.log('Speech transcript:', payload.text);
+                    break;
+
+                case 'status':
+                    console.log('Speech status:', payload);
+                    break;
+
+                case 'wake':
+                    console.log('Wake word detected:', payload);
+                    break;
+
+                case 'pipeline_metrics':
+                    console.log('Pipeline metrics:', payload);
+                    break;
+
+                default:
+                    break;
+            }
+        },
+        [handleSpeechResponse]
+    );
 
     const { status } = useKioskSocket({ onEvent: handleSocketEvent });
 
     return (
         <div className="app">
-            <WeatherHeader 
+            <WeatherHeader
                 location={{ lat: 40.7420, lon: -74.1780 }}
                 apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
             />
-            <MapsIndoorsMap supportsUrlParameters={true}
+
+            <MapsIndoorsMap
+                supportsUrlParameters={true}
                 apiKey={import.meta.env.VITE_MAPSINDOORS_API_KEY}
                 venue={import.meta.env.VITE_VENUE || ''}
                 gmApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
@@ -333,4 +439,3 @@ function App() {
 }
 
 export default App;
-

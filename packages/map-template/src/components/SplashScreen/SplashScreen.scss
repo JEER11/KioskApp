@@ -31,11 +31,11 @@
     }
 
     &__loader {
-        width: var(--spacing-xxx-large);
-        height: var(--spacing-xxx-large);
-        border-radius: 50%;
+        width: 72px;
+        height: 72px;
         position: relative;
-        animation: loader 1s infinite linear;
+        object-fit: contain;
+        transform: translateY(-20px);
     }
 
     &__container {
@@ -49,16 +49,6 @@
         align-items: center;
         gap: var(--spacing-xxx-large);
         animation: slideIn 1s;
-    }
-}
-
-@keyframes loader {
-    0% {
-        rotate: 0deg;
-    }
-
-    100% {
-        rotate: 360deg;
     }
 }
 

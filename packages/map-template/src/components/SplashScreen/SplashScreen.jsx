@@ -1,5 +1,4 @@
 import { useRecoilValue } from 'recoil';
-import primaryColorState from '../../atoms/primaryColorState';
 import './SplashScreen.scss';
 import logoState from '../../atoms/logoState';
 
@@ -8,7 +7,6 @@ import logoState from '../../atoms/logoState';
  * The default color and logo are MapsIndoors' visual identity.
  */
 function SplashScreen() {
-    const primaryColor = useRecoilValue(primaryColorState);
     const logo = useRecoilValue(logoState);
 
     return (
@@ -18,14 +16,11 @@ function SplashScreen() {
                     src={logo}
                     alt=""
                 />
-                {/* The border value is set based on the #rrggbbaa and includes an
-                        opacity level of around 20%, which translates to the value of 33. */}
-                <div className="splash-screen__loader"
-                    style={{
-                        border: `8px solid ${primaryColor}33`,
-                        borderLeft: `8px solid ${primaryColor}`
-                    }}>
-                </div>
+                <img
+                    className="splash-screen__loader"
+                    src="/pulse-multiple.svg"
+                    alt="Loading"
+                />
             </div>
         </div>
     )
