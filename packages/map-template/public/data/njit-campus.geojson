@@ -679,6 +679,118 @@
         "type": "Point",
         "coordinates": [-74.17863967398546, 40.74146490288614]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Campus Bookstore",
+        "category": "building",
+        "code": "CBS",
+        "image": "/Building/Campusbookstore.jpg",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17830128696572, 40.74130831036277], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17830128696572, 40.74130831036277]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colton Hall",
+        "category": "building",
+        "code": "COLT",
+        "image": "/Building/Coltonhall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17799567881143, 40.74149054188957], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17799567881143, 40.74149054188957]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cypress Hall",
+        "category": "building",
+        "code": "CYPR",
+        "image": "/Building/Cypress.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.1791774856381, 40.743615966339405], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1791774856381, 40.743615966339405]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "GITC",
+        "category": "building",
+        "code": "GITC",
+        "image": "/Building/GITC.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17953559974751, 40.744426917829465], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17953559974751, 40.744426917829465]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Laurel Hall",
+        "category": "building",
+        "code": "LAUR",
+        "image": "/Building/LaurelHall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17945931316386, 40.740704684871176], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17945931316386, 40.740704684871176]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Weston Hall",
+        "category": "building",
+        "code": "WEST",
+        "image": "/Building/Westonhall.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.17746732848391, 40.74099440250148], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.17746732848391, 40.74099440250148]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "York Center",
+        "category": "building",
+        "code": "YORK",
+        "image": "/Building/Yorkcenter.png",
+        "entrances": [
+          { "type": "Point", "coordinates": [-74.1783970651519, 40.74080936727471], "floor": null, "label": "main entrance" }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.1783970651519, 40.74080936727471]
+      }
     }
   ]
 }
