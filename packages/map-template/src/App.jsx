@@ -182,9 +182,77 @@ function fireWheelZoom(deltaY) {
     target.dispatchEvent(event);
 }
 
+function VoiceStatusBar({ state, text }) {
+    const getLabel = () => {
+        switch (state) {
+            case 'listening': return 'Listening...';
+            case 'recording': return 'Recording...';
+            case 'transcribing': return 'Processing speech...';
+            case 'thinking': return 'Thinking...';
+            case 'speaking': return 'Speaking...';
+            case 'calibrating': return 'Calibrating...';
+            case 'awake': return 'Wake word detected';
+            case 'idle':
+            default:
+                return 'Say "Hey Kiosk"';
+        }
+    };
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                bottom: '16px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 99999,
+
+                background: 'rgba(0, 0, 0, 0.75)',
+                color: '#fff',
+                padding: '12px 16px',
+                borderRadius: '10px',
+
+                minWidth: '280px',
+                maxWidth: '600px',
+
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(6px)',
+                pointerEvents: 'none',
+            }}
+        >
+            <div style={{ fontWeight: 600, fontSize: '16px' }}>
+                {getLabel()}
+            </div>
+
+            {text && state !== 'idle' && (
+                <div
+                    style={{
+                        marginTop: '6px',
+                        fontSize: '13px',
+                        opacity: 0.85,
+                        textAlign: 'center',
+                        maxWidth: '520px',
+                        wordWrap: 'break-word',
+                    }}
+                >
+                    {text}
+                </div>
+            )}
+        </div>
+    );
+}
+
+
 function App() {
     const [lastEvent, setLastEvent] = useState(null);
-
+    
+    const [voiceState, setVoiceState] = useState('idle');
+    const [voiceText, setVoiceText] = useState('Say Hey Kiosk');
+    
     const [cursor, setCursor] = useState({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
@@ -413,6 +481,8 @@ function App() {
 
                 case 'status':
                     console.log('Speech status:', payload);
+                    setVoiceState(payload.state || 'idle');
+                    setVoiceText(payload.text || '');
                     break;
 
                 case 'wake':
@@ -456,6 +526,8 @@ function App() {
                 mapboxMapStyle={'mapbox://styles/mapbox/streets-v12'}
             />
 
+
+            <VoiceStatusBar state={voiceState} text={voiceText} />
             <KioskFeedbackPanel status={status} lastEvent={lastEvent} />
             <GestureCursor cursor={cursor} />
         </div>
