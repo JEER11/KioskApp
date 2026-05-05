@@ -892,6 +892,28 @@ useEffect(() => {
 
 
 useEffect(() => {
+    function onVoiceShowRestrooms() {
+        console.log('Voice triggering restroom overlay');
+        getFilteredLocations('restroom', 'Restrooms');
+    }
+
+    function onVoiceShowParking() {
+        console.log('Voice triggering parking overlay');
+        getFilteredLocations('parking', 'Parking');
+    }
+
+    window.addEventListener('voice-show-restrooms', onVoiceShowRestrooms);
+    window.addEventListener('voice-show-parking', onVoiceShowParking);
+
+    return () => {
+        window.removeEventListener('voice-show-restrooms', onVoiceShowRestrooms);
+        window.removeEventListener('voice-show-parking', onVoiceShowParking);
+    };
+}, []);
+
+
+
+useEffect(() => {
     const detail = pendingVoiceRouteRef.current;
 
     if (!detail) return;

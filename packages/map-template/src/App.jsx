@@ -213,6 +213,27 @@ function App() {
             submitSearchQuery(query);
         }
 
+
+// ADD THIS BLOCK ABOVE route_to_location
+
+        if (payload.map_action === 'show_restrooms') {
+            console.log('Voice: show restrooms');
+
+            window.dispatchEvent(
+                new CustomEvent('voice-show-restrooms')
+            );
+            return;
+        }
+
+        if (payload.map_action === 'show_parking') {
+            console.log('Voice: show parking');
+
+            window.dispatchEvent(
+                new CustomEvent('voice-show-parking')
+            );
+            return;
+        }
+
         if (payload.map_action === 'route_to_location') {
             submitSearchQuery(query);
 
