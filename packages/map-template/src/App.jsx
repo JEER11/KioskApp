@@ -221,16 +221,19 @@ function App() {
              * To draw an actual route, MapsIndoorsMap.jsx needs to expose
              * or listen for a route command.
              */
-            window.dispatchEvent(
-                new CustomEvent('voice-route-request', {
-                    detail: {
-                        query,
-                        targetName: payload.target_name,
-                        targetKey: payload.target_key,
-                        locationText: payload.location_text,
-                    },
-                })
-            );
+        window.dispatchEvent(
+            new CustomEvent('voice-route-request', {
+                detail: {
+                    action: 'route_to_location',
+                    query,
+                    targetName: payload.target_name,
+                    targetKey: payload.target_key,
+                    locationText: payload.location_text,
+                    transcript: payload.transcript,
+                },
+            })
+        );
+
         }
     }, []);
 

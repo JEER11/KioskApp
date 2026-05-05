@@ -477,6 +477,33 @@ function Wayfinding({ onStartDirections, onBack, directionsToLocation, direction
             toFieldRef.current.setDisplayText(currentLocation.properties.name);
         }
     }, [currentLocation]);
+    useEffect(() => {
+        function onVoiceStartWayfinding() {
+            if (!isActive) return;
+
+            const tryStart = () => {
+                if (areDirectionsReady) {
+                    console.log('Voice auto-starting directions');
+                    onStartDirections();
+                } else {
+                    console.log('Voice wanted directions, but route is not ready yet', {
+                        areDirectionsReady,
+                        originLocation,
+                        destinationLocation
+                    });
+                }
+            };
+
+            window.setTimeout(tryStart, 500);
+        }
+
+        window.addEventListener('voice-start-wayfinding', onVoiceStartWayfinding);
+
+        return () => {
+            window.removeEventListener('voice-start-wayfinding', onVoiceStartWayfinding);
+        };
+    }, [isActive, areDirectionsReady, originLocation, destinationLocation, onStartDirections]);
+
 
     return (
         <div className="wayfinding" ref={wayfindingRef}>

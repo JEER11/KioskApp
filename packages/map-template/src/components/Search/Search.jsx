@@ -110,6 +110,7 @@ function Search({ onSetSize, isOpen }) {
     const searchRef = useRef();
     const scrollButtonsRef = useRef();
     const requestAnimationFrameId = useRef();
+    const pendingVoiceRouteRef = useRef(null);
 
     /** Referencing the search field */
     const searchFieldRef = useRef();
@@ -608,17 +609,34 @@ function Search({ onSetSize, isOpen }) {
             
             // If we found building matches, show them
             if (buildingMatches.length > 0) {
-                console.log('Found building matches:', buildingMatches.length);
-                const buildingResults = buildingMatches.map(building => formatBuildingResult(building));
-                setBuildingSearchResults(buildingResults);
-                
-                // Display building results
-                setSize(snapPoints.MAX);
-                setSearchResults([]);
-                setFilteredLocations([]);
-                setShowNotFoundMessage(false);
-                return;
-            }
+    console.log('Found building matches:', buildingMatches.length);
+    const buildingResults = buildingMatches.map(building => formatBuildingResult(building));
+    setBuildingSearchResults(buildingResults);
+
+    setSize(snapPoints.MAX);
+    setSearchResults([]);
+    setFilteredLocations([]);
+    setShowNotFoundMessage(false);
+
+    // 🔥 AUTO SELECT FOR VOICE
+    const detail = pendingVoiceRouteRef.current;
+
+    if (detail && detail.action === 'route_to_location') {
+        const firstBuilding = buildingResults[0];
+
+        console.log('Voice auto-selecting building immediately:', firstBuilding);
+
+        pendingVoiceRouteRef.current = null;
+
+        window.setTimeout(() => {
+            onBuildingClicked(firstBuilding);
+        }, 300);
+    }
+
+    return;
+}
+
+
         }
         
         // Otherwise, proceed with normal MapsIndoors search
@@ -849,6 +867,73 @@ function Search({ onSetSize, isOpen }) {
             });
         });
     }
+
+useEffect(() => {
+    function onVoiceRouteRequest(evt) {
+        const detail = evt?.detail || {};
+        const query = detail.targetName || detail.query || detail.targetKey;
+
+        console.log('Search received voice-route-request:', detail);
+
+        if (!query) {
+            console.warn('Voice route: missing query');
+            return;
+        }
+
+        pendingVoiceRouteRef.current = detail;
+    }
+
+    window.addEventListener('voice-route-request', onVoiceRouteRequest);
+
+    return () => {
+        window.removeEventListener('voice-route-request', onVoiceRouteRequest);
+    };
+}, []);
+
+
+useEffect(() => {
+    const detail = pendingVoiceRouteRef.current;
+
+    if (!detail) return;
+
+    if (searchResults.length > 0) {
+        const firstResult = searchResults[0];
+
+        console.log('Voice auto-selecting first search result:', firstResult);
+
+        pendingVoiceRouteRef.current = null;
+
+        onLocationClicked(firstResult);
+
+        if (detail.action === 'route_to_location') {
+            window.setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('voice-start-location-details'));
+            }, 700);
+        }
+
+        return;
+    }
+
+    if (buildingSearchResults.length > 0) {
+        const firstBuilding = buildingSearchResults[0];
+
+        console.log('Voice auto-selecting first building result:', firstBuilding);
+
+        pendingVoiceRouteRef.current = null;
+
+        onBuildingClicked(firstBuilding);
+
+        if (detail.action === 'route_to_location') {
+            window.setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('voice-start-location-details'));
+            }, 700);
+        }
+    }
+}, [searchResults, buildingSearchResults]);
+
+
+
+
 
     /**
      * Get bottom padding when selecting a location.

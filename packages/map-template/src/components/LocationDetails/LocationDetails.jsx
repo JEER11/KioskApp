@@ -289,6 +289,31 @@ function LocationDetails({ onBack, onStartWayfinding, onSetSize, onStartDirectio
         }
     }, [location, mapsIndoorsInstance, kioskLocation]);
 
+
+
+useEffect(() => {
+    function onVoiceStartLocationDetails() {
+        if (!isOpen || !location) return;
+
+        console.log('Voice auto-starting from LocationDetails');
+
+        if (kioskLocation && isDesktop) {
+            startDirections();
+        } else {
+            startWayfinding();
+        }
+    }
+
+    window.addEventListener('voice-start-location-details', onVoiceStartLocationDetails);
+
+    return () => {
+        window.removeEventListener('voice-start-location-details', onVoiceStartLocationDetails);
+    };
+}, [isOpen, location, kioskLocation, isDesktop]);
+
+
+
+
     useEffect(() => {
         const hasAdditionalDetails = locationAdditionalDetails?.length > 0;
         // Expand the sheet when location changes, is open, and has additional details
